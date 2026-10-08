@@ -1,0 +1,462 @@
+<title>Pooldach-Rechner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: Werkstattblatt – links Eingaben wie ein Massblatt, rechts Draufsicht, Zuschnittliste und Einkaufszettel */
+:root{
+  --bg:#f2f5f7; --panel:#ffffff; --ink:#1c2a33; --muted:#5d6e79; --line:#d5dee4;
+  --water:#d9ecf4; --rail:#4a5862; --accent:#0d6f8f; --rod:#d9821e; --hub:#b8402f; --clip:#2364a8; --ridge:#7a4d96;
+  --warn-bg:#fff3dc; --warn-ink:#7a4a00; --ok-bg:#e3f3ea; --ok-ink:#1d6a3e;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#131b20; --panel:#1b252c; --ink:#e3ebf0; --muted:#9aabb6; --line:#2e3c45;
+  --water:#183544; --rail:#a9b7c0; --accent:#4fb6d6; --rod:#f0a04a; --hub:#e46d5b; --clip:#6aa5e8; --ridge:#b98ad6;
+  --warn-bg:#3a2d12; --warn-ink:#f3cf8b; --ok-bg:#163126; --ok-ink:#9fd9b6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#131b20; --panel:#1b252c; --ink:#e3ebf0; --muted:#9aabb6; --line:#2e3c45;
+  --water:#183544; --rail:#a9b7c0; --accent:#4fb6d6; --rod:#f0a04a; --hub:#e46d5b; --clip:#6aa5e8; --ridge:#b98ad6;
+  --warn-bg:#3a2d12; --warn-ink:#f3cf8b; --ok-bg:#163126; --ok-ink:#9fd9b6; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;margin:0}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:16px;padding-block:24px 48px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px;margin-bottom:18px}
+h1{font-family:var(--display);font-weight:700;font-size:2.3rem;letter-spacing:.01em;margin:0;line-height:1.05}
+header p{margin:0;color:var(--muted);max-width:62ch}
+h2{font-family:var(--display);font-weight:600;font-size:1.35rem;letter-spacing:.02em;margin:0 0 10px;text-wrap:balance}
+h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.grid{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px}
+.inputs{display:flex;flex-direction:column;gap:18px}
+fieldset{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 92px;gap:10px;align-items:center}
+.row label{font-size:.88rem;color:var(--ink)}
+.row label small{display:block;color:var(--muted);font-size:.76rem;line-height:1.3}
+input[type=number],select{width:100%;font:inherit;font-family:var(--mono);font-size:.9rem;padding:5px 7px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);text-align:right}
+select{text-align:left;font-family:var(--body)}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.unit{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:.88rem}
+.hint{margin:0;font-size:.8rem;color:var(--muted)}
+.key{width:100%;max-width:300px;height:auto;display:block;margin:2px 0 4px}
+.check input{margin-top:4px}
+.results{display:flex;flex-direction:column;gap:20px;min-width:0}
+.plan{width:100%;height:auto;display:block}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{border-top:3px solid var(--accent);padding-top:6px}
+.kpi b{display:block;font-family:var(--display);font-size:1.7rem;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi span{font-size:.78rem;color:var(--muted)}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.88rem;font-variant-numeric:tabular-nums}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+th:first-child,td:first-child{text-align:left}
+td.cut{font-family:var(--mono);font-weight:500;color:var(--accent)}
+.tag{display:inline-block;min-width:2.2em;text-align:center;font-weight:600;font-size:.78rem;color:#fff;border-radius:99px;padding:1px 7px;margin-right:6px}
+.notes{display:flex;flex-direction:column;gap:8px}
+.note{padding:8px 11px;border-radius:5px;font-size:.88rem}
+.note.warn{background:var(--warn-bg);color:var(--warn-ink)}
+.note.ok{background:var(--ok-bg);color:var(--ok-ink)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+.tarps{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:640px){.tarps{grid-template-columns:minmax(0,1fr)}}
+.tarp{display:flex;flex-direction:column;gap:6px;min-width:0}
+.tarp svg{width:100%;height:auto;display:block}
+.tarp b.big{font-family:var(--display);font-size:1.5rem;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.tarp dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;margin:0;font-size:.85rem}
+.tarp dt{color:var(--muted)}
+.tarp dd{margin:0;font-variant-numeric:tabular-nums}
+@media (max-width:760px){.two{grid-template-columns:minmax(0,1fr)}}
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.list li{display:grid;grid-template-columns:3.6em minmax(0,1fr);gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:.9rem}
+.list li .q{font-family:var(--mono);text-align:right;color:var(--accent);font-weight:500}
+.list li small{display:block;color:var(--muted);font-size:.78rem}
+.sect{font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:14px 0 2px;font-weight:600}
+.sect:first-child{margin-top:0}
+pre.code{font-family:var(--mono);font-size:.84rem;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:10px;overflow-x:auto;margin:0 0 8px;white-space:pre}
+.btn{font:inherit;font-size:.85rem;font-weight:600;padding:6px 12px;border-radius:4px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer}
+.btn:hover{background:var(--accent);color:var(--panel)}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.status{font-size:.8rem;color:var(--muted)}
+.foot{color:var(--muted);font-size:.8rem;max-width:80ch}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.8rem;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:12px;height:4px;border-radius:2px;margin-right:5px;vertical-align:middle}
+@media (prefers-reduced-motion:no-preference){.kpi b,td.cut{transition:color .2s}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Pooldach-Rechner</h1>
+    <p>Satteldach mit Hub-Gelenken und Randhalter-Clips für Oval-Frame-Pools. Ändere Poolmaße oder Dachhöhe, Zuschnitt und Einkaufszettel rechnen sofort neu.</p>
+  </header>
+
+  <div class="grid">
+    <form class="panel inputs" id="f" autocomplete="off">
+      <fieldset>
+        <h3>Dach</h3>
+        <div class="row"><label for="h">Firsthöhe [cm]<small>Firstachse über Rahmenrohrachse</small></label><input id="h" type="number" step="1" value="60"></div>
+        <div class="row"><label for="hubX">Hub-Abstand [cm]<small>Hubmitte ab Poolmitte; Firstlänge = 2 × Wert</small></label><input id="hubX" type="number" step="1" value="135"></div>
+        <div class="row"><label for="ov">Planenüberstand [cm]<small>je Seite über die Rahmenrohre hinaus</small></label><input id="ov" type="number" step="1" value="20"></div>
+      </fieldset>
+      <fieldset>
+        <h3>Pool-Grundriss [cm], Pfostenmitte zu Pfostenmitte</h3>
+        <p class="hint">Oberer Rahmen laut Bestway-Anleitung: zwei Geraden (D–A–D), an jedem Ende vier gleiche Bogenrohre C über Eckverbinder F und Bogenverbinder E. Unter jedem Verbinder steht ein Pfosten. Messen zwischen den Pfostenmitten auf Höhe des Rahmenrohrs.</p>
+        <svg class="key" viewBox="0 0 300 192" role="img" aria-label="Skizze der Messstrecken am Pool-Grundriss">
+          <polygon points="216.6,24.1 253.8,51.2 268.0,95.0 253.8,138.8 216.6,165.9 83.4,165.9 46.2,138.8 32.0,95.0 46.2,51.2 83.4,24.1" fill="var(--water)" stroke="var(--rail)" stroke-width="3" stroke-linejoin="round"/>
+          <g fill="var(--rail)"><circle cx="216.6" cy="24.1" r="3.5"/><circle cx="253.8" cy="51.2" r="3.5"/><circle cx="268.0" cy="95.0" r="3.5"/><circle cx="253.8" cy="138.8" r="3.5"/><circle cx="216.6" cy="165.9" r="3.5"/><circle cx="83.4" cy="165.9" r="3.5"/><circle cx="46.2" cy="138.8" r="3.5"/><circle cx="32.0" cy="95.0" r="3.5"/><circle cx="46.2" cy="51.2" r="3.5"/><circle cx="83.4" cy="24.1" r="3.5"/></g>
+          <g stroke="var(--accent)" stroke-width="1.4" fill="none">
+            <line x1="83.4" y1="12" x2="216.6" y2="12"/><line x1="83.4" y1="7" x2="83.4" y2="17"/><line x1="216.6" y1="7" x2="216.6" y2="17"/>
+            <line x1="150.0" y1="24.1" x2="150.0" y2="165.9" stroke-dasharray="3 3"/><line x1="145.0" y1="24.1" x2="155.0" y2="24.1"/><line x1="145.0" y1="165.9" x2="155.0" y2="165.9"/>
+            <line x1="32.0" y1="182" x2="268.0" y2="182"/><line x1="32.0" y1="177" x2="32.0" y2="187"/><line x1="268.0" y1="177" x2="268.0" y2="187"/>
+          </g>
+          <g font-family="IBM Plex Sans, system-ui, sans-serif" font-size="12" font-weight="600" text-anchor="middle">
+            <text x="138.0" y="9" fill="var(--accent)">a</text><text x="159.0" y="99.0" fill="var(--accent)">b</text><text x="150.0" y="178" fill="var(--accent)">e</text>
+            <text x="224.6" y="20.1" fill="var(--muted)" font-size="10">F</text><text x="271.9" y="77.1" fill="var(--muted)" font-size="10">C</text><text x="244.2" y="33.6" fill="var(--muted)" font-size="10">C</text><text x="279.0" y="99.0" fill="var(--muted)" font-size="10">E</text>
+          </g>
+        </svg>
+        <div class="row"><label for="bx">a · Gerade<small>Eckpfosten zu Eckpfosten (Verbinder F) einer Längsseite</small></label><input id="bx" type="number" step="1" value="263"></div>
+        <div class="row"><label for="by">b · Breite<small>Eckpfosten zum gegenüberliegenden Eckpfosten</small></label><input id="by" type="number" step="1" value="280"></div>
+        <div class="row"><label for="px">e · Gesamtlänge<small>Spitzenpfosten zu Spitzenpfosten (Verbinder E in Poolmitte)</small></label><input id="px" type="number" step="1" value="466"></div>
+        <p class="hint" id="cinfo"></p>
+        <div class="row"><label for="cs">Clip-Abstand [cm]<small>Pfostenmitte bis Clipbeginn; Übergangsstück freihalten</small></label><input id="cs" type="number" step="0.5" value="7"></div>
+      </fieldset>
+      <fieldset>
+        <h3>Bauteilmaße aus den v3-Vorlagen [mm]</h3>
+        <div class="row"><label for="cw">Clipbreite<small>Bauhöhe der Vorlage (40)</small></label><input id="cw" type="number" step="1" value="40"></div>
+        <div class="row"><label for="cp">Gelenkhöhe am Clip<small>Rohrachse bis Neigegelenk; Steckachse 92,5, Schraube 93,6</small></label><input id="cp" type="number" step="0.1" value="92.5"></div>
+        <div class="row"><label for="cm">Gelenk bis Muffenrand<small>Neigegelenk bis Muffenende auf dem Clip-Zapfen</small></label><input id="cm" type="number" step="1" value="20"></div>
+        <div class="row"><label for="rh">Gelenkradius (gelenk_radius)<small>Hubmitte bis Gelenkachse der Nasen</small></label><input id="rh" type="number" step="1" value="62"></div>
+        <div class="row"><label for="kk">Kragenradius (kranz_kragen_radius)<small>Hubmitte bis Kragen der Stangenzapfen</small></label><input id="kk" type="number" step="1" value="88"></div>
+        <div class="row"><label for="kd">Zapfendurchmesser (kranz_zapfen_d)<small>44,3 = Innenmaß HT-Rohr DN 50</small></label><input id="kd" type="number" step="0.1" value="44.3"></div>
+        <div class="row"><label for="fk">Kragenradius First (first_kragen_radius)<small>Hubmitte bis Kragen des First-Zapfens</small></label><input id="fk" type="number" step="1" value="62"></div>
+        <div class="row"><label for="mt">Muffentiefe<small>Einstecktiefe der HT-Muffe</small></label><input id="mt" type="number" step="1" value="50"></div>
+      </fieldset>
+      <fieldset>
+        <h3>Ausführung</h3>
+        <div class="row"><label for="vb">Verbindung Clip – Gabel<small>Parameter verbindung</small></label>
+          <select id="vb"><option value="steck">Steckachse (gedruckt)</option><option value="schraube">Schraube M8</option></select></div>
+        <label class="check"><input id="alu" type="checkbox" checked> Alu-Innenrohr 40 × 2 im First (Verstärkung gegen Durchbiegen)</label>
+        <label class="check"><input id="alu2" type="checkbox"> Alu-Innenrohr auch in den Gratstangen (Knicksicherheit)</label>
+        <button type="button" class="btn" id="reset">Bestway 56448 (Vorgabe) laden</button>
+      </fieldset>
+    </form>
+
+    <div class="results">
+      <section class="panel">
+        <div class="kpis" id="kpis"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Draufsicht</h2>
+        <svg class="plan" id="plan" viewBox="0 0 600 380" role="img" aria-label="Draufsicht des Pools mit Hubs, Gratstangen und Clips"></svg>
+        <div class="legend"><span><i style="background:var(--rail)"></i>Rahmenrohr</span><span><i style="background:var(--rod)"></i>Gratstange</span><span><i style="background:var(--ridge)"></i>First</span><span><i style="background:var(--hub)"></i>Hub</span><span><i style="background:var(--clip)"></i>Clip</span></div>
+      </section>
+
+      <section class="panel">
+        <h2>Zuschnittliste</h2>
+        <div class="tablewrap"><table id="cuts"></table></div>
+        <div class="notes" id="notes" style="margin-top:12px"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Plane</h2>
+        <p class="hint" style="margin-bottom:12px">Die Plane liegt auf dem Dach. Die Maße stammen aus der Abwicklung der Dachflächen in die Ebene, plus Überstand. Die hellen Flächen zeigen die abgewickelte Dachfläche, die dunkle Linie die Plane.</p>
+        <div class="tarps">
+          <div class="tarp"><h3>Rechteckplane</h3><svg id="tarpRect" viewBox="0 0 300 190" role="img" aria-label="Rechteckplane über der abgewickelten Dachfläche"></svg><div id="tarpRectTxt"></div></div>
+          <div class="tarp"><h3>Ovalplane</h3><svg id="tarpOval" viewBox="0 0 300 190" role="img" aria-label="Ovalplane über der abgewickelten Dachfläche"></svg><div id="tarpOvalTxt"></div></div>
+        </div>
+      </section>
+
+      <div class="two">
+        <section class="panel">
+          <div class="bar"><h2 style="margin:0">Einkaufszettel</h2><button type="button" class="btn" id="copyList">Kopieren</button></div>
+          <div id="shop"></div>
+          <div class="status" id="copyStatus" aria-live="polite"></div>
+        </section>
+        <section class="panel">
+          <h2>Werte für pool_hub_v3.scad</h2>
+          <pre class="code" id="scad"></pre>
+          <div class="bar"><button type="button" class="btn" id="copyScad">Kopieren</button><span class="status" id="scadStatus" aria-live="polite"></span></div>
+          <p class="foot">Werte in der Gruppe „Peilungen“ bzw. „Kranz-Zapfen“ der Vorlage ersetzen. Weichen die Peilungen um mehr als 1–2° von der gedruckten Version ab, den Hub neu drucken. Der Kragenradius folgt aus dem kleinsten Winkel zwischen zwei Nasen; OpenSCAD meldet beim Rendern die Druckfläche (260-mm-Bett: Kragenradius bis etwa 95 mm).</p>
+        </section>
+      </div>
+
+      <p class="foot">Alle Längen sind rechnerisch und gelten für die Clip-Seiten aus dem Montageplan: Gerade-Clip auf der Geraden, Schrägen-Clip zur Spitze hin, Spitzen-Clip neben dem Spitzenknoten. Der Clip-Arm wird zur Stange hin gedreht. Rohre erst lang zuschneiden, am Pool anhalten und dann auf Maß kürzen. Prüfe beim Kauf, ob die HT-Rohrlänge mit oder ohne Muffe angegeben ist.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const ids=["h","hubX","ov","bx","by","px","cs","cw","cp","cm","rh","kk","kd","fk","mt","vb","alu","alu2"];
+  const defaults={};
+  ids.forEach(id=>{const el=document.getElementById(id);defaults[id]=el.type==="checkbox"?el.checked:el.value;});
+  const KEY="pooldach-rechner-v5";
+  try{const saved=JSON.parse(localStorage.getItem(KEY)||"null");
+    if(saved) ids.forEach(id=>{if(id in saved){const el=document.getElementById(id);if(el.type==="checkbox")el.checked=saved[id];else el.value=saved[id];}});
+  }catch(e){}
+  const HT=[15,25,50,100,150,200];   // gängige HT-DN50-Längen in cm
+
+  function val(id){const el=document.getElementById(id);if(el.type==="checkbox")return el.checked;if(el.tagName==="SELECT")return el.value;const v=parseFloat(el.value);return isFinite(v)?v:NaN;}
+  const sub=(a,b)=>a.map((v,i)=>v-b[i]), add=(a,b)=>a.map((v,i)=>v+b[i]), mul=(a,s)=>a.map(v=>v*s);
+  const dot=(a,b)=>a.reduce((s,v,i)=>s+v*b[i],0), norm=a=>Math.hypot(...a), unit=a=>mul(a,1/norm(a));
+  const deg=r=>r*180/Math.PI;
+  const f1=v=>v.toLocaleString("de-DE",{minimumFractionDigits:1,maximumFractionDigits:1});
+  const f0=v=>Math.round(v).toLocaleString("de-DE");
+
+  function compute(p){
+    const B=[p.bx,p.by],A=[p.ax,p.ay],P=[p.px,0];
+    const s=p.cs+p.cw/20;          // Clipmitte ab Knoten (cm)
+    const clipAt=(n,toward)=>{const t=unit(sub(toward,n));return {c:add(n,mul(t,s)),t};};
+    const defs=[
+      {key:"2a",name:"Beginn Gerade",n:B,to:[p.bx-100,p.by],side:1},
+      {key:"2b",name:"Schräge",n:A,to:P,side:1},
+      {key:"2c",name:"Spitze",n:P,to:A,side:1},
+      {key:"2b",name:"Schräge",n:[p.ax,-p.ay],to:P,side:-1},
+      {key:"2a",name:"Beginn Gerade",n:[p.bx,-p.by],to:[p.bx-100,-p.by],side:-1}];
+    const rh=p.rh/10, e=p.cp/10;
+    const rods=defs.map(d=>{
+      const {c,t}=clipAt(d.n,d.to);
+      const t3=[t[0],t[1],0], C3=[c[0],c[1],0];
+      let u=[0,0,1], pin, H, beta;
+      for(let i=0;i<30;i++){
+        pin=add(C3,mul(u,e));
+        beta=Math.atan2(pin[1],pin[0]-p.hubX);
+        H=[p.hubX+rh*Math.cos(beta),rh*Math.sin(beta),p.h];
+        const dvec=sub(H,pin); const dp=sub(dvec,mul(t3,dot(dvec,t3)));
+        u=unit(dp);
+      }
+      const dv=sub(H,pin), L=norm(dv);
+      return {clip:c,t,pin,H,L,beta:deg(beta),pitch:deg(Math.asin(dv[2]/L)),yaw:deg(Math.asin(Math.abs(dot(dv,t3))/L)),
+        cut:L-(p.kk+4-p.rh)/10-p.cm/10};
+    });
+    const ridgeCut=2*p.hubX-2*(p.fk+4)/10;   // fk = first_kragen_radius, Zapfen beginnt 4 mm dahinter
+    // Abstände der Peilungen am Hub (inkl. First bei 180°)
+    const bs=rods.map(r=>r.beta).concat([180]).sort((a,b)=>a-b);
+    let gap=360; for(let i=0;i<bs.length;i++){const g=(bs[(i+1)%bs.length]-bs[i]+360)%360; if(g>0) gap=Math.min(gap,g);}
+    // Dachflaeche (Facetten) und Planenmass
+    const hub=[p.hubX,0,p.h], nodes=[[p.bx,p.by],[p.ax,p.ay],[p.px,0],[p.ax,-p.ay],[p.bx,-p.by]].map(n=>[n[0],n[1],0]);
+    const tri=(a,b,c)=>{const x=sub(b,a),y=sub(c,a);return norm([x[1]*y[2]-x[2]*y[1],x[2]*y[0]-x[0]*y[2],x[0]*y[1]-x[1]*y[0]])/2;};
+    let area=0; for(let i=0;i<4;i++) area+=tri(hub,nodes[i],nodes[i+1]);
+    area*=2;
+    const hubL=[-p.hubX,0,p.h];
+    for(const sg of [1,-1]){const b1=[p.bx,sg*p.by,0],b2=[-p.bx,sg*p.by,0];area+=tri(hub,hubL,b1)+tri(hubL,b2,b1);}
+    area/=1e4;
+    // Plane liegt auf dem Dach: Dachflaechen in die Planenebene abwickeln.
+    // Lange Seitenflaeche liegt eben; die Endflaechen werden ueber die Gratstangen 2a und 2b angeklappt.
+    const H3=[p.hubX,0,p.h], B3=[p.bx,p.by,0], A3=[p.ax,p.ay,0], P3=[p.px,0,0];
+    const unfold=(p1,p2,q,d1,d2)=>{const e=unit(sub(d2,d1)),n=[e[1],-e[0]],u=unit(sub(p2,p1)),w=sub(q,p1);
+      const a=dot(w,u),b=Math.sqrt(Math.max(dot(w,w)-a*a,0));return add(add(d1,mul(e,a)),mul(n,b));};
+    const Hd=[p.hubX,0], Bd=[p.bx,Math.hypot(p.by,p.h)];
+    const Ad=unfold(H3,B3,A3,Hd,Bd), Pd=unfold(H3,A3,P3,Hd,Ad);
+    const halfL=Math.max(p.hubX+Math.hypot(p.px-p.hubX,p.h),Ad[0],Pd[0]);   // Spitze ueber den Grat gemessen
+    const halfW=Math.max(Bd[1],Ad[1]);
+    const planeL=2*(halfL+p.ov), planeW=2*(halfW+p.ov);
+    const falte=2*Math.max(Pd[1],0);   // ueberschuessige Stoffbreite an jeder Spitze
+    // Abgewickelte Dachflaeche (ein Viertel, x>=0, y>=0): Laengsseite, Schraege, Spitze, Grat
+    const devQ=[[0,Bd[1]],Bd,Ad,Pd,[halfL,0]];
+    // Ovalplane in Poolform: Gerade bis xs = k*a, Enden als Kreisbogen durch (xs,b) und (a,0)
+    const k=Math.min(0.8,Math.max(0.3,p.bx/p.px));
+    const ovalInside=(a,b,x,y)=>{const xs=k*a; if(x<=xs) return y<=b+1e-9;
+      const cx=(a*a-xs*xs-b*b)/(2*(a-xs)), rr=a-cx; if(cx>xs) return false; return Math.hypot(x-cx,y)<=rr+1e-9;};
+    const fits=(a,b)=>devQ.every(([x,y])=>ovalInside(a-p.ov,b-p.ov,x,y));
+    let oval=null;
+    const bMin=Math.max(...devQ.map(q=>q[1]))+p.ov;
+    for(let b=Math.ceil(bMin);b<=bMin+120;b+=1){
+      let lo=halfL+p.ov, hi=halfL+p.ov+400; if(!fits(hi,b)) continue;
+      for(let i=0;i<40;i++){const m=(lo+hi)/2; if(fits(m,b)) hi=m; else lo=m;}
+      if(!oval||hi*b<oval.a*oval.b) oval={a:hi,b};
+    }
+    // Handelsuebliche Ovalplanen (Nennmass des Pools, fuer den sie gedacht sind)
+    const ovalCat=[[427,250],[488,305],[549,274],[610,366],[732,366]];
+    const ovalPick=ovalCat.find(([L,W])=>fits(L/2,W/2))||null;
+    // Gewebeplanen-Standardgroessen in m
+    const rectCat=[[2,3],[3,4],[3,5],[4,5],[4,6],[4,8],[5,6],[5,8],[6,8],[6,10],[8,10],[8,12],[10,12]];
+    const rectPick=rectCat.map(([w,l])=>[w*100,l*100]).filter(([w,l])=>l>=planeL-0.5&&w>=planeW-0.5).sort((u,v)=>u[0]*u[1]-v[0]*v[1])[0]||null;
+    const kkMin=(p.kd+8+3)/(2*Math.sin(gap*Math.PI/360));
+    return {rods,ridgeCut,gap,kkMin,area,planeL,planeW,falte,halfL,halfW,devQ,oval,ovalPick,rectPick,k,defs};
+  }
+
+  // Rundung aus vier gleichen Bogenrohren, gleiche Knickwinkel an den drei E-Verbindern
+  function endGeom(xb,hb,xe){
+    const R=Math.PI/180;
+    const f=t2=>{const t1=3*t2-180;const s=hb/(Math.sin(t1*R)+Math.sin(t2*R));return {d:xb+s*(Math.cos(t1*R)+Math.cos(t2*R))-xe,s,t1};};
+    let lo=60.001,hi=89.999;
+    if(f(lo).d*f(hi).d>0) return null;
+    for(let i=0;i<80;i++){const m=(lo+hi)/2;if(f(lo).d*f(m).d<=0)hi=m;else lo=m;}
+    const t2=(lo+hi)/2,{s,t1}=f(t2);
+    return {s,t1,t2,A:[xb+s*Math.cos(t1*R),hb-s*Math.sin(t1*R)]};
+  }
+  function pickPipe(cut){const need=cut+2;for(const l of HT) if(l>=need) return l;return null;}
+  function ridgePipes(cut,mt){ // zwei Rohre über die Muffe verbinden
+    let best=null;
+    for(const a of HT) for(const b of HT){const eff=a+b-mt; if(eff>=cut+2 && (!best||a+b<best.a+best.b)) best={a:Math.max(a,b),b:Math.min(a,b)};}
+    return best;
+  }
+
+  function render(){
+    const p={};ids.forEach(id=>p[id]=val(id));
+    ['bx','by','px'].forEach(k=>p[k]=p[k]/2);   // Eingaben sind Gesamtabstände, gerechnet wird ab Poolmitte
+    const en=endGeom(p.bx,p.by,p.px);
+    if(!en){document.getElementById("notes").innerHTML=`<div class="note warn">Mit diesen Maßen lässt sich die Rundung nicht aus vier gleichen Bogenrohren bilden. Bitte a, b und e prüfen.</div>`;return;}
+    p.ax=en.A[0]; p.ay=en.A[1];
+    document.getElementById("cinfo").textContent=`Daraus folgt: Bogenrohr C von Pfosten zu Pfosten ${f1(en.s)} cm, Knick am Eckverbinder F ${f1(en.t1)}°, an den Bogenverbindern E ${f1(en.t2-en.t1)}°. Mit dem Maßband kurz nachprüfen.`;
+    try{localStorage.setItem(KEY,JSON.stringify(Object.fromEntries(ids.map(id=>{const el=document.getElementById(id);return [id,el.type==="checkbox"?el.checked:el.value];}))));}catch(e){}
+    const bad=ids.filter(id=>typeof p[id]==="number"&&!isFinite(p[id]));
+    if(bad.length){document.getElementById("notes").innerHTML=`<div class="note warn">Bitte alle Felder mit Zahlen füllen.</div>`;return;}
+    const r=compute(p);
+    const uniq=[r.rods[0],r.rods[1],r.rods[2]];
+    const counts={"2a":4,"2b":4,"2c":2};
+    const colors={"2a":"var(--clip)","2b":"var(--clip)","2c":"var(--clip)"};
+
+    // Kennzahlen
+    const pitches=r.rods.map(x=>x.pitch);
+    document.getElementById("kpis").innerHTML=
+      `<div class="kpi"><b>${f0(r.ridgeCut)} cm</b><span>First zuschneiden</span></div>`+
+      `<div class="kpi"><b>${f0(Math.min(...pitches))}–${f0(Math.max(...pitches))}°</b><span>Dachneigung der Gratstangen</span></div>`+
+      `<div class="kpi"><b>${f1(r.area)} m²</b><span>Dachfläche ohne Überstand</span></div>`+
+      `<div class="kpi"><b>${f1(r.planeL/100)} × ${f1(r.planeW/100)} m</b><span>Plane mindestens (auf dem Dach gemessen)</span></div>`;
+
+    // Tabelle
+    let rows=`<thead><tr><th>Stange</th><th>Anzahl</th><th>Gelenk–Gelenk</th><th>Zuschnitt</th><th>Neigung</th><th>Peilung am Hub</th><th>Gier am Clip</th></tr></thead><tbody>`;
+    uniq.forEach(x=>{const d=r.rods.indexOf(x);const k=r.defs[d].key;
+      rows+=`<tr><td><span class="tag" style="background:${colors[k]}">${k}</span>${r.defs[d].name}</td><td>${counts[k]}×</td><td>${f1(x.L)} cm</td><td class="cut">${f1(x.cut)} cm</td><td>${f0(x.pitch)}°</td><td>±${f1(Math.abs(x.beta))}°</td><td>${f0(x.yaw)}°</td></tr>`;});
+    rows+=`<tr><td><span class="tag" style="background:var(--ridge)">4</span>First</td><td>1×</td><td>${f1(2*p.hubX)} cm</td><td class="cut">${f1(r.ridgeCut)} cm</td><td>0°</td><td>180°</td><td>–</td></tr></tbody>`;
+    document.getElementById("cuts").innerHTML=rows;
+
+    // Hinweise
+    const notes=[];
+    const maxBA=Math.max(r.rods[0].pitch,r.rods[1].pitch);
+    if(maxBA>38) notes.push(["warn",`Die Gratstangen 2a und 2b stehen mit ${f0(maxBA)}° steiler als 38°. Dann bleibt zwischen den Nasen am Hub weniger als etwa 1 mm Luft. Firsthöhe verringern.`]);
+    if(Math.min(...pitches)<12) notes.push(["warn",`Die flachste Stange hat nur ${f0(Math.min(...pitches))}° Neigung. Auf der Plane bleibt dann leicht Wasser stehen.`]);
+    if(p.kk<r.kkMin) notes.push(["warn",`Benachbarte Nasen am Hub liegen nur ${f1(r.gap)}° auseinander; ihre Kragen brauchen einen Kragenradius von mindestens ${Math.ceil(r.kkMin)} mm (eingestellt: ${f0(p.kk)} mm). Wert im Hub erhöhen, der Hub wird dadurch etwas größer.`]);
+    if(Math.max(...r.rods.map(x=>x.cut))>200-2) notes.push(["warn","Eine Gratstange ist länger als 2 m und braucht zwei Rohre mit Muffe."]);
+    if(!notes.length) notes.push(["ok","Geometrie im Auslegungsbereich: Neigungen, Nasenabstand und Rohrlängen passen."]);
+    document.getElementById("notes").innerHTML=notes.map(n=>`<div class="note ${n[0]}">${n[1]}</div>`).join("");
+
+    // Einkaufszettel
+    const items=[];   // [Abschnitt, Menge, Text, Detail]
+    const pipeCount={};
+    const rodPipe=[];
+    uniq.forEach(x=>{const d=r.rods.indexOf(x);const k=r.defs[d].key;const l=pickPipe(x.cut);
+      rodPipe.push(`${counts[k]}× ${l?l+" cm":"über 2 m"} für ${k} (Zuschnitt ${f1(x.cut)} cm)`);
+      if(l) pipeCount[l]=(pipeCount[l]||0)+counts[k];});
+    const rp=ridgePipes(r.ridgeCut,p.mt);
+    if(rp){pipeCount[rp.a]=(pipeCount[rp.a]||0)+1;pipeCount[rp.b]=(pipeCount[rp.b]||0)+1;}
+    Object.keys(pipeCount).map(Number).sort((a,b)=>b-a).forEach(l=>items.push(["Rohre",pipeCount[l],`HT-Rohr DN 50, ${l} cm, mit Muffe`,""]));
+    items.push(["Rohre","",`Aufteilung`,rodPipe.join(" · ")+(rp?` · First: ${rp.a} + ${rp.b} cm über die Muffe gesteckt, dann auf ${f1(r.ridgeCut)} cm kürzen (äußere Muffe absägen)`:"")]);
+    const aluFirst=r.ridgeCut-2*4.5;
+    let aluTotal=0, aluTxt=[];
+    if(p.alu){aluTotal+=aluFirst;aluTxt.push(`First 1× ${f0(aluFirst)} cm`);}
+    if(p.alu2){uniq.forEach(x=>{const d=r.rods.indexOf(x);const k=r.defs[d].key;const l=x.cut-5.5-4-1;aluTotal+=l*counts[k];aluTxt.push(`${k} ${counts[k]}× ${f0(l)} cm`);});}
+    if(aluTotal>0) items.push(["Rohre",Math.ceil(aluTotal/100),`Alu-Rundrohr 40 × 2 mm, Meter`,aluTxt.join(" · ")+" (endet vor den Zapfen)"]);
+    items.push(["Kleinteile",10,"Linsenkopfschraube M5 × 70 + Stoppmutter M5 + 2 Scheiben","Sicherung Muffe auf Clip-Zapfen"]);
+    items.push(["Kleinteile",12,"Linsenkopfschraube M5 × 60 + Stoppmutter M5 + 2 Scheiben","Sicherung Rohr auf Hub-Zapfen (10 Grat + 2 First)"]);
+    if(p.vb==="schraube"){
+      items.push(["Kleinteile",10,"Zylinderschraube M8 × 30, DIN 912","Verbindung Clip–Gabel"]);
+      items.push(["Kleinteile",10,"Sicherungsmutter M8, DIN 985 + Scheibe M8",""]);
+    }
+    items.push(["Kleinteile",30,"Kabelbinder UV-beständig, ca. 4,8 × 300 mm","Clips gegen Verrutschen am Übergangsstück sichern"]);
+    items.push(["Plane",1,`Variante A: Gewebeplane mit Ösen ${r.rectPick?`${f0(r.rectPick[0]/100)} × ${f0(r.rectPick[1]/100)} m (Standardgröße)`:"nach Maß"}`,`mindestens ${f1(r.planeL/100)} × ${f1(r.planeW/100)} m; an jeder Spitze legt sich eine Falte von ca. ${f0(r.falte)} cm Stoffbreite`]);
+    items.push(["Plane","",`oder Variante B: Ovalplane ${r.ovalPick?`für Oval-Pools ${f1(r.ovalPick[0]/100)} × ${f1(r.ovalPick[1]/100)} m`:"nach Maß"}`,`Planenmaß mindestens ${f1(2*r.oval.a/100)} × ${f1(2*r.oval.b/100)} m in Poolform – vor dem Kauf das tatsächliche Planenmaß beim Händler prüfen`]);
+    items.push(["Plane",1,"Expanderseil oder Gummispanner, ca. 20 Stück","Plane am Rahmenrohr abspannen"]);
+    items.push(["Druckteile",2,"Hub (pool_hub_v3.scad)","je ein Druck, ca. 245 × 245 mm, auf dem Bett um 45° gedreht"]);
+    items.push(["Druckteile",10,"Randhalter (pool_randhalter_v3.scad)",p.vb==="steck"?"je Satz teil 1–4: Clip, Gabel mit Stange, Steckachse, Riegel":"je Satz teil 1–2: Clip, Gabel mit Stange"]);
+
+    let html="",txt="Einkaufszettel Pooldach\n",last="";
+    items.forEach(([sec,q,t,d])=>{
+      if(sec!==last){html+=(last?"</ul>":"")+`<div class="sect">${sec}</div><ul class="list">`;txt+=`\n${sec}\n`;last=sec;}
+      html+=`<li><span class="q">${q===""?"":q+"×"}</span><span>${t}${d?`<small>${d}</small>`:""}</span></li>`;
+      txt+=`${q===""?"   ":String(q).padStart(3)+"×"} ${t}${d?" – "+d:""}\n`;
+    });
+    document.getElementById("shop").innerHTML=html+"</ul>";
+    document.getElementById("shop").dataset.txt=txt;
+
+    // SCAD
+    const b=r.rods.map(x=>f1(x.beta).replace(",","."));
+    const kkOut=Math.max(Math.ceil(r.kkMin),Math.round(p.kk),Math.round(p.rh)+26);
+    document.getElementById("scad").textContent=`kranz_peilungen = [${b.join(", ")}];\nfirst_peilung = 180;\nkranz_kragen_radius = ${kkOut};   // mindestens ${Math.max(Math.ceil(r.kkMin),Math.round(p.rh)+26)}\nkranz_texte = ["2a", "2b", "2c", "2b", "2a"];`;
+
+    drawPlan(p,r);
+    drawTarps(p,r);
+  }
+
+  function drawTarps(p,r){
+    const W=300,Hh=190,pad=14;
+    const fullDev=q=>{const pts=[];q.forEach(([x,y])=>pts.push([x,y]));
+      for(let i=q.length-1;i>=0;i--) pts.push([q[i][0],-q[i][1]]);
+      const left=pts.map(([x,y])=>[-x,-y]); return pts.concat(left);};
+    const dev=fullDev(r.devQ);
+    function frame(halfX,halfY){const s=Math.min((W-2*pad)/(2*halfX),(Hh-2*pad)/(2*halfY));return {X:x=>W/2+x*s,Y:y=>Hh/2-y*s,s};}
+    const devPath=(f)=>dev.map(([x,y],i)=>`${i?"L":"M"}${f.X(x).toFixed(1)},${f.Y(y).toFixed(1)}`).join("")+"Z";
+    // Rechteck
+    let L=r.planeL/2,B=r.planeW/2,f=frame(Math.max(L,r.rectPick?r.rectPick[1]/2:0),Math.max(B,r.rectPick?r.rectPick[0]/2:0));
+    let g=`<path d="${devPath(f)}" fill="var(--water)" stroke="var(--rail)" stroke-width="1" stroke-dasharray="3 2"/>`;
+    g+=`<rect x="${f.X(-L)}" y="${f.Y(B)}" width="${2*L*f.s}" height="${2*B*f.s}" fill="none" stroke="var(--ink)" stroke-width="2"/>`;
+    if(r.rectPick){const l2=r.rectPick[1]/2,b2=r.rectPick[0]/2;g+=`<rect x="${f.X(-l2)}" y="${f.Y(b2)}" width="${2*l2*f.s}" height="${2*b2*f.s}" fill="none" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="5 3"/>`;}
+    document.getElementById("tarpRect").innerHTML=g;
+    document.getElementById("tarpRectTxt").innerHTML=`<b class="big">${f1(r.planeL/100)} × ${f1(r.planeW/100)} m</b><dl>
+      <dt>Standardgröße</dt><dd>${r.rectPick?`${f0(r.rectPick[0]/100)} × ${f0(r.rectPick[1]/100)} m (gestrichelt)`:"keine passende, nach Maß"}</dd>
+      <dt>Falte</dt><dd>an jeder Spitze ca. ${f0(r.falte)} cm Stoffbreite, mit Expander einschlagen</dd></dl>`;
+    // Oval
+    const o=r.oval; const k=r.k;
+    const ovalPts=(a,b)=>{const xs=k*a,cx=(a*a-xs*xs-b*b)/(2*(a-xs)),rr=a-cx,t0=Math.atan2(b,xs-cx);
+      const arc=[];for(let i=0;i<=32;i++){const t=t0-2*t0*i/32;arc.push([cx+rr*Math.cos(t),rr*Math.sin(t)]);}
+      return arc.concat(arc.map(([x,y])=>[-x,-y]));};
+    const pa=o?o.a:L, pb=o?o.b:B;
+    const cat=r.ovalPick?[r.ovalPick[0]/2,r.ovalPick[1]/2]:null;
+    f=frame(Math.max(pa,cat?cat[0]:0),Math.max(pb,cat?cat[1]:0));
+    const pathOf=pts=>pts.map(([x,y],i)=>`${i?"L":"M"}${f.X(x).toFixed(1)},${f.Y(y).toFixed(1)}`).join("")+"Z";
+    g=`<path d="${devPath(f)}" fill="var(--water)" stroke="var(--rail)" stroke-width="1" stroke-dasharray="3 2"/>`;
+    if(o) g+=`<path d="${pathOf(ovalPts(pa,pb))}" fill="none" stroke="var(--ink)" stroke-width="2"/>`;
+    if(cat) g+=`<path d="${pathOf(ovalPts(cat[0],cat[1]))}" fill="none" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="5 3"/>`;
+    document.getElementById("tarpOval").innerHTML=g;
+    document.getElementById("tarpOvalTxt").innerHTML=o?`<b class="big">${f1(2*o.a/100)} × ${f1(2*o.b/100)} m</b><dl>
+      <dt>Im Handel</dt><dd>${r.ovalPick?`Abdeckplane für Oval-Pools ${f1(r.ovalPick[0]/100)} × ${f1(r.ovalPick[1]/100)} m (gestrichelt, Nennmaß des Pools)`:"keine Standardgröße passt, nach Maß"}</dd>
+      <dt>Hinweis</dt><dd>Händler nennen meist nur die Poolgröße. Das echte Planenmaß muss mindestens ${f1(2*o.a/100)} × ${f1(2*o.b/100)} m betragen.</dd></dl>`:`<p class="hint">Keine passende Ovalform gefunden.</p>`;
+  }
+
+  function drawPlan(p,r){
+    const svg=document.getElementById("plan");
+    const W=600,Hh=380,pad=30;
+    const xs=[p.px,p.bx+10], ys=[p.by];
+    const sx=(W-2*pad)/(2*Math.max(...xs)), sy=(Hh-2*pad)/(2*p.by), s=Math.min(sx,sy);
+    const X=x=>W/2+x*s, Y=y=>Hh/2-y*s;
+    const half=[[p.bx,p.by],[p.ax,p.ay],[p.px,0],[p.ax,-p.ay],[p.bx,-p.by]];
+    const ring=half.concat(half.map(n=>[-n[0],-n[1]]));
+    const pts=ring.map(n=>`${X(n[0]).toFixed(1)},${Y(n[1]).toFixed(1)}`).join(" ");
+    let g=`<polygon points="${pts}" fill="var(--water)" stroke="var(--rail)" stroke-width="5" stroke-linejoin="round"/>`;
+    ring.forEach(n=>g+=`<circle cx="${X(n[0])}" cy="${Y(n[1])}" r="4" fill="var(--rail)"/>`);
+    g+=`<line x1="${X(-p.hubX)}" y1="${Y(0)}" x2="${X(p.hubX)}" y2="${Y(0)}" stroke="var(--ridge)" stroke-width="4"/>`;
+    for(const sg of [1,-1]){
+      r.rods.forEach((x,i)=>{
+        const c=mul(x.clip,sg), hx=sg*p.hubX;
+        g+=`<line x1="${X(hx)}" y1="${Y(0)}" x2="${X(c[0])}" y2="${Y(c[1])}" stroke="var(--rod)" stroke-width="3"/>`;
+        const t=mul(x.t,sg), n=[-t[1],t[0]], a=add(c,mul(t,p.cw/20)), b2=add(c,mul(t,-p.cw/20));
+        g+=`<line x1="${X(a[0])}" y1="${Y(a[1])}" x2="${X(b2[0])}" y2="${Y(b2[1])}" stroke="var(--clip)" stroke-width="7"/>`;
+        const o=unit(c), lp=add(c,mul(o,18/s));
+        g+=`<text x="${X(lp[0])}" y="${Y(lp[1])+4}" text-anchor="middle" font-size="11" font-weight="600" fill="var(--clip)" font-family="IBM Plex Sans, system-ui, sans-serif">${r.defs[i].key}</text>`;
+      });
+      g+=`<circle cx="${X(sg*p.hubX)}" cy="${Y(0)}" r="8" fill="var(--hub)"/>`;
+    }
+    g+=`<text x="${X(0)}" y="${Y(0)-8}" text-anchor="middle" font-size="12" fill="var(--ink)" font-family="IBM Plex Mono, monospace">First ${f0(2*p.hubX)} cm</text>`;
+    svg.innerHTML=g;
+  }
+
+  function copy(text,status){
+    const done=m=>{status.textContent=m;setTimeout(()=>status.textContent="",2500);};
+    try{navigator.clipboard.writeText(text).then(()=>done("Kopiert."),()=>done("Kopieren nicht möglich – Text bitte markieren."));}
+    catch(e){done("Kopieren nicht möglich – Text bitte markieren.");}
+  }
+  document.getElementById("copyList").addEventListener("click",()=>copy(document.getElementById("shop").dataset.txt||"",document.getElementById("copyStatus")));
+  document.getElementById("copyScad").addEventListener("click",()=>copy(document.getElementById("scad").textContent,document.getElementById("scadStatus")));
+  document.getElementById("reset").addEventListener("click",()=>{ids.forEach(id=>{const el=document.getElementById(id);if(el.type==="checkbox")el.checked=defaults[id];else el.value=defaults[id];});render();});
+  document.getElementById("f").addEventListener("input",render);
+  document.getElementById("f").addEventListener("submit",e=>e.preventDefault());
+  render();
+})();
+</script>

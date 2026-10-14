@@ -1,4 +1,4 @@
-// Schlüssel-Drehknauf mit Beschlag – Winkhaus Profilzylinder  (Version 5)
+// Schlüssel-Drehknauf mit Beschlag – Winkhaus Profilzylinder  (Version 5, Smarthome)
 // Teile: Platte (Beschlag mit Lagerbund, optional Elektronikfach), Schaft (Gabel), Griff (Glocke),
 //        Haus-Einsatz, Gewindekappen für den Griff, Kappen für die Türschrauben.
 //
@@ -7,11 +7,13 @@
 // Drücken -> Griffunterkante setzt auf Platte (0,3 mm). Ziehen -> Flansch am Deckel (0,4 mm).
 // Der Schlüssel hat zu allen Teilen MEHR Spiel (>= 0,6 mm), wird also nur auf Drehung belastet.
 //
-// Ohne Elektronik (elektronik = false): kurze Platte, Griff ohne Magnettaschen.
-// Mit elektronik = true entsteht die Smarthome-Variante mit Verschlusssensor (siehe SMARTHOME.md / Tag "smarthome").
+// Smarthome (elektronik = true, siehe SMARTHOME.md): 2 Magnete (Ø3x2, entgegengesetzt gepolt) in der
+// Griffunterseite, 2 Hall-Latches (TI DRV5012) auf einer Bogenplatine in der Plattenoberseite unter dem Griffrand.
+// XIAO ESP32C6 auf der Trägerplatine + LiPo 803040 im Fach der Plattenverlängerung (von hinten bestückt), USB-C unten,
+// RGB-LED hinter einem Lichtfenster, Reset per Büroklammer. elektronik = false: reiner Knauf.
 //
 // Druck: PETG, 4-5 Perimeter, 40 % Infill, 0,2 mm Schicht.
-//   Platte: RÜCKSEITE (Türseite) auf das Druckbett (ohne Elektronik keine Stützen nötig).
+//   Platte: RÜCKSEITE (Türseite) auf das Druckbett, mit Elektronik Stützen "nur auf dem Druckbett".
 //   Griff:  Oberseite (Haus) auf das Druckbett.
 // Hinweis: Aus OpenSCAD exportierte Teile liegen in Einbaulage. Griff, Haus und Gewindekappen
 // zum Drucken um 180° um die X-Achse drehen (oder im Slicer drehen).
@@ -70,7 +72,7 @@ pcb_t  = pcb_d + 0.8;   // Taschentiefe: Platine + 0,4 Bauteile + 0,4 Luft – S
 kabel_a = 225; kabel_r = 18.0;   // Lötaugen J1
 
 /* ---------- Elektronikfach (von hinten offen, die Tür schließt es) ---------- */
-elektronik = false;  // false: Platte ohne Elektronikfach/Sensortaschen, Griff ohne Magnete (reiner Knauf)
+elektronik = true;   // false: Platte ohne Elektronikfach/Sensortaschen, Griff ohne Magnete (reiner Knauf)
 gestapelt = true;    // true: XIAO liegt über dem Akku (kürzer, volle Dicke) | false: XIAO unter dem Akku (länger, flach auslaufend)
 fach_oben = -40;     // Oberkante Fach (unter der unteren Türschraube)
 bat_b = gestapelt ? 32 : 31;     // Akku 803040: 30 x 40 x 8 mm (+ Schutzplatine); gestapelt 1 mm Kabelweg je Seite

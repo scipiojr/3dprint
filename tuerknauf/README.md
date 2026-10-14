@@ -60,4 +60,6 @@ Die Prüfungen (`assert`) melden, wenn Bund, Querschraube oder Wände nicht mehr
 
 ## Smarthome-Variante
 
-Mit `elektronik = true` entsteht eine verlängerte Platte mit Verschlusssensor (Hall-Sensoren, XIAO ESP32C6, Akku, MQTT). Beschreibung, Platinen und Firmware: Tag [`smarthome`](https://github.com/scipiojr/3dprint/tree/smarthome/tuerknauf), Datei `SMARTHOME.md`.
+Dieser Stand enthält zusätzlich den Verschlusssensor: Mit `elektronik = true` (Voreinstellung) entstehen die verlängerte Platte mit Elektronikfach, Lichtfenster und Reset-Loch sowie der Griff mit Magnettaschen. Platinen, Firmware, Bestellung und Einbau beschreibt [SMARTHOME.md](SMARTHOME.md). Mit `elektronik = false` entsteht der reine Knauf.
+
+![Smarthome-Variante](bilder/uebersicht_smarthome.png)

@@ -70,6 +70,9 @@ pcb_sp = 0.2;   // Spiel rundum in der Tasche
 pcb_d  = 1.6;   // Platinendicke (AISLER 2 Lagen: 1,6 mm)
 pcb_t  = pcb_d + 0.8;   // Taschentiefe: Platine + 0,4 Bauteile + 0,4 Luft – Sensoroberseite 0,4 mm unter der Platte
 kabel_a = 225; kabel_r = 18.0;   // Lötaugen J1
+kabel_loch_d = 3.0;  // Kabeldurchlass von der Platinentasche nach hinten (4 Adern AWG 28/30)
+kanal_b = 3.5;       // Kabelkanal auf der Rückseite bis ins Elektronikfach: Breite
+kanal_t = 3.0;       //                                                       Tiefe
 
 /* ---------- Elektronikfach (von hinten offen, die Tür schließt es) ---------- */
 elektronik = true;   // false: Platte ohne Elektronikfach/Sensortaschen, Griff ohne Magnete (reiner Knauf)
@@ -213,8 +216,9 @@ module platinen2d() intersection() {
 module sensortaschen() {
   translate([0, 0, H - pcb_t]) linear_extrude(pcb_t + 1) platinen2d();                    // Tasche von vorne
   xs = kabel_r*cos(kabel_a); ys = kabel_r*sin(kabel_a);
-  translate([xs, ys, -1]) cylinder(d = 2.4, h = H, $fn = 24);                             // Kabelloch nach hinten
-  translate([xs - 1.5, fach_oben - 1, -1]) cube([3, ys + 1.5 - (fach_oben - 1), 1 + 2.5]); // Kabelkanal bis ins Fach
+  translate([xs, ys, -1]) cylinder(d = kabel_loch_d, h = H, $fn = 32);                                       // Kabelloch nach hinten
+  // Kabelkanal bis ins Fach, 0,5 mm nach außen versetzt (Abstand zur Rosettenkammer), endet in der Lochmitte
+  translate([xs - 0.5 - kanal_b/2, fach_oben - 1, -1]) cube([kanal_b, ys - (fach_oben - 1), 1 + kanal_t]);
 }
 
 module platte() {

@@ -35,7 +35,7 @@ Erweiterung des Türknaufs um einen Sensor, der meldet, ob die Tür abgeschlosse
 | Seeed Studio XIAO ESP32C6 | 1 | wird auf die Trägerplatine gelötet |
 | LiPo 803040 (3,7 V, ca. 1000 mAh) mit Schutzschaltung | 1 | 30 × 40 × 8 mm |
 | Neodym-Magnet Ø 3 × 2 mm, axial | 2 | einer mit Nord, einer mit Süd nach unten einkleben |
-| Litze 4-adrig, dünn | ca. 15 cm | Sensorplatine → Trägerplatine |
+| Einzeldrähte AWG 28–30 (z. B. Kynar/Wrap-Draht), 4 Stück | je ca. 15 cm | Sensorplatine → Trägerplatine; die Lötaugen haben 0,5 mm Bohrung |
 | Schaumstoffstreifen 2 mm | 1 | zwischen Akku und Tür, drückt die Platine an |
 | Transparentes PETG | – | für das Lichtfenster (`teil = "led_fenster"`) |
 
@@ -45,6 +45,7 @@ Erweiterung des Türknaufs um einen Sensor, der meldet, ob die Tür abgeschlosse
 - `platte` und `led_fenster` als ein Objekt laden, dem Fenster transparentes PETG zuweisen.
 - `fach_test` druckt nur das untere Ende der Platte: vorab Trägerplatine, XIAO, USB-Stecker, Lichtfenster und Reset-Loch prüfen.
 - Griff wie in der README; die Magnettaschen liegen an der Unterseite.
+- Kabeldurchlass von der Sensortasche nach hinten: `kabel_loch_d` (3 mm) und Kanal `kanal_b` × `kanal_t` (3,5 × 3 mm), reicht für 4 Adern AWG 28/30, nicht für ein Kabel mit Mantel.
 
 ## Platinen bestellen (JLCPCB)
 
@@ -97,3 +98,14 @@ Weitere Befehle: `wach` (10 Minuten wach, z. B. zum Flashen ohne USB-Erkennung),
 - **Antenne:** Die Platine geht davon aus, dass die Keramikantenne am Ende gegenüber der USB-Buchse sitzt, und lässt dort die Massefläche frei.
 - **RGB-LED LTST-C19HE1WT:** Pinbelegung (1 = R, 2 = G, 3 = B, 4 = Anode) aus den Bauteildaten von LCSC; in der JLCPCB-Vorschau kontrollieren.
 - Die Firmware ist kompiliert, aber noch nicht auf echter Hardware getestet.
+
+## Idee: Akku über Stecker anschließen (noch nicht umgesetzt)
+
+Die Akkus kommen meist mit Stecker (JST PH 2.0). Derzeit werden die Akkukabel an die Lötaugen „AKKU“ gelötet. Für eine Steckverbindung wäre nötig:
+
+- **Platz:** Eine liegende PH-2.0-Buchse ist mit Gegenstecker etwa 5 mm hoch und rund 12 mm lang. Vor der Trägerplatine sind nur 1,9 mm frei, über dem Akku etwa 2,5 mm. Die Buchse braucht also eine Stelle im Fach ohne Akku.
+- **Vorschlag:** Platte unten um ca. 10 mm verlängern (`bat_l` von 46 auf etwa 56), Akku ans obere Ende des Fachs mit den Kabeln nach unten, SMD-Buchse (z. B. JST S2B-PH-SM4-TB) auf der **Rückseite** der Trägerplatine unter dem USB-Ende des XIAO, Öffnung zum Akku. Die Lötaugen „AKKU“ bleiben als Alternative.
+- **Löten:** JLCPCB bestückt bei „Economic“ nur eine Seite – die Buchse wird von Hand gelötet (zwei Pads, zwei Haltelaschen).
+- **Polarität:** Bei Akkus von AliExpress ist die Belegung am PH-Stecker nicht einheitlich. + und − auf der Platine kennzeichnen und vor dem ersten Einstecken nachmessen.
+- Vorher klären: Steckertyp (PH 2.0 oder 1.25 mm) und Gesamtlänge des Akkus mit Schutzschaltung.
+

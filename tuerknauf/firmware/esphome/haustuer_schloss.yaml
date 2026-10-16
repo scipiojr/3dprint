@@ -1,0 +1,325 @@
+# Verschlusssensor Haustür – ESPHome für das ESP32-C6 Super Mini ohne Trägerplatine
+# (schluesselknauf.scad mit modul = "supermini_frei", Akku-Messung mit Adafruit MAX17048 #5580).
+#
+# Ablauf wie die Arduino-Firmware: Aufwachen bei jedem Pegelwechsel der Hall-Sensoren, Drehung in
+# Vierteldrehungen zählen, nach 2,5 s Stillstand per MQTT melden, wieder schlafen. Alle 12 h ein
+# Lebenszeichen. Solange USB steckt (oder nach dem Befehl "wach" für 10 min), bleibt er wach (OTA/Logs).
+#
+# Kalibrieren (Nachricht mit retain an haustuer/schloss/befehl, danach Knauf kurz drehen):
+#   "zu"    – abgeschlossen, Haus oben
+#   "auf"   – nach einer halben Drehung aufschließen
+#   "wach"  – 10 Minuten wach bleiben,  "reset" – Kalibrierung löschen
+#
+# LED (WS2812 auf dem Modul): weiß = Neustart, grün = gemeldet, 3x gelb = kein WLAN,
+# 3x lila = kein MQTT, 2x rot = Akku < 15 %, blau blitzend = wach (USB/Wartung).
+#
+# Verdrahtung: GPIO1 Sensor A, GPIO2 Sensor B, GPIO20 SDA, GPIO19 SCL (MAX17048), 3V3/GND an Sensorplatine
+# und Breakout (VIN), Akku -> JST-Pads des Breakouts -> zweite JST-Pads -> B+/B- auf der Modulunterseite.
+
+substitutions:
+  pin_a: "1"
+  pin_b: "2"
+  rel_max: "2"      # abgeschlossen: noch 1/2 Drehung weiter in Schließrichtung
+  rel_min: "-5"     # aufschließen 1/2 Drehung, danach 3/4 Drehung bis zum Anschlag
+  akku_warnung: "15"
+
+esphome:
+  name: haustuer-schloss
+  friendly_name: Haustür Schloss
+  includes:
+    - schloss.h
+  on_boot:
+    - priority: 700      # nach dem Laden der Globals (800)
+      then:
+        - lambda: |-
+            for (int p : {${pin_a}, ${pin_b}}) {
+              gpio_reset_pin((gpio_num_t) p);
+              gpio_set_direction((gpio_num_t) p, GPIO_MODE_INPUT);
+            }
+            int code = schloss_code(${pin_a}, ${pin_b});
+            auto grund = esp_sleep_get_wakeup_cause();
+            if (grund != ESP_SLEEP_WAKEUP_EXT1 && grund != ESP_SLEEP_WAKEUP_TIMER) {
+              id(letzter_code) = code;          // Kaltstart: aktuelle Stellung übernehmen
+              id(offen) = true;
+              id(kaltstart) = true;
+            } else {
+              schloss_schritt(code, id(letzter_code), id(pos), id(letzte_richtung));
+            }
+            id(herzschlag) = (grund == ESP_SLEEP_WAKEUP_TIMER);
+            id(letzte_bewegung) = millis();
+    - priority: -100
+      then:
+        - if:
+            condition:
+              lambda: return id(kaltstart);
+            then:
+              - script.execute: { id: blinken, r: 1.0, g: 1.0, b: 1.0, n: 1, an: 300 }
+
+esp32:
+  board: esp32-c6-devkitc-1
+  variant: esp32c6
+  framework:
+    type: esp-idf
+
+logger:
+  hardware_uart: USB_SERIAL_JTAG
+  level: INFO
+
+wifi:
+  ssid: !secret wlan_ssid
+  password: !secret wlan_passwort
+  enable_on_boot: false      # erst einschalten, wenn gemeldet wird
+  fast_connect: true
+  reboot_timeout: 0s
+  # manual_ip spart etwa eine Sekunde Funkzeit:
+  # manual_ip:
+  #   static_ip: 192.168.1.60
+  #   gateway: 192.168.1.1
+  #   subnet: 255.255.255.0
+
+mqtt:
+  id: mqtt_client
+  broker: !secret mqtt_broker
+  username: !secret mqtt_benutzer
+  password: !secret mqtt_passwort
+  topic_prefix: haustuer/schloss
+  discovery: true
+  discovery_retain: true
+  birth_message:             # kein "offline", während er schläft
+  will_message:
+  reboot_timeout: 0s
+  on_message:
+    - topic: haustuer/schloss/befehl
+      qos: 1
+      then:
+        - lambda: |-
+            std::string b = x;
+            b.erase(0, b.find_first_not_of(" \r\n\t"));
+            b.erase(b.find_last_not_of(" \r\n\t") + 1);
+            if (b == "zu") {
+              id(pos_zu) = id(pos); id(zu_gesetzt) = true;
+            } else if (b == "auf" && id(zu_gesetzt)) {
+              int d = id(pos_zu) - id(pos);
+              if (d != 0) id(richtung) = d > 0 ? 1 : -1;
+            } else if (b == "wach") {
+              id(wach_bis) = millis() + 600000;
+            } else if (b == "reset") {
+              id(zu_gesetzt) = false; id(richtung) = 0; id(pos_zu) = 0;
+            }
+            if (!b.empty()) ESP_LOGI("schloss", "Befehl: %s", b.c_str());
+        - if:
+            condition:
+              lambda: return !x.empty();
+            then:
+              - mqtt.publish:          # Befehl löschen
+                  topic: haustuer/schloss/befehl
+                  payload: ""
+                  retain: true
+
+ota:
+  - platform: esphome
+    password: !secret ota_passwort
+
+deep_sleep:
+  id: tiefschlaf
+
+i2c:
+  sda: GPIO20
+  scl: GPIO19
+  frequency: 100kHz
+
+globals:
+  # im Flash, überlebt Schlaf und Akkuwechsel
+  - { id: pos, type: int, restore_value: true, initial_value: "0" }          # Zähler in Vierteldrehungen
+  - { id: letzter_code, type: int, restore_value: true, initial_value: "-1" }
+  - { id: letzte_richtung, type: int, restore_value: true, initial_value: "1" }
+  - { id: gemeldet_pos, type: int, restore_value: true, initial_value: "-99999" }
+  - { id: offen, type: bool, restore_value: true, initial_value: "true" }    # Meldung steht noch aus
+  - { id: pos_zu, type: int, restore_value: true, initial_value: "0" }       # Zähler bei "abgeschlossen, Haus oben"
+  - { id: richtung, type: int, restore_value: true, initial_value: "0" }     # +1/-1 beim Abschließen, 0 = unbekannt
+  - { id: zu_gesetzt, type: bool, restore_value: true, initial_value: "false" }
+  # nur im RAM
+  - { id: kaltstart, type: bool, initial_value: "false" }
+  - { id: herzschlag, type: bool, initial_value: "false" }
+  - { id: letzte_bewegung, type: uint32_t, initial_value: "0" }
+  - { id: wach_bis, type: uint32_t, initial_value: "0" }
+  - { id: meldet, type: bool, initial_value: "false" }
+
+interval:
+  # Drehung verfolgen
+  - interval: 5ms
+    then:
+      - lambda: |-
+          int code = schloss_code(${pin_a}, ${pin_b});
+          if (schloss_schritt(code, id(letzter_code), id(pos), id(letzte_richtung))) {
+            id(letzte_bewegung) = millis();
+            if (id(zu_gesetzt) && id(richtung) != 0) {     // Anschläge: Kalibrierung nachführen
+              int r = (id(pos) - id(pos_zu)) * id(richtung);
+              if (r > ${rel_max}) id(pos_zu) = id(pos) - ${rel_max} * id(richtung);
+              if (r < ${rel_min}) id(pos_zu) = id(pos) - ${rel_min} * id(richtung);
+            }
+          }
+  # nach Stillstand melden oder schlafen
+  - interval: 200ms
+    then:
+      - if:
+          condition:
+            lambda: return !id(meldet) && millis() - id(letzte_bewegung) > 2500;
+          then:
+            - if:
+                condition:
+                  lambda: return id(pos) != id(gemeldet_pos) || id(offen) || id(herzschlag);
+                then:
+                  - script.execute: melden
+                else:
+                  - if:
+                      condition:
+                        lambda: return !schloss_usb() && millis() > id(wach_bis);
+                      then:
+                        - script.execute: schlafen
+  # wach: blau blitzen
+  - interval: 3s
+    then:
+      - if:
+          condition:
+            lambda: return !id(meldet) && (schloss_usb() || millis() < id(wach_bis));
+          then:
+            - script.execute: { id: blinken, r: 0.0, g: 0.0, b: 1.0, n: 1, an: 30 }
+
+script:
+  - id: melden
+    mode: single
+    then:
+      - lambda: id(meldet) = true;
+      - wifi.enable:
+      - wait_until:
+          condition:
+            mqtt.connected:
+          timeout: 15s
+      - if:
+          condition:
+            mqtt.connected:
+          then:
+            - delay: 500ms                 # gespeicherten Befehl abholen
+            - component.update: akku
+            - delay: 200ms
+            - lambda: |-
+                std::string z = schloss_zustand(id(pos), id(pos_zu), id(richtung), id(zu_gesetzt));
+                id(stellung).publish_state(z);
+                id(aufgeschlossen).publish_state(z != "abgeschlossen");
+                bool kal = id(zu_gesetzt) && id(richtung) != 0;
+                id(position).publish_state(kal ? (id(pos) - id(pos_zu)) * id(richtung) : 0);
+            - delay: 300ms
+            - lambda: |-
+                id(gemeldet_pos) = id(pos); id(offen) = false;
+            - if:
+                condition:
+                  lambda: return !id(herzschlag);
+                then:
+                  - script.execute: { id: blinken, r: 0.0, g: 1.0, b: 0.0, n: 1, an: 80 }
+                  - script.wait: blinken
+          else:
+            - lambda: id(offen) = true;
+            - if:
+                condition:
+                  lambda: return !id(herzschlag);
+                then:
+                  - if:
+                      condition:
+                        wifi.connected:
+                      then:
+                        - script.execute: { id: blinken, r: 1.0, g: 0.0, b: 1.0, n: 3, an: 150 }   # kein MQTT
+                      else:
+                        - script.execute: { id: blinken, r: 1.0, g: 1.0, b: 0.0, n: 3, an: 150 }   # kein WLAN
+                  - script.wait: blinken
+      - if:
+          condition:
+            lambda: return !id(herzschlag) && id(akku_pct).has_state() && id(akku_pct).state < ${akku_warnung};
+          then:
+            - delay: 300ms
+            - script.execute: { id: blinken, r: 1.0, g: 0.0, b: 0.0, n: 2, an: 150 }
+            - script.wait: blinken
+      - lambda: |-
+          id(herzschlag) = false;
+          id(meldet) = false;
+          id(letzte_bewegung) = millis();
+      - if:
+          condition:
+            lambda: return !schloss_usb() && millis() > id(wach_bis);
+          then:
+            - script.execute: schlafen
+
+  - id: schlafen
+    mode: single
+    then:
+      - light.turn_off: { id: status_led, transition_length: 0s }
+      - delay: 50ms
+      - lambda: schloss_wecken_einrichten(${pin_a}, ${pin_b});
+      - deep_sleep.enter:
+          id: tiefschlaf
+          sleep_duration: !lambda "return id(offen) ? 10 * 60 * 1000 : 12 * 3600 * 1000;"
+
+  - id: blinken
+    mode: queued
+    parameters:
+      r: float
+      g: float
+      b: float
+      n: int
+      an: int
+    then:
+      - repeat:
+          count: !lambda return n;
+          then:
+            - light.turn_on:
+                id: status_led
+                red: !lambda return r;
+                green: !lambda return g;
+                blue: !lambda return b;
+                brightness: 30%
+                transition_length: 0s
+            - delay: !lambda return an;
+            - light.turn_off: { id: status_led, transition_length: 0s }
+            - delay: 200ms
+
+light:
+  - platform: esp32_rmt_led_strip
+    id: status_led
+    internal: true
+    pin: GPIO8
+    num_leds: 1
+    chipset: WS2812
+    channel_colors: GRB
+    restore_mode: ALWAYS_OFF
+    default_transition_length: 0s
+
+sensor:
+  - platform: max17043          # liest auch den MAX17048 (gleiche Register für Spannung und Ladestand)
+    id: akku
+    update_interval: never
+    battery_voltage:
+      name: Akkuspannung
+    battery_level:
+      id: akku_pct
+      name: Akku
+      accuracy_decimals: 0
+  - platform: template
+    id: position
+    name: Position
+    accuracy_decimals: 0
+    unit_of_measurement: "¼"
+    entity_category: diagnostic
+    update_interval: never
+
+text_sensor:
+  - platform: template
+    id: stellung
+    name: Stellung
+    icon: mdi:lock-question
+    update_interval: never
+
+binary_sensor:
+  - platform: template
+    id: aufgeschlossen
+    name: Aufgeschlossen
+    device_class: lock          # ON = aufgeschlossen

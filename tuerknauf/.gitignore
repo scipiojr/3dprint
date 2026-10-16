@@ -1,2 +1,4 @@
 
 *.json
+firmware/esphome/secrets.yaml
+firmware/esphome/.esphome/

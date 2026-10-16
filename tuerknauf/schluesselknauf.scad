@@ -12,7 +12,8 @@
 // ESP32-C6-Modul auf der Trägerplatine + LiPo 803040 im Fach der Plattenverlängerung (von hinten bestückt), USB-C unten,
 // RGB-LED hinter einem Lichtfenster, Reset per Büroklammer. elektronik = false: reiner Knauf.
 // Modul: modul = "xiao" (Seeed XIAO ESP32C6, platine/traeger.kicad_pcb) oder
-//        modul = "supermini" (ESP32-C6 Super Mini, platine/traeger_supermini.kicad_pcb).
+//        modul = "supermini" (ESP32-C6 Super Mini, platine/traeger_supermini.kicad_pcb) oder
+//        modul = "supermini_frei" (Super Mini ohne Trägerplatine, frei verdrahtet, Akku-Messung mit Adafruit MAX17048 #5580).
 //
 // Druck: PETG, 4-5 Perimeter, 40 % Infill, 0,2 mm Schicht.
 //   Platte: RÜCKSEITE (Türseite) auf das Druckbett, mit Elektronik Stützen "nur auf dem Druckbett".
@@ -21,7 +22,7 @@
 // zum Drucken um 180° um die X-Achse drehen (oder im Slicer drehen).
 
 teil = "alle";
-modul = "xiao";  // "xiao" oder "supermini" – bestimmt Trägerplatine, Fach, Lichtfenster und Reset-Loch   // "platte", "led_fenster", "xiao_halter", "schaft", "griff", "haus", "kappe", "kappe_kopf", "kappe_mutter", "fach_test", "alle"
+modul = "xiao";  // "xiao", "supermini" oder "supermini_frei" – bestimmt Trägerplatine, Fach, Lichtfenster und Reset-Loch   // "platte", "led_fenster", "xiao_halter", "schaft", "griff", "haus", "kappe", "kappe_kopf", "kappe_mutter", "fach_test", "alle"
 
 /* ---------- gemessen ---------- */
 c         = 10.2;  // Stirnfläche Zylinder über Türoberfläche
@@ -82,9 +83,13 @@ elektronik = true;   // false: Platte ohne Elektronikfach/Sensortaschen, Griff o
 gestapelt = true;    // true: XIAO liegt über dem Akku (kürzer, volle Dicke) | false: XIAO unter dem Akku (länger, flach auslaufend)
 fach_oben = -40;     // Oberkante Fach (unter der unteren Türschraube)
 bat_b = gestapelt ? 32 : 31;     // Akku 803040: 30 x 40 x 8 mm (+ Schutzplatine); gestapelt 1 mm Kabelweg je Seite
-bat_l = 46;
+frei = modul == "supermini_frei";   // ohne Trägerplatine
+// Adafruit MAX17048 (#5580) über dem Akku, oberhalb des Moduls; JST-PH-Buchsen abgelötet, Bauteile nach vorne
+ada     = [25.7, 20.3];  // Breite (quer), Länge
+ada_h   = 4.6;           // Höhe ohne JST-PH (Platine 1,6 + STEMMA-QT-Buchse 3,0); mit JST-PH 7,2 passt nicht
+ant_abst = 4;            // Abstand Modulende (Antenne) – Breakout
 bat_h = gestapelt ? 10.0 : 10.5; // Decke des Akkufachs über Türfläche (Akku 8 mm + Schaumstoff/Kabel)
-sm = modul == "supermini";
+sm = modul != "xiao";
 // Modulmaße (die Namen xiao_* gelten für beide Module)
 xiao_b = sm ? 18.0 : 17.8;     // Breite      XIAO ESP32C6 17,8 | Super Mini 18
 xiao_l = sm ? 25.5 : 21.0;     // Länge       XIAO 21           | Super Mini 25,5 (Foto, Herstellerangaben 25–27)
@@ -100,10 +105,12 @@ halter_sp = 0.2;     // Spiel XIAO-Halter im Fach (je Seite)
 // Koordinaten auf der Platine: Ursprung = XIAO-Mitte, von vorne gesehen; die Platine reicht von der USB-Kante
 // des XIAO (-10,5) bis 28,5 mm darüber. Bauteile zeigen nach vorne, eingesetzt wird von hinten.
 // Super Mini: Platine 24 x 38,75 mm, beginnt an der USB-Kante (-12,75); unter dem Modul ein Fenster (USB-Laschen, Akku-Pads).
-tr_b = sm ? 24.0 : 22.0; tr_unten = sm ? -12.75 : -10.5; tr_oben = sm ? 26.0 : 28.5; tr_d = 0.8;
-tr_luft = 0.6;       // zwischen Akkufach-Decke und Platinenrückseite (Lötstellen)
+tr_b = sm ? 24.0 : 22.0; tr_unten = sm ? -xiao_l/2 : -10.5; tr_oben = sm ? 26.0 : 28.5;
+tr_d = frei ? 0 : 0.8;
+tr_luft = frei ? 1.4 : 0.6;   // Luft hinter Trägerplatine bzw. Modul (Lötstellen, Drähte an B+/B−)
 tr_bt   = 1.9;       // Bauteilraum vor der Platine (Taster 1,5 mm, Lötstellen der Kabel)
 tr_sp   = 0.2;       // Spiel je Seite
+bat_l = frei ? max(46, usb_ueber + xiao_l + ant_abst + ada[1] + 2*tr_sp + 1) : 46;   // Akkufach-Länge (frei: Modul + Breakout)
 // XIAO: RGB-LED und Reset-Taster sitzen auf der Trägerplatine.
 // Super Mini: WS2812 (GPIO8) und RST-Taster sitzen auf dem Modul (Lage aus dem Produktfoto, nachmessen).
 tr_led  = sm ? [ 5.70,  2.19] : [-6.8, 17.2];   // RGB-LED
@@ -136,6 +143,8 @@ z_tr      = z_pf - xiao_d;                                     // Vorderseite Tr
 y_ende    = y_in_unten - wand_u;                    // Unterkante Platte
 z_usb     = z_pf + 1.63;                            // Mitte USB-C-Buchse
 z_fen     = sm ? z_pf + xiao_bt + 1 : z_tr + tr_bt;   // Unterkante Lichtfenster/Reset-Loch (Decke des Bauteilraums)
+ada_y0    = tr_y0 + xiao_l/2 + ant_abst;            // Unterkante Breakout-Tasche (nur frei)
+y_el_oben = frei ? ada_y0 + ada[1] + 2*tr_sp : tr_y0 + tr_oben + tr_sp;   // Oberkante der Elektronik
 
 assert(bund_id > 2*sqrt(pow(k_breite/2,2)+pow(k_dicke/2,2)) + 1, "Bund innen zu eng für Schlüsselkopf");
 assert(zb + 2 < zpin - 3, "Bund zu hoch – kollidiert mit Querschraube");
@@ -144,8 +153,10 @@ assert(mag_r - (mag_d + 0.2)/2 > (bund_d + 2*lager_spiel)/2 + 1, "Magnettasche z
 assert(pcb_ri - pcb_sp > bund_d/2, "Platinentasche läuft unter den Bund");
 assert(H - pcb_t > cav + 1, "Platinentasche zu tief für den Deckel");
 assert(z_pf + xiao_bt + 2 <= Hx, "Elektronikfach zu hoch für die Plattendicke");
-assert(!gestapelt || tr_y0 + tr_oben + tr_sp <= fach_oben - 1, "Trägerplatine passt nicht über den Akku");
-assert(tr_b + 2*tr_sp <= bat_b, "Trägerplatine breiter als das Akkufach");
+assert(!gestapelt || y_el_oben <= fach_oben - 1 + 0.01, "Trägerplatine/Breakout passt nicht über den Akku");
+assert(frei || tr_b + 2*tr_sp <= bat_b, "Trägerplatine breiter als das Akkufach");
+assert(!frei || ada[0] + 2*tr_sp <= bat_b, "Breakout breiter als das Akkufach");
+assert(!frei || H - (bat_h + tr_luft + ada_h) >= 1.2, "Breakout zu hoch für die Plattendicke");
 assert(!sm || gestapelt, "Super Mini nur in der gestapelten Bauform");
 assert(H - z_fen >= 1.2, "Lichtfenster zu dünn");
 
@@ -204,6 +215,11 @@ module elektronikfach() {
   if (gestapelt && halter_sep) {
     // Raum für den XIAO-Halter über dem unteren Teil des Akkus
     translate([-bat_b/2, y_in_unten - 0.01, bat_h - 0.01]) cube([bat_b, halter_l + 2*halter_sp + 0.01, z_pf + xiao_bt - bat_h + 0.01]);
+  } else if (frei) {
+    xiao_tasche(y_in_unten, bat_h - 0.01);      // Modul direkt über dem Akku, Drähte dahinter
+    translate([-ada[0]/2 - tr_sp, ada_y0, bat_h - 0.01]) cube([ada[0] + 2*tr_sp, ada[1] + 2*tr_sp, tr_luft + ada_h + 0.01]);  // Breakout
+    led_fenster();
+    taster_loecher();
   } else if (gestapelt) {
     traeger_tasche();                           // Trägerplatine über dem Akku
     xiao_tasche(y_in_unten, z_tr - 0.01);       // XIAO darauf (Bauteile, USB-Durchgang)
@@ -265,7 +281,7 @@ module platte() {
 // Schnelltest: nur das untere Ende der Platte (XIAO-Tasche + USB) zum Probedrucken
 module fach_test() intersection() {
   platte();
-  translate([-30, y_ende - 1, -5]) cube([60, (tr_y0 + tr_oben + 3) - (y_ende - 1), 40]);
+  translate([-30, y_ende - 1, -5]) cube([60, (y_el_oben + 3) - (y_ende - 1), 40]);
 }
 
 /* ================= Schaft ================= */

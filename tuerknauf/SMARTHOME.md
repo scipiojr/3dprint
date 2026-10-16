@@ -2,7 +2,7 @@
 
 Erweiterung des Türknaufs um einen Sensor, der meldet, ob die Tür abgeschlossen ist. Zwei Magnete im Griff und zwei Hall-Sensoren unter dem Griffrand zählen die Drehungen des Schlüssels. Ein XIAO ESP32C6 mit Akku sitzt in der verlängerten Platte, wacht bei jeder Drehung auf, meldet den Zustand per WLAN/MQTT an Home Assistant und schläft wieder. Laden und Flashen gehen über die USB-C-Buchse am unteren Ende, ohne die Platte abzunehmen.
 
-Statt des XIAO passt auch ein **ESP32-C6 Super Mini** (eigene Trägerplatine, `modul = "supermini"`), siehe [Variante mit ESP32-C6 Super Mini](#variante-mit-esp32-c6-super-mini).
+Statt des XIAO passt auch ein **ESP32-C6 Super Mini** (eigene Trägerplatine, `modul = "supermini"`), siehe [Variante mit ESP32-C6 Super Mini](#variante-mit-esp32-c6-super-mini), oder ganz ohne Trägerplatine mit einem Adafruit MAX17048 (`modul = "supermini_frei"`, ESPHome), siehe [Variante ohne Trägerplatine](#variante-ohne-trägerplatine-super-mini--adafruit-max17048).
 
 ![Übersicht](bilder/uebersicht_smarthome.png)
 
@@ -24,7 +24,9 @@ Statt des XIAO passt auch ein **ESP32-C6 Super Mini** (eigene Trägerplatine, `m
 | Pfad | Inhalt |
 |---|---|
 | `schluesselknauf.scad` | Mechanik, hier mit `elektronik = true` (Platte mit Fach, Griff mit Magnettaschen) |
-| `firmware/schloss_sensor/schloss_sensor.ino` | Firmware für den XIAO ESP32C6 (Arduino) |
+| `firmware/schloss_sensor/schloss_sensor.ino` | Firmware für XIAO und Super Mini mit Trägerplatine (Arduino) |
+| `firmware/esphome/haustuer_schloss.yaml`, `schloss.h` | ESPHome-Konfiguration für die Variante ohne Trägerplatine |
+| `platte_supermini_frei.3mf`, `erzeuge_3mf.py` | Platte + Lichtfenster als 3MF (zwei Teile eines Objekts); das Skript erzeugt sie für jede Variante neu |
 | `platine/schloss_sensor.kicad_pcb` | Sensorplatine (Bogen, 2 × DRV5012), 1,6 mm |
 | `platine/traeger.kicad_pcb` | Trägerplatine für den XIAO mit Akkumessung, RGB-LED, Reset-Taster, 0,8 mm |
 | `platine/traeger_supermini.kicad_pcb` | Trägerplatine für das ESP32-C6 Super Mini mit Akkumessung, 0,8 mm |
@@ -132,6 +134,37 @@ Pinbelegung Super Mini: GPIO0 Akkumessung, GPIO1 Sensor A, GPIO2 Sensor B, GPIO3
 - Lage von WS2812, RST-Taster und Lade-LED (`tr_led`, `tr_tast`, `tr_lade`) am Probedruck kontrollieren.
 - Es gibt mehrere Super-Mini-Versionen; diese Platine passt zur Version mit Akku-Pads B+/B− auf der Unterseite und Ladeschaltung (Beschriftung „BAT“ an der Lade-LED neben der USB-Buchse). Ohne Ladeschaltung lässt sich der Akku nicht über USB laden.
 - Farbreihenfolge der WS2812 (GRB angenommen): Beim Neustart muss sie weiß blinken, nach einer Meldung grün.
+
+## Variante ohne Trägerplatine (Super Mini + Adafruit MAX17048)
+
+Keine eigene Platine für die Elektronik: Das Super Mini liegt direkt in seiner Tasche, die Akkumessung übernimmt ein fertiges Breakout (Adafruit #5580, MAX17048). Alles wird mit Einzeldrähten verbunden. Nur die Sensorplatine wird noch bestellt.
+
+![Platte ohne Trägerplatine](bilder/platte_supermini_frei.png)
+
+**Platte:** `modul = "supermini_frei"` (bzw. `platte_supermini_frei.3mf`). Die Platte wird unten 7,2 mm länger, weil das Breakout (25,7 × 20,3 mm) über dem Akku oberhalb des Moduls liegt, 4 mm Abstand zur Antenne (`ant_abst`). Lichtfenster, Lade-Fenster und Reset-Loch wie bei der Super-Mini-Variante.
+
+**Breakout vorbereiten:**
+- Die beiden **JST-PH-Buchsen ablöten** (sonst 7,2 mm hoch, passt nicht); die STEMMA-QT-Buchsen dürfen bleiben (`ada_h` = 4,6 mm).
+- Leiterbahn der „on“-LED auf der Rückseite durchtrennen, sonst zieht sie dauerhaft Strom aus 3V3.
+
+**Verdrahtung** (AWG 28–30, Drähte von hinten an die Lötaugen, vorne flach halten – das Modul liegt vorne mit dem Rand auf 1-mm-Auflagen):
+
+| Von | Nach |
+|---|---|
+| Akku + / − | erstes JST-Padpaar des Breakouts (Polarität laut Aufdruck) |
+| zweites JST-Padpaar des Breakouts | B+ / B− auf der Unterseite des Super Mini |
+| Breakout VIN, GND, SDA, SCL | Super Mini 3V3, GND, GPIO20, GPIO19 |
+| Sensorplatine J1 Pin 1 / 2 | Super Mini 3V3 / GND |
+| Sensorplatine J1 Pin 3 / 4 | Super Mini GPIO1 / GPIO2 |
+
+**Einbau:** Modul mit den Bauteilen nach vorne, USB-C zur Öffnung, in die untere Tasche; Breakout mit den Bauteilen nach vorne in die obere Tasche; Drähte flach auf die Rückseiten; Akku mit Schaumstoffstreifen darauf (er drückt Modul und Breakout an).
+
+**Firmware (ESPHome):** `firmware/esphome/haustuer_schloss.yaml` mit `schloss.h` daneben; `secrets.beispiel.yaml` nach `secrets.yaml` kopieren und ausfüllen. Funktion, LED-Signale und Kalibrier-Befehle wie oben (MQTT, Topic `haustuer/schloss/befehl`). Der MAX17048 läuft über die ESPHome-Komponente `max17043` (gleiche Register für Spannung und Ladestand) und geht bei der kleinen Last von selbst in den Ruhemodus (~3 µA). Erstes Flashen per USB („Plug into this computer“ im ESPHome-Dashboard), danach OTA, solange USB steckt oder nach dem Befehl `wach`.
+
+**Prüfen:**
+- Die ESPHome-Konfiguration ist mit ESPHome 2026.9 geprüft (`esphome config`), aber nicht kompiliert und nicht auf Hardware getestet.
+- Beim Aufwachen braucht ESPHome länger als die Arduino-Firmware bis zum ersten Lesen der Sensoren; ein verpasster Zwischenschritt wird ausgeglichen, sehr schnelles Drehen direkt nach dem Aufwachen kann trotzdem einen Schritt kosten.
+- Maße des Breakouts (25,7 × 20,3 mm, Höhe ohne JST-PH) am eigenen Board nachmessen; `fach_test` drucken.
 
 ## Offene Punkte vor dem Bestellen
 

@@ -9,8 +9,10 @@
 //
 // Smarthome (elektronik = true, siehe SMARTHOME.md): 2 Magnete (Ø3x2, entgegengesetzt gepolt) in der
 // Griffunterseite, 2 Hall-Latches (TI DRV5012) auf einer Bogenplatine in der Plattenoberseite unter dem Griffrand.
-// XIAO ESP32C6 auf der Trägerplatine + LiPo 803040 im Fach der Plattenverlängerung (von hinten bestückt), USB-C unten,
+// ESP32-C6-Modul auf der Trägerplatine + LiPo 803040 im Fach der Plattenverlängerung (von hinten bestückt), USB-C unten,
 // RGB-LED hinter einem Lichtfenster, Reset per Büroklammer. elektronik = false: reiner Knauf.
+// Modul: modul = "xiao" (Seeed XIAO ESP32C6, platine/traeger.kicad_pcb) oder
+//        modul = "supermini" (ESP32-C6 Super Mini, platine/traeger_supermini.kicad_pcb).
 //
 // Druck: PETG, 4-5 Perimeter, 40 % Infill, 0,2 mm Schicht.
 //   Platte: RÜCKSEITE (Türseite) auf das Druckbett, mit Elektronik Stützen "nur auf dem Druckbett".
@@ -18,7 +20,8 @@
 // Hinweis: Aus OpenSCAD exportierte Teile liegen in Einbaulage. Griff, Haus und Gewindekappen
 // zum Drucken um 180° um die X-Achse drehen (oder im Slicer drehen).
 
-teil = "alle";   // "platte", "led_fenster", "xiao_halter", "schaft", "griff", "haus", "kappe", "kappe_kopf", "kappe_mutter", "fach_test", "alle"
+teil = "alle";
+modul = "xiao";  // "xiao" oder "supermini" – bestimmt Trägerplatine, Fach, Lichtfenster und Reset-Loch   // "platte", "led_fenster", "xiao_halter", "schaft", "griff", "haus", "kappe", "kappe_kopf", "kappe_mutter", "fach_test", "alle"
 
 /* ---------- gemessen ---------- */
 c         = 10.2;  // Stirnfläche Zylinder über Türoberfläche
@@ -81,9 +84,13 @@ fach_oben = -40;     // Oberkante Fach (unter der unteren Türschraube)
 bat_b = gestapelt ? 32 : 31;     // Akku 803040: 30 x 40 x 8 mm (+ Schutzplatine); gestapelt 1 mm Kabelweg je Seite
 bat_l = 46;
 bat_h = gestapelt ? 10.0 : 10.5; // Decke des Akkufachs über Türfläche (Akku 8 mm + Schaumstoff/Kabel)
-xiao_b = 17.8; xiao_l = 21.0; xiao_d = 1.0;   // Seeed XIAO ESP32C6
-usb_ueber = 1.0;     // Überstand USB-C-Buchse über die Platinenkante (nachmessen!)
-xiao_bt   = 3.6;     // Bauteilhöhe auf der Oberseite
+sm = modul == "supermini";
+// Modulmaße (die Namen xiao_* gelten für beide Module)
+xiao_b = sm ? 18.0 : 17.8;     // Breite      XIAO ESP32C6 17,8 | Super Mini 18
+xiao_l = sm ? 25.5 : 21.0;     // Länge       XIAO 21           | Super Mini 25,5 (Foto, Herstellerangaben 25–27)
+xiao_d = 1.0;                  // Platinendicke (Super Mini nachmessen, bis 1,2 passt)
+usb_ueber = sm ? 2.0 : 1.0;    // Überstand USB-C-Buchse über die Platinenkante (nachmessen! Super Mini: aus dem Foto)
+xiao_bt   = 3.6;               // Bauteilhöhe auf der Oberseite (USB-C-Buchse 3,2)
 wand_u    = 1.5;     // Wand unten
 usb_oeff  = [13.0, 7.2];   // Öffnung für den USB-C-Stecker (Breite, Höhe) – passt für übliche Kabel
 halter_sep = false;  // gestapelt: false = XIAO-Tasche direkt in der Platte (braucht Stützen im Fach),
@@ -92,12 +99,18 @@ halter_sp = 0.2;     // Spiel XIAO-Halter im Fach (je Seite)
 // Trägerplatine (platine/traeger.kicad_pcb): XIAO flach aufgelötet, darüber Akku-Messung, RGB-LED, Reset-Taster.
 // Koordinaten auf der Platine: Ursprung = XIAO-Mitte, von vorne gesehen; die Platine reicht von der USB-Kante
 // des XIAO (-10,5) bis 28,5 mm darüber. Bauteile zeigen nach vorne, eingesetzt wird von hinten.
-tr_b = 22.0; tr_unten = -10.5; tr_oben = 28.5; tr_d = 0.8;
+// Super Mini: Platine 24 x 38,75 mm, beginnt an der USB-Kante (-12,75); unter dem Modul ein Fenster (USB-Laschen, Akku-Pads).
+tr_b = sm ? 24.0 : 22.0; tr_unten = sm ? -12.75 : -10.5; tr_oben = sm ? 26.0 : 28.5; tr_d = 0.8;
 tr_luft = 0.6;       // zwischen Akkufach-Decke und Platinenrückseite (Lötstellen)
 tr_bt   = 1.9;       // Bauteilraum vor der Platine (Taster 1,5 mm, Lötstellen der Kabel)
 tr_sp   = 0.2;       // Spiel je Seite
-tr_led  = [-6.8, 17.2];   // RGB-LED
-tr_tast = [ 2.0, 17.2];   // Reset-Taster (Büroklammer)
+// XIAO: RGB-LED und Reset-Taster sitzen auf der Trägerplatine.
+// Super Mini: WS2812 (GPIO8) und RST-Taster sitzen auf dem Modul (Lage aus dem Produktfoto, nachmessen).
+tr_led  = sm ? [ 5.70,  2.19] : [-6.8, 17.2];   // RGB-LED
+tr_tast = sm ? [-4.61, -4.30] : [ 2.0, 17.2];   // Reset-Taster (Büroklammer)
+tr_lade = [-6.3, -11.9];  // nur Super Mini: grüne Lade-LED neben der USB-Buchse (Foto: Beschriftung „BAT“)
+lade_fenster = sm;        // zweites Lichtfenster für die Lade-LED
+lade_d = 2.5;
 fenster_d = 4.0;     // Lichtfenster über der LED: eigener Körper für transparentes PETG (Mehrfarbdruck)
 taster_loch = 1.4;   // Büroklammer Ø 1 mm
 
@@ -122,6 +135,7 @@ tr_y0     = y_x0 + usb_ueber - tr_unten;                       // Plattenkoordin
 z_tr      = z_pf - xiao_d;                                     // Vorderseite Trägerplatine
 y_ende    = y_in_unten - wand_u;                    // Unterkante Platte
 z_usb     = z_pf + 1.63;                            // Mitte USB-C-Buchse
+z_fen     = sm ? z_pf + xiao_bt + 1 : z_tr + tr_bt;   // Unterkante Lichtfenster/Reset-Loch (Decke des Bauteilraums)
 
 assert(bund_id > 2*sqrt(pow(k_breite/2,2)+pow(k_dicke/2,2)) + 1, "Bund innen zu eng für Schlüsselkopf");
 assert(zb + 2 < zpin - 3, "Bund zu hoch – kollidiert mit Querschraube");
@@ -131,6 +145,9 @@ assert(pcb_ri - pcb_sp > bund_d/2, "Platinentasche läuft unter den Bund");
 assert(H - pcb_t > cav + 1, "Platinentasche zu tief für den Deckel");
 assert(z_pf + xiao_bt + 2 <= Hx, "Elektronikfach zu hoch für die Plattendicke");
 assert(!gestapelt || tr_y0 + tr_oben + tr_sp <= fach_oben - 1, "Trägerplatine passt nicht über den Akku");
+assert(tr_b + 2*tr_sp <= bat_b, "Trägerplatine breiter als das Akkufach");
+assert(!sm || gestapelt, "Super Mini nur in der gestapelten Bauform");
+assert(H - z_fen >= 1.2, "Lichtfenster zu dünn");
 
 /* ================= Platte ================= */
 module stadion2d() hull() for (y = [-24, 24]) translate([0, y]) circle(d = pl_b);
@@ -147,12 +164,13 @@ module platten_koerper() hull() {
   }
 }
 
-// Tasche für die Akku-Messplatine: liegt mit der Bauteilseite an 1-mm-Auflagen (45°) links und rechts
+// Lichtfenster über der LED (eigener Körper für transparentes PETG), beim Super Mini zusätzlich über der Lade-LED
 module led_fenster() {
-  translate([tr_led[0], tr_y0 + tr_led[1], z_tr + tr_bt - 0.01]) cylinder(d = fenster_d, h = H - (z_tr + tr_bt) + 0.01, $fn = 48);
+  translate([tr_led[0], tr_y0 + tr_led[1], z_fen - 0.01]) cylinder(d = fenster_d, h = H - z_fen + 0.01, $fn = 48);
+  if (lade_fenster) translate([tr_lade[0], tr_y0 + tr_lade[1], z_fen - 0.01]) cylinder(d = lade_d, h = H - z_fen + 0.01, $fn = 32);
 }
 module taster_loecher() translate([tr_tast[0], tr_y0 + tr_tast[1], 0]) {
-  translate([0, 0, z_tr + tr_bt - 0.01]) cylinder(d = taster_loch, h = H, $fn = 24);
+  translate([0, 0, z_fen - 0.01]) cylinder(d = taster_loch, h = H, $fn = 24);
   translate([0, 0, H - 0.8]) cylinder(d1 = taster_loch, d2 = taster_loch + 1.6, h = 0.81, $fn = 24);   // Fase zum Einfädeln
 }
 // Tasche für die Trägerplatine: liegt mit der Vorderseite an 1-mm-Auflagen (45°) links und rechts
@@ -189,6 +207,8 @@ module elektronikfach() {
   } else if (gestapelt) {
     traeger_tasche();                           // Trägerplatine über dem Akku
     xiao_tasche(y_in_unten, z_tr - 0.01);       // XIAO darauf (Bauteile, USB-Durchgang)
+    // Durchgang für den Überstand der USB-Buchse beim Einsetzen von hinten (unter der Buchse bis zur Akkufach-Decke)
+    translate([-4.7, y_in_unten - 0.5, bat_h - 0.01]) cube([9.4, usb_ueber + tr_sp + 0.51, z_tr - bat_h + 0.02]);
     led_fenster();                              // Lichtfenster (separat als transparenter Körper)
     taster_loecher();                           // Reset mit der Büroklammer
   } else {
@@ -347,7 +367,7 @@ else if (teil == "griff")  griff();
 else if (teil == "haus")   haus();
 else if (teil == "kappe_kopf")   kappe_kopf();
 else if (teil == "kappe_mutter") kappe_mutter();
-else {
+else if (teil == "alle") {
   color("white") platte();
   color("orange") translate([0,0,15]) schaft();
   color("steelblue") translate([0,0,45]) griff();

@@ -1,13 +1,15 @@
 /*
-  Verschlusssensor Haustür – Seeed XIAO ESP32C6
-  ---------------------------------------------
+  Verschlusssensor Haustür – Seeed XIAO ESP32C6 oder ESP32-C6 Super Mini
+  ---------------------------------------------------------------------
   Zwei Hall-Latches (TI DRV5012) unter dem Griffrand erkennen zwei entgegengesetzt
   gepolte Magnete im Griff. Daraus ergeben sich 4 Schritte pro Umdrehung (Quadratur).
   Der Zähler wird in Vierteldrehungen geführt; nach dem Drehen meldet das Gerät per MQTT,
-  ob abgeschlossen ist, und schläft dann wieder (Deep Sleep, ~20 µA).
+  ob abgeschlossen ist, und schläft dann wieder (Deep Sleep: XIAO ~20 µA, Super Mini ~55 µA laut Messungen Dritter).
 
   Arduino-IDE:  Boardpaket "esp32" von Espressif ab Version 3.0
-                Board "XIAO_ESP32C6", "USB CDC On Boot: Enabled"
+                Board "XIAO_ESP32C6"         -> XIAO-Variante (platine/traeger.kicad_pcb)
+                Board "ESP32C6 Dev Module"   -> Super-Mini-Variante (platine/traeger_supermini.kicad_pcb)
+                jeweils "USB CDC On Boot: Enabled"
   Bibliothek:   PubSubClient (Nick O'Leary)
 
   Flashen über USB: Kabel einstecken, dann den Knauf kurz drehen (weckt den ESP).
@@ -27,8 +29,10 @@
     3x lila       MQTT-Broker nicht erreichbar / Senden fehlgeschlagen
     2x rot        Akku unter AKKU_WARNUNG Prozent – bitte laden
     blau blitzt   wach am USB oder im Wartungsmodus ("wach")
-  Reset: Büroklammer ins kleine Loch neben dem Lichtfenster (Taster SW1 auf der Trägerplatine, zieht EN auf GND).
-  Hardware: XIAO auf die Trägerplatine gelötet (platine/traeger.kicad_pcb), Pins wie unten.
+  Reset: Büroklammer ins kleine Loch neben dem Lichtfenster (XIAO: Taster SW1 auf der Trägerplatine,
+         Super Mini: RST-Taster auf dem Modul).
+  Hardware: Modul auf die passende Trägerplatine gelötet, Pins wie unten. Das Modul wird aus dem
+  gewählten Board erkannt; MODUL_XIAO unten lässt sich auch von Hand setzen.
 */
 
 #include <WiFi.h>
@@ -61,18 +65,34 @@ const uint32_t RUHE_MS        = 2500;                        // so lange keine B
 const uint64_t HERZSCHLAG_US  = 12ULL * 3600ULL * 1000000ULL; // Statusmeldung alle 12 h
 const uint64_t WIEDERHOLEN_US = 10ULL * 60ULL * 1000000ULL;   // nach Fehlschlag in 10 min erneut
 
-// Pins (XIAO ESP32C6)
-const int PIN_A   = 1;    // D1: Hall-Sensor A (von vorne gesehen links unten)
-const int PIN_B   = 2;    // D2: Hall-Sensor B (rechts unten)
-const int PIN_BAT = 0;    // D0/A0: Akkuspannung über die Trägerplatine (Teiler 100k/100k, 100 nF nach GND)
+#ifndef MODUL_XIAO
+  #if defined(ARDUINO_XIAO_ESP32C6)
+    #define MODUL_XIAO 1        // Seeed XIAO ESP32C6
+  #else
+    #define MODUL_XIAO 0        // ESP32-C6 Super Mini
+  #endif
+#endif
+
+// Pins. Sensoren an LP-GPIOs (0–7), sonst geht das Aufwachen per ext1 nicht.
+const int PIN_A   = 1;    // GPIO1: Hall-Sensor A (von vorne gesehen links unten)   XIAO D1
+const int PIN_B   = 2;    // GPIO2: Hall-Sensor B (rechts unten)                     XIAO D2
+const int PIN_BAT = 0;    // GPIO0: Akkuspannung über die Trägerplatine (Teiler 100k/100k, 100 nF nach GND)   XIAO D0/A0
+#if MODUL_XIAO
 const int PIN_MESS = 21;  // D3: HIGH schaltet Teiler und RGB-LED der Trägerplatine ein (1M-Pulldown hält ihn sonst aus)
 const int PIN_LED_R = 19;  // D8: RGB-LED rot (LOW = an, nur bei eingeschaltetem D3)
 const int PIN_LED_G = 20;  // D9: grün
 const int PIN_LED_B = 18;  // D10: blau
-const bool LED_OK_BLINKEN = true;  // nach jeder erfolgreichen Meldung kurz grün
-const int  AKKU_WARNUNG   = 15;    // Prozent
 const int PIN_RF  = 3;    // RF-Schalter aktivieren (LOW)
 const int PIN_ANT = 14;   // LOW = Keramikantenne auf der Platine, HIGH = externe Antenne
+const char* MODELL = "XIAO ESP32C6";
+#else
+const int PIN_MESS = 3;   // GPIO3: HIGH schaltet den Teiler der Trägerplatine ein (1M-Pulldown hält ihn sonst aus)
+const int PIN_RGB  = 8;   // GPIO8: WS2812 auf dem Modul
+const uint8_t LED_HELL = 40;   // Helligkeit 0–255 (hinter dem Lichtfenster reicht wenig)
+const char* MODELL = "ESP32-C6 Super Mini";
+#endif
+const bool LED_OK_BLINKEN = true;  // nach jeder erfolgreichen Meldung kurz grün
+const int  AKKU_WARNUNG   = 15;    // Prozent
 
 // ===================== Zustand =====================
 // RTC-Speicher überlebt den Deep Sleep (nicht aber das Abklemmen des Akkus)
@@ -152,6 +172,7 @@ float akkuVolt() {
   return s / 16.0f * 2.0f / 1000.0f;
 }
 // ---------- Status-LED ----------
+#if MODUL_XIAO
 // Die LEDs hängen am selben Schalter wie der Teiler: D3 HIGH versorgt sie, LOW am LED-Pin schaltet die Farbe ein.
 void ledAus() {
   digitalWrite(PIN_LED_R, HIGH); digitalWrite(PIN_LED_G, HIGH); digitalWrite(PIN_LED_B, HIGH);
@@ -161,6 +182,11 @@ void ledFarbe(bool r, bool g, bool b) {
   digitalWrite(PIN_LED_R, !r); digitalWrite(PIN_LED_G, !g); digitalWrite(PIN_LED_B, !b);
   digitalWrite(PIN_MESS, (r || g || b) ? HIGH : LOW);
 }
+#else
+// WS2812 auf dem Modul (Farbreihenfolge übernimmt rgbLedWrite)
+void ledAus() { rgbLedWrite(PIN_RGB, 0, 0, 0); }
+void ledFarbe(bool r, bool g, bool b) { rgbLedWrite(PIN_RGB, r ? LED_HELL : 0, g ? LED_HELL : 0, b ? LED_HELL : 0); }
+#endif
 void ledBlinken(bool r, bool g, bool b, int n, int an = 150, int aus = 200) {
   for (int i = 0; i < n; i++) { ledFarbe(r, g, b); delay(an); ledAus(); if (i < n - 1) delay(aus); }
 }
@@ -179,8 +205,10 @@ bool wlanWarten(uint32_t ms) {
 }
 
 bool wlanVerbinden() {
+#if MODUL_XIAO
   pinMode(PIN_RF, OUTPUT);  digitalWrite(PIN_RF, LOW);
   pinMode(PIN_ANT, OUTPUT); digitalWrite(PIN_ANT, LOW);
+#endif
   WiFi.persistent(false);
   WiFi.mode(WIFI_STA);
   if (FESTE_IP) WiFi.config(ip, gateway, netzmaske, dns);
@@ -206,7 +234,7 @@ String t(const char* sub) { return String(T_BASIS) + "/" + sub; }
 void discovery() {    // Home Assistant MQTT-Discovery, nur einmal bzw. nach Versionswechsel
   const int VERSION = 1;
   if (prefs.getInt("disc", 0) == VERSION) return;
-  String dev = String("\"dev\":{\"ids\":[\"") + GERAET + "\"],\"name\":\"Haustür Schloss\",\"mf\":\"Eigenbau\",\"mdl\":\"XIAO ESP32C6\"}";
+  String dev = String("\"dev\":{\"ids\":[\"") + GERAET + "\"],\"name\":\"Haustür Schloss\",\"mf\":\"Eigenbau\",\"mdl\":\"" + MODELL + "\"}";
   String s1 = String("{\"name\":\"Aufgeschlossen\",\"uniq_id\":\"") + GERAET + "_lock\",\"stat_t\":\"" + t("zustand") +
               "\",\"dev_cla\":\"lock\",\"val_tpl\":\"{{ 'OFF' if value == 'abgeschlossen' else 'ON' }}\",\"json_attr_t\":\"" +
               t("attribute") + "\"," + dev + "}";
@@ -288,8 +316,12 @@ void einschlafen(uint64_t timerUs) {
   esp_sleep_enable_ext1_wakeup_io(1ULL << PIN_A, (c & 2) ? ESP_EXT1_WAKEUP_ANY_LOW : ESP_EXT1_WAKEUP_ANY_HIGH);
   esp_sleep_enable_ext1_wakeup_io(1ULL << PIN_B, (c & 1) ? ESP_EXT1_WAKEUP_ANY_LOW : ESP_EXT1_WAKEUP_ANY_HIGH);
   esp_sleep_enable_timer_wakeup(timerUs);
-  pinMode(PIN_MESS, INPUT);                           // im Schlaf hält R4 (1 MOhm) Teiler und LEDs aus
+  pinMode(PIN_MESS, INPUT);                           // im Schlaf hält R4 (1 MOhm) den Teiler (XIAO: auch die LEDs) aus
+#if MODUL_XIAO
   pinMode(PIN_LED_R, INPUT); pinMode(PIN_LED_G, INPUT); pinMode(PIN_LED_B, INPUT);
+#else
+  ledAus();                                           // WS2812 bleibt versorgt und behält die letzte Farbe
+#endif
   esp_deep_sleep_start();
 }
 
@@ -315,7 +347,9 @@ void setup() {
   analogReadResolution(12);
   pinMode(PIN_BAT, INPUT);
   pinMode(PIN_MESS, OUTPUT); digitalWrite(PIN_MESS, LOW);
+#if MODUL_XIAO
   pinMode(PIN_LED_R, OUTPUT); pinMode(PIN_LED_G, OUTPUT); pinMode(PIN_LED_B, OUTPUT);
+#endif
   ledAus();
   if (grund != ESP_SLEEP_WAKEUP_EXT1 && grund != ESP_SLEEP_WAKEUP_TIMER) ledBlinken(true, true, true, 1, 300);  // Neustart
 

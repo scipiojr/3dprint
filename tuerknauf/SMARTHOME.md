@@ -2,6 +2,8 @@
 
 Erweiterung des Türknaufs um einen Sensor, der meldet, ob die Tür abgeschlossen ist. Zwei Magnete im Griff und zwei Hall-Sensoren unter dem Griffrand zählen die Drehungen des Schlüssels. Ein XIAO ESP32C6 mit Akku sitzt in der verlängerten Platte, wacht bei jeder Drehung auf, meldet den Zustand per WLAN/MQTT an Home Assistant und schläft wieder. Laden und Flashen gehen über die USB-C-Buchse am unteren Ende, ohne die Platte abzunehmen.
 
+Statt des XIAO passt auch ein **ESP32-C6 Super Mini** (eigene Trägerplatine, `modul = "supermini"`), siehe [Variante mit ESP32-C6 Super Mini](#variante-mit-esp32-c6-super-mini).
+
 ![Übersicht](bilder/uebersicht_smarthome.png)
 
 | Platte | Trägerplatine (vorne / hinten) | Sensorplatine |
@@ -25,6 +27,7 @@ Erweiterung des Türknaufs um einen Sensor, der meldet, ob die Tür abgeschlosse
 | `firmware/schloss_sensor/schloss_sensor.ino` | Firmware für den XIAO ESP32C6 (Arduino) |
 | `platine/schloss_sensor.kicad_pcb` | Sensorplatine (Bogen, 2 × DRV5012), 1,6 mm |
 | `platine/traeger.kicad_pcb` | Trägerplatine für den XIAO mit Akkumessung, RGB-LED, Reset-Taster, 0,8 mm |
+| `platine/traeger_supermini.kicad_pcb` | Trägerplatine für das ESP32-C6 Super Mini mit Akkumessung, 0,8 mm |
 | `platine/jlcpcb/…` | Fertigungsdaten je Platine: Gerber-ZIP, Stückliste (BOM) und Bestückungsliste (CPL) für JLCPCB |
 | `platine/erzeuge_*.py`, `ses_import.py`, `exportiere_jlc.py` | Skripte, aus denen die Platinen entstehen (KiCad 7 pcbnew, Freerouting für die Trägerplatine) |
 
@@ -80,7 +83,7 @@ Pinbelegung am XIAO (für eigene Aufbauten): D0/A0 Akkumessung, D1 Sensor A, D2 
 
 ## Firmware
 
-1. Arduino-IDE mit dem Boardpaket „esp32“ von Espressif ab Version 3.0, Board „XIAO_ESP32C6“, „USB CDC On Boot: Enabled“, Bibliothek **PubSubClient**.
+1. Arduino-IDE mit dem Boardpaket „esp32“ von Espressif ab Version 3.0, Board „XIAO_ESP32C6“ (Super Mini: „MakerGO ESP32 C6 SuperMini“ oder „ESP32C6 Dev Module“), „USB CDC On Boot: Enabled“, Bibliothek **PubSubClient**. Die Firmware erkennt am gewählten Board, welches Modul verbaut ist.
 2. Oben in `schloss_sensor.ino` WLAN, MQTT-Broker und ggf. feste IP eintragen.
 3. Hochladen: USB-Kabel einstecken und den Knauf kurz drehen (weckt den ESP); solange USB steckt, bleibt er wach.
 4. Home Assistant findet die Sensoren „Aufgeschlossen“, „Stellung“, „Akku“ und „Akkuspannung“ per MQTT-Discovery.
@@ -91,6 +94,44 @@ Pinbelegung am XIAO (für eigene Aufbauten): D0/A0 Akkumessung, D1 Sensor A, D2 
 2. Eine halbe Drehung aufschließen → `auf` senden, Knauf kurz drehen.
 
 Weitere Befehle: `wach` (10 Minuten wach, z. B. zum Flashen ohne USB-Erkennung), `reset` (Kalibrierung löschen). Der Befehl wird beim nächsten Aufwachen abgeholt und danach gelöscht.
+
+## Variante mit ESP32-C6 Super Mini
+
+Gleiche Mechanik, Sensorplatine, Firmware und Akku; anders sind Trägerplatine, Elektronikfach, Lichtfenster und Reset-Loch.
+
+| Platte (Fach, vorne / hinten) | Trägerplatine (vorne / hinten) |
+|---|---|
+| ![Platte Super Mini](bilder/platte_supermini.png) | ![Trägerplatine Super Mini](bilder/traegerplatine_supermini.png) |
+
+| | XIAO ESP32C6 | ESP32-C6 Super Mini |
+|---|---|---|
+| Modul | 21 × 17,8 mm | 25,5 × 18 mm, 2 × 10 Randkontakte |
+| Trägerplatine | 22 × 39 mm, 12 Bauteile | 24 × 38,75 mm, 7 Bauteile (nur Akkumessung) |
+| Status-LED | RGB-LED auf der Trägerplatine | WS2812 auf dem Modul (GPIO8) |
+| Reset | Taster SW1 auf der Trägerplatine | RST-Taster auf dem Modul |
+| Akku laden | Ladeschaltung im XIAO | Ladeschaltung LTH7R auf dem Modul |
+| Ruhestrom (Deep Sleep) | ca. 15–20 µA | ca. 54 µA (Messung von dmelo.eu am BAT-Pad mit 3,7 V) |
+
+Der höhere Ruhestrom kostet Laufzeit: Allein der Schlaf zieht aus 1000 mAh gut 2 Jahre lang, mit den Meldungen bleibt rund 1 Jahr pro Ladung (geschätzt).
+
+**Platte:** In `schluesselknauf.scad` `modul = "supermini"` setzen und `platte`, `led_fenster` und `fach_test` neu exportieren. Griff, Schaft, Haus und Kappen bleiben gleich. Das Lichtfenster hat hier zwei Fenster: eines über der WS2812, ein kleines über der grünen Lade-LED neben der USB-Buchse.
+
+**Trägerplatine bestellen:** wie oben, mit `platine/jlcpcb/traeger_supermini/` (2 Lagen, **0,8 mm**, Menge 5; Assembly mit `BOM_traeger_supermini.csv` und `CPL_traeger_supermini.csv`). Unter dem Modul ist die Platine ausgeschnitten: Dort stehen die Haltelaschen der USB-C-Buchse über, die Akku-Pads des Moduls bleiben von hinten erreichbar, und unter der Antenne liegt kein Kupfer.
+
+**Löten:**
+1. Modul mit den Bauteilen nach vorne auf die beiden Lötflächen-Leisten legen, USB-C zur offenen Seite des Ausschnitts. Die Leiste „TX, RX, 0 … 7“ liegt von vorne gesehen rechts.
+2. Zwei Ecken anheften, Lage prüfen, alle 20 Randkontakte löten (Zinn läuft in die Bohrungen der Randkontakte).
+3. Akku an **AKKU + / −**.
+4. **Akku-Pad des Moduls:** kurze Drahtbrücke vom Lötauge **BAT** der Trägerplatine zum BAT-Pad des Moduls. Die Lage dieses Pads ist nicht dokumentiert (Quellen nennen „neben der USB-Buchse“, teils auf der Unterseite) – durch den Ausschnitt ist die ganze Unterseite des Moduls zugänglich. Vor dem ersten Laden nachmessen: am BAT-Pad muss die Akkuspannung anliegen.
+5. Sensorkabel wie oben: 3V3/GND links, A/B rechts.
+
+Pinbelegung Super Mini: GPIO0 Akkumessung, GPIO1 Sensor A, GPIO2 Sensor B, GPIO3 Messung einschalten, GPIO8 WS2812.
+
+**Vor dem Bestellen prüfen** (alle Maße des Super Mini stammen aus Herstellerfoto und Quellen, nicht von einem Modul in der Hand):
+- Länge (25,5 mm), Überstand der USB-C-Buchse (2,0 mm, `usb_ueber`) und Platinendicke (1,0 mm, `xiao_d`) nachmessen. `fach_test` drucken und das Modul probehalber einlegen.
+- Lage von WS2812, RST-Taster und Lade-LED (`tr_led`, `tr_tast`, `tr_lade`) am Probedruck kontrollieren.
+- Es gibt mehrere Super-Mini-Versionen; diese Platine passt zur Version mit BAT-Pad und Ladeschaltung (Beschriftung „BAT“ neben der USB-Buchse). Ohne Ladeschaltung lässt sich der Akku nicht über USB laden.
+- Farbreihenfolge der WS2812 (GRB angenommen): Beim Neustart muss sie weiß blinken, nach einer Meldung grün.
 
 ## Offene Punkte vor dem Bestellen
 

@@ -6,7 +6,7 @@
 # Das Modul liegt mit den Bauteilen nach vorne auf der Trägerplatine, USB-C zeigt nach unten (-y).
 # Unter dem Modul ist die Platine ausgeschnitten (Fenster, unten offen):
 #   - die Haltelaschen der USB-C-Buchse stehen auf der Modulunterseite über,
-#   - die Akku-Pads des Moduls (Unterseite, Lage nicht dokumentiert) bleiben von hinten erreichbar,
+#   - die Akku-Pads B+/B- des Moduls (Unterseite, am USB-Ende zwischen den Laschen) bleiben von hinten erreichbar,
 #   - unter der Keramikantenne liegt kein Leiterplattenmaterial und kein Kupfer.
 #
 # Schaltung:

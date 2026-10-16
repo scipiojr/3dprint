@@ -122,7 +122,7 @@ Der höhere Ruhestrom kostet Laufzeit: Allein der Schlaf zieht aus 1000 mAh gut 
 1. Modul mit den Bauteilen nach vorne auf die beiden Lötflächen-Leisten legen, USB-C zur offenen Seite des Ausschnitts. Die Leiste „TX, RX, 0 … 7“ liegt von vorne gesehen rechts.
 2. Zwei Ecken anheften, Lage prüfen, alle 20 Randkontakte löten (Zinn läuft in die Bohrungen der Randkontakte).
 3. Akku an **AKKU + / −**.
-4. **Akku-Pad des Moduls:** kurze Drahtbrücke vom Lötauge **BAT** der Trägerplatine zum BAT-Pad des Moduls. Die Lage dieses Pads ist nicht dokumentiert (Quellen nennen „neben der USB-Buchse“, teils auf der Unterseite) – durch den Ausschnitt ist die ganze Unterseite des Moduls zugänglich. Vor dem ersten Laden nachmessen: am BAT-Pad muss die Akkuspannung anliegen.
+4. **Akku-Pads des Moduls:** Sie liegen auf der **Unterseite** am USB-Ende, zwischen den Haltelaschen der USB-Buchse, etwa 2 mm von der Kante: **B+** zur Seite „5V/GND/3V3“, **B−** zur Seite „TX/RX“ (achteckige Pads, Produktfoto). Beide liegen im Ausschnitt der Trägerplatine. Draht (AWG 28–30) vom Lötauge **BAT** der Trägerplatine auf der Rückseite flach durch den Ausschnitt zu **B+** führen; B− bleibt frei (Masse kommt über die Randkontakte). Vor dem ersten Laden nachmessen: an B+ muss die Akkuspannung anliegen.
 5. Sensorkabel wie oben: 3V3/GND links, A/B rechts.
 
 Pinbelegung Super Mini: GPIO0 Akkumessung, GPIO1 Sensor A, GPIO2 Sensor B, GPIO3 Messung einschalten, GPIO8 WS2812.
@@ -130,7 +130,7 @@ Pinbelegung Super Mini: GPIO0 Akkumessung, GPIO1 Sensor A, GPIO2 Sensor B, GPIO3
 **Vor dem Bestellen prüfen** (alle Maße des Super Mini stammen aus Herstellerfoto und Quellen, nicht von einem Modul in der Hand):
 - Länge (25,5 mm), Überstand der USB-C-Buchse (2,0 mm, `usb_ueber`) und Platinendicke (1,0 mm, `xiao_d`) nachmessen. `fach_test` drucken und das Modul probehalber einlegen.
 - Lage von WS2812, RST-Taster und Lade-LED (`tr_led`, `tr_tast`, `tr_lade`) am Probedruck kontrollieren.
-- Es gibt mehrere Super-Mini-Versionen; diese Platine passt zur Version mit BAT-Pad und Ladeschaltung (Beschriftung „BAT“ neben der USB-Buchse). Ohne Ladeschaltung lässt sich der Akku nicht über USB laden.
+- Es gibt mehrere Super-Mini-Versionen; diese Platine passt zur Version mit Akku-Pads B+/B− auf der Unterseite und Ladeschaltung (Beschriftung „BAT“ an der Lade-LED neben der USB-Buchse). Ohne Ladeschaltung lässt sich der Akku nicht über USB laden.
 - Farbreihenfolge der WS2812 (GRB angenommen): Beim Neustart muss sie weiß blinken, nach einer Meldung grün.
 
 ## Offene Punkte vor dem Bestellen

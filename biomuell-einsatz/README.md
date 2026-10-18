@@ -39,6 +39,7 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 | `biomuell_system.scad` | 1 | rekonstruiert | Hauptdatei, Stand 1 (Keilwand, Druckhilfe an, Eimer 278 mm, Schnapphaken) |
 | `vergleich_v1_v2.png` | 1 | Original | Vergleich Version 1 (rot) und Version 2 (grün), Schnitte durch die Trichterschräge |
 | `trichter_v2_haelfte_2x.stl` | 1 | rekonstruiert | Trichterhälfte mit Druckhilfe, Eimer 278 mm: 143,25 × 207,5 × 59, 2× drucken |
+| `trichter_v2.3mf` | 2 | rekonstruiert | Trichter, beide Hälften mit Druckhilfe auf je einer Platte, Druckeinstellungen je Objekt |
 
 ## Teile
 
@@ -99,6 +100,7 @@ Bei den großen Flächen ggf. eine Brim verwenden. Für die Trichterhälften ist
 - Außenwand 60–80 mm/s, Wandbeschleunigung höchstens 3000.
 - 240–245 °C, Lüfter 30–40 %, Überhang-Lüfter höchstens 50 %.
 - Stützen aus, Brim 5–8 mm.
+- In `trichter_v2*.3mf` hinterlegt: 4 Wände (Arachne), 40 % Gyroid, oben/unten 5 Lagen, 0,2 mm, Brim 6 mm, Außenwand 70 mm/s, Innenwand 100 mm/s, Beschleunigung 2000/3000, Naht hinten. Temperatur und Lüfter stehen nicht in der 3MF (Filamentprofil).
 - Die 3MFs sind in PrusaSlicer geprüft (Teile dicht), im Anycubic Slicer Next nicht geöffnet.
 
 ## Montage
@@ -115,6 +117,7 @@ Jeder Konstruktionsstand ist ein eigener Commit mit allen erzeugten Dateien. Det
 | Stand | 18.10.2026 | Änderung |
 |---|---|---|
 | 1 | 10:04 | Trichter Version 2: Keilwand (innen steilere Schräge, oben dickere Wand), abbrechbare Druckhilfe (Standard an), Eimer weiter 278 mm. Neue Trichterhälfte (STL) und Vergleich V1/V2. |
+| 2 | 10:13 | `trichter_v2.3mf`: beide Hälften auf je einer Platte, Druckeinstellungen je Objekt. |
 
 ## Stand
 

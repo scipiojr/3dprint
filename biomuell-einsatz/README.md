@@ -29,6 +29,7 @@ Einsatz für einen Biomülleimer in einem Küchenauszug. Ein Papier-Biomüllsack
 | `archiv/` | Zwischenstände vom 16.10.2026: Python-Generator (V0) und erste SCAD-Version (V1), jeweils mit Vorschau und Kennwerten. |
 | `werkzeuge/` | Skripte für die Bilder und OpenSCAD als WebAssembly (für Umgebungen ohne OpenSCAD). |
 | `agent.md` | Arbeitsstand, Konzeptentscheidungen und Arbeitsweise für KI-Agenten. |
+| `v3_plan.md` | Plan für Version 3 (abnehmbare Seitenwände an den Schmalseiten), Entscheidungen, Parameter, Ablauf. |
 
 Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt in diesem Ordner, jeder Stand ist ein eigener Commit (siehe [Verlauf](#verlauf)). Neu erzeugen aus der SCAD-Datei: `teil` wählen, `stueck` setzen, F6, als STL exportieren.
 
@@ -142,6 +143,11 @@ Jeder Konstruktionsstand ist ein eigener Commit mit allen erzeugten Dateien. Det
 | 7 | 16:10 | Laschenlöcher korrigiert: je Lasche 2 volle Löcher (M3 × 16), Lage aus der Laschenbreite berechnet (`loch_rand_min = 1.5`). Beide Trichter-3MFs neu. |
 | 8 | 16:13 | Eimer nachgemessen: `eimer_l` 278 → 283, `eimer_gerade_l` 240 → 245. Hälften 140,25 mm lang, ohne Mittelteil. Passlehre `lehre_haelfte_2x.stl`. |
 | 9 | 16:19 | Parameter `mittelteil` (5 mm): Hälften wieder 137,75 mm, je Längsseite ein Mittelteil. `mittelteil_v1.scad` für die alten Hälften der Version 1. |
+| V3-1 | 18:30 | Plan für Version 3 eingecheckt ([`v3_plan.md`](v3_plan.md)): abnehmbare ∩-Seitenwände statt Schmalseiten-Bänder. Noch keine Geometrie. |
+
+## Version 3 (in Planung)
+
+Geplant: Die Griffbänder an den Schmalseiten werden durch zwei steife, abnehmbare **∩-förmige Seitenwände** ersetzt (Standardhöhe 100 mm, Wandhöhe parametrierbar, Dicke 4 mm). Sie werden mit Steckzapfen und Rastzunge in die Plattform geclippt und lassen sich zum Reinigen abnehmen. Gehoben wird dann nur an den Längsbügeln. Die Trichteröffnung (217 × 172 mm) bleibt unverändert; die Plattform wird in Längsrichtung etwa 4 mm länger. Das bisherige Band bleibt über `schmalseite_typ = "band"` wählbar. Details und Entscheidungen: [`v3_plan.md`](v3_plan.md). Noch nicht umgesetzt.
 
 ## Stand
 

@@ -95,6 +95,17 @@ Alles steht in **einer parametrischen OpenSCAD-Datei** (`biomuell_system.scad`).
 - Trichter: lokal mit z = 0 auf der Absatzebene.
 - Bänder: Druckkoordinaten X = Länge, Y = Breite, Z = Dicke; Z = 0 ist die Außenseite zur Eimerwand.
 
+## Version 3 (in Planung)
+
+Plan: [`v3_plan.md`](v3_plan.md) (Stand 18.10.2026, 18:30). Noch keine Geometrie umgesetzt.
+
+- Schmalseiten: statt Band mit Griffschlaufe zwei steife, abnehmbare ∩-Wände (zwei Seitenstege + Quersteg), `wand_h = 100` (variabel, ab Plattenoberseite), `wand_t = 4`. Seitenstege beginnen nach den Eckschrägen (`wand_eck_abstand = 0`, nach innen verschiebbar).
+- Befestigung: Steckzapfen mit Rastzunge in unten offener Tasche (Taschenblöcke an der Plattform, y ≈ ±57); Lösen per Daumendruck von unten.
+- Plattform im Wandmodus `platte_l` ≈ 210. **Trichteröffnung bleibt 217 × 172** (feste Parameter `oeffnung_l/b`, vom Trichter nicht abhängig von der Plattform); Trichter und Mittelteil bleiben unverändert.
+- Griffe nur an den Längsbügeln (Entscheidung der Nutzerin). `schmalseite_typ = "band"` hält Version 2 wählbar.
+- Neue Teile: `teil = "seitenwand"` (2×), `teil = "rastprobe"` (Testdruck). Eckfüße rücken nach innen, wenn sie mit den Taschenblöcken kollidieren.
+- Arbeitsweise ab jetzt: jeder Zwischenstand von Version 3 wird sofort committet und gepusht (Commit-Messages mit Uhrzeit und „V3, Stand n“).
+
 ## Offene Punkte
 
 1. **`absatz_z` nachmessen lassen** (Absatz über dem Innenboden), danach STLs neu exportieren.

@@ -151,14 +151,14 @@ pl = stl("asm_plattform.stl")
 ba = stl("asm_baender.stl")
 wa = stl("asm_waende.stl")
 tr = stl("asm_trichter.stl")
-mt = stl("asm_mittelteil.stl")
+mt = stl("asm_mittelteil.stl") if (W / "asm_mittelteil.stl").exists() else np.zeros((0, 3, 3))   # nur mit mittelteil > 0
 
 ansicht([kanten(eimer), (pl, FARBE["plattform"], 1), (ba, FARBE["baender"], 1), (wa, FARBE["waende"], 1),
-         (tr, FARBE["trichter"], 1), (mt, FARBE["mittelteil"], 1)],
+         (tr, FARBE["trichter"], 1)] + ([(mt, FARBE["mittelteil"], 1)] if len(mt) else []),
         "uebersicht.png", elev=28, azim=-55, zoom=1.15)
 ansicht([(pl, FARBE["plattform"], 1), (ba, FARBE["baender"], 1), (wa, FARBE["waende"], 1)],
         "korb.png", elev=22, azim=-55, zoom=1.15)
-ansicht([(tr, FARBE["trichter"], 1), (mt, FARBE["mittelteil"], 1)],
+ansicht([(tr, FARBE["trichter"], 1)] + ([(mt, FARBE["mittelteil"], 1)] if len(mt) else []),
         "trichter.png", elev=38, azim=-60, zoom=1.0)
 ansicht([(stl("plattform.stl"), FARBE["plattform"], 1)], "plattform.png", elev=55, azim=-60, zoom=1.1)
 ansicht([(stl("langseite.stl"), FARBE["baender"], 1)], "buegel_langseite.png", elev=60, azim=-80, zoom=1.0)

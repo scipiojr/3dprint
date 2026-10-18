@@ -77,12 +77,14 @@ Alles steht in **einer parametrischen OpenSCAD-Datei** (`biomuell_system.scad`).
      - **Prüfungen** (Standardwerte): alle Netze dicht (offene Kanten 0); Wand ↔ Plattform durchdringen sich nicht (Schnittmenge leer), kleinster Abstand ca. 0,2 mm (Zapfenspiel); waagerechter Abstand zur Trichteröffnung: Taschenblock 1,8 mm, Wand samt Nase 3,0 mm, Bügel 3,3 mm; Wand innen 0,5 mm vom Sack. Rastzunge: Dehnung ca. 2,5 %, Haltefläche 0,8 mm. Wand-Durchbiegung oben bei 5 N ca. 3,7 mm (Biegung), mit Spiel im Zapfen höchstens 6,6 mm.
      - **Nicht geprüft:** Einstecken und Rasten am Probedruck, Passung im Eimer, Slicer-Import der `korb_v3.3mf` (Netze dicht, XML gültig).
 
+  - **Stand 3, 19:54 Uhr:** **Mittelteil optional, `mittelteil = 0` als Standard.** Wunsch der Nutzerin: Die Mittelteile (Notlösung für die schon gedruckten Hälften) sollen nicht mehr Standard sein, der Trichter entsprechend größer (länger) werden. Umsetzung: Hälften 140,25 × 207,5 × 59 mm (je 2,5 mm länger als mit Mittelteil), Trichter weiter 280,5 mm (= Eimerlänge 283 − 2 × 1,25 mm Spiel), Öffnung weiter fest 217 × 172 (`oeffnung_l/b`), Schrauben M3 × 16. Neu erzeugt: `trichter_v2_haelfte_2x.stl`, `lehre_haelfte_2x.stl`, `druckhilfe_steg.stl`, `trichter_v2.3mf`, `trichter_v2_druckhilfe.3mf` (Netze dicht, Boxen wie in den Vorlagen; Druckeinstellungen aus den Vorlagen übernommen, `werkzeuge/trichter_3mf.py`). Die bisherige Passlehre (137,75 mm) heißt jetzt `lehre_haelfte_mittelteilversion_2x.stl`. Die Mittelteil-Dateien (`mittelteil_5mm_2x.stl`, `trichter_haelfte_mittelteilversion_2x.stl`, `trichter_v2_mittelteil.3mf`, `mittelteil_v1*`) bleiben gültig für Nutzer des Mittelteils. Bilder ohne Mittelteil neu erzeugt.
+
 ### Kennwerte mit Standardwerten (Konsolenausgabe)
 
 - Druckraum nutzbar 250 × 250 (`bett_rand = 5`).
 - Plattform 210 × 166 (mit Ohren 213,4), Höhe 56, 1 Stück, 9 Langlöcher, Eckfüße bei x = ±78,6, y = ±43,5.
 - Bügel Langseite: 239,75 mm, 1 Stück, 2× drucken. Griff-Oberkante 280 mm über Boden. Seitenwand Schmalseite: 120 × 134 × 5 mm (`wand_h = 100`), 1 Stück, 2× drucken, Oberkante 156 mm über Boden.
-- Trichter 280,5 × 207,5 × 59: 2 Hälften à 137,75 + 2 Mittelteile à 5. Öffnung 217 × 172. Außenschräge 54°/69°, Ecken 52°.
+- Trichter 280,5 × 207,5 × 59: 2 Hälften à 140,25 (Standard, `mittelteil = 0`; mit `mittelteil = 5`: 2 × 137,75 + 2 Mittelteile à 5). Öffnung 217 × 172. Außenschräge 54°/69°, Ecken 52°. Trichterfugen: je Fuge 4 Schrauben M3 × 16 (mit Mittelteil M3 × 20).
 - Sack in der Öffnung: 8,5 mm (Längsrichtung, mit Mittelteil) / 6 mm (Querrichtung) Abstand je Seite. Öffnungs-Unterkante 220 mm über Boden.
 - Trichterfugen: je Fuge 4 Schrauben M3 × 20 (Edelstahl) + Muttern, optional 2K-Epoxid.
 
@@ -98,7 +100,7 @@ Alles steht in **einer parametrischen OpenSCAD-Datei** (`biomuell_system.scad`).
 - Keilwand: `innenform = "keil"`, `ring_x = 10`, `ring_y = 6`; Druckhilfe `druckhilfe = false`.
 - Scharnier: `stift_flach = 4.2`, `kanal_spiel = 0.25`, `kanal_fase = 0.6`.
 - Laschenlöcher: `loch_rand_min = 1.5`, 2 Löcher je Lasche, Lage aus der Laschenbreite.
-- Mittelteil: `mittelteil = 5` (0 = keins), `teil = "mittelteil"`.
+- Mittelteil: `mittelteil = 0` (Standard, seit V3-3; 5 = Mittelteil wie in Stand 9), `teil = "mittelteil"` nur bei `mittelteil > 0`.
 
 ### Koordinaten
 

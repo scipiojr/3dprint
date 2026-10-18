@@ -127,3 +127,9 @@ Keine offenen Rückfragen an die Nutzerin. Zu bestätigen bleibt nach dem Probed
 - Passung und Rastkraft des Zapfens (`zapfen_spiel`, `rast_nase`) – dafür gibt es die Rastprobe.
 - Ob 100 mm Wandhöhe passen oder mehr bzw. weniger gewünscht ist.
 - Weiterhin offen aus Version 2: `absatz_z` nachmessen (Griffhöhe der Längsbügel hängt davon ab).
+
+## Umsetzungsstand (V3, Stand 3)
+
+- `mittelteil = 0` ist jetzt der Standard. Der Trichter besteht aus zwei Hälften à 140,25 mm (Gesamtlänge 280,5 mm), die Öffnung bleibt 217 × 172 mm.
+- Das Mittelteil bleibt als optionale Notlösung für schon gedruckte Hälften (`mittelteil = 5`); die zugehörigen Dateien sind weiter gültig.
+- Schrauben der Trichterfugen: M3 × 16 (mit Mittelteil M3 × 20).

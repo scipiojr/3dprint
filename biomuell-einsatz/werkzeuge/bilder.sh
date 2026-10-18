@@ -35,7 +35,13 @@ baugruppe asm_plattform.stl  'translate([0,0,PLATTE_OBEN_Z]) plattform_roh();' &
 baugruppe asm_baender.stl    'baender_alle();' &
 baugruppe asm_waende.stl     'waende_alle();' &
 baugruppe asm_trichter.stl   "translate([0,0,absatz_z]) { $TR_HAELFTEN }" &
-baugruppe asm_mittelteil.stl 'translate([0,0,absatz_z]) mittelteil_roh();' &
+# Mittelteil nur, wenn eingestellt (Standard: keins)
+MITTELTEIL=$(grep -oP '^mittelteil = \K[0-9.]+' "$SCAD" || echo 0)
+if [ "${MITTELTEIL%.*}" != "0" ]; then
+    baugruppe asm_mittelteil.stl 'translate([0,0,absatz_z]) mittelteil_roh();' &
+else
+    rm -f "$TMP/asm_mittelteil.stl"
+fi
 baugruppe asm_eimer.stl      'eimer_geist();' &
 for p in plattform langseite seitenwand rastprobe; do
     oscad "$SCAD" -o "$TMP/$p.stl" -D "teil=\"$p\"" > "$TMP/$p.log" 2>&1 &

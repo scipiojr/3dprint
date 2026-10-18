@@ -14,7 +14,7 @@ Einsatz für einen Biomülleimer in einem Küchenauszug. Ein Papier-Biomüllsack
 
 ![Schnitte durch den eingebauten Zustand](bilder/schnitt.png)
 
-| Korb (Plattform + Bügel + Seitenwände) | Trichter (2 Hälften + 2 Mittelteile) |
+| Korb (Plattform + Bügel + Seitenwände) | Trichter (2 Hälften) |
 |---|---|
 | ![Korb](bilder/korb.png) | ![Trichter](bilder/trichter.png) |
 
@@ -23,7 +23,7 @@ Einsatz für einen Biomülleimer in einem Küchenauszug. Ein Papier-Biomüllsack
 | Datei | Inhalt |
 |---|---|
 | `biomuell_system.scad` | Hauptdatei: alle Teile, parametrisch, Customizer auf Deutsch (OpenSCAD 2021.01 oder neuer). |
-| `mittelteil_v1.scad` | Mittelteil für bereits gedruckte Trichterhälften der Version 1 (Eimerlänge 278 mm). |
+| `mittelteil_v1.scad` | Optional: Mittelteil für bereits gedruckte Trichterhälften der Version 1 (Eimerlänge 278 mm). |
 | `biomuell_system.3mf` | Bambu-Studio-Projekt vom ersten Druckdurchgang (Trichter Version 1), Teile mit Druckeinstellungen auf Platten verteilt. Enthält zusätzlich zwei Testobjekte. |
 | `bilder/` | Vorschaubilder, erzeugt mit `werkzeuge/bilder.sh`. |
 | `archiv/` | Zwischenstände vom 16.10.2026: Python-Generator (V0) und erste SCAD-Version (V1), jeweils mit Vorschau und Kennwerten. |
@@ -38,11 +38,12 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 | Datei | Stand | Herkunft | Inhalt |
 |---|---|---|---|
 | `biomuell_system.scad` | V3-2 | Original | Hauptdatei, Version 3 (`schmalseite_typ`, Seitenwand, feste Trichteröffnung) |
+| V3-3 | 19:54 | Mittelteil optional: `mittelteil = 0` als Standard. Trichter wie gemessen 280,5 mm lang aus zwei Hälften à 140,25 mm (je 2,5 mm länger als mit Mittelteil), Öffnung unverändert 217 × 172 (feste Parameter), Schrauben M3 × 16. Neu: `trichter_v2_haelfte_2x.stl`, `lehre_haelfte_2x.stl`, `trichter_v2.3mf`, `trichter_v2_druckhilfe.3mf`, `druckhilfe_steg.stl`; die bisherige Passlehre heißt jetzt `lehre_haelfte_mittelteilversion_2x.stl`. |
 | `vergleich_v1_v2.png` | 1 | Original | Vergleich Version 1 (rot) und Version 2 (grün), Schnitte durch die Trichterschräge |
-| `trichter_v2_haelfte_2x.stl` | 8 | Original | Trichterhälfte, Eimer 283 mm, ohne Mittelteil: 140,25 × 207,5 × 59, 2× drucken |
-| `trichter_v2.3mf` | 8 | Original | Trichter ohne Druckhilfe, Eimer 283 mm, ohne Mittelteil |
-| `druckhilfe_steg.stl` | 8 | Original | Druckhilfe-Steg für Eimer 283 mm |
-| `trichter_v2_druckhilfe.3mf` | 8 | Original | wie zuvor, Eimer 283 mm, ohne Mittelteil |
+| `trichter_v2_haelfte_2x.stl` | V3-3 | Original | Trichterhälfte (Standard, ohne Mittelteil), Eimer 283 mm, Öffnung 217 × 172: 140,25 × 207,5 × 59, 2× drucken |
+| `trichter_v2.3mf` | V3-3 | Original | Trichter ohne Druckhilfe, ohne Mittelteil (je Platte eine Hälfte), Einstellungen wie zuvor; mit `werkzeuge/trichter_3mf.py` neu erzeugt |
+| `druckhilfe_steg.stl` | V3-3 | Original | Druckhilfe-Steg für Eimer 283 mm (Hälfte 140,25 mm) |
+| `trichter_v2_druckhilfe.3mf` | V3-3 | Original | wie zuvor mit abtrennbarer Druckhilfe, ohne Mittelteil |
 | `plattform.stl` | V3-2 | Original | Plattform **210** × 166 × 56 (213,4 mit den Ohren der Taschenblöcke) mit abgeflachten Scharnierstiften an den Langseiten und vier Taschen für die Seitenwände, Eckfüße bei x = ±78,6, 1× drucken. Die Plattform der Version 2 (206 mm, mit Scharnier an den Schmalseiten) steht in der Git-Historie; sie passt zu `band_schmalseite_2x.stl`. |
 | `buegel_langseite_2x.stl` | 5 | Original | Bügel Langseite mit 2 Haken (Kanal), 239,75 × 134, 2× drucken |
 | `band_schmalseite_2x.stl` | 5 | Original | Band Schmalseite mit 1 Haken (Kanal), 239,75 × 124, 2× drucken. Nur für die Plattform der Version 2 (`schmalseite_typ = "band"`). |
@@ -53,11 +54,12 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 | `korb_v3.3mf` | V3-2 | Original | Korb Version 3 auf 5 Platten: Plattform, 2 Bügel, 2 Seitenwände (4 Wände, 100 %), erzeugt mit `werkzeuge/korb_3mf.py` |
 | `schnitt_wand.png` | V3-2 | Original | Schnitt durch einen Wandsteg: Zapfen in der Tasche, Rastnase unter dem Block |
 | `lasche_loecher.png` | 7 | Original | Schnitt durch die Laschen, je 2 volle Schraublöcher |
-| `lehre_haelfte_2x.stl` | 9 | Original | Passlehre 5 mm kürzer (137,75 × 207,5 × 10), 2× drucken; in der Mitte bleibt Platz für das Mittelteil |
-| `mittelteil_v1_5mm_2x.stl` | 9 | Original | Mittelteil 5 mm für die alten Hälften (Version 1) aus `mittelteil_v1.scad`, 2× drucken |
-| `mittelteil_5mm_2x.stl` | 9 | Original | Mittelteil 5 mm für Version 2 (Keilwand), 2× drucken |
-| `trichter_haelfte_mittelteilversion_2x.stl` | 9 | Original | Trichterhälfte für die Verwendung mit Mittelteil (137,75 × 207,5 × 59), 2× drucken |
-| `trichter_v2_mittelteil.3mf` | 9 | Original | Trichter mit Mittelteil: je Platte eine Hälfte und ein Mittelteil |
+| `lehre_haelfte_2x.stl` | V3-3 | Original | Passlehre (Standard, ohne Mittelteil): 140,25 × 207,5 × 10, 2× drucken |
+| `lehre_haelfte_mittelteilversion_2x.stl` | 9 | Original | Passlehre 5 mm kürzer (137,75 × 207,5 × 10) für die Verwendung mit Mittelteil (früher `lehre_haelfte_2x.stl`) |
+| `mittelteil_v1_5mm_2x.stl` | 9 | Original | Optional: Mittelteil 5 mm für die alten Hälften (Version 1) aus `mittelteil_v1.scad`, 2× drucken |
+| `mittelteil_5mm_2x.stl` | 9 | Original | Optional: Mittelteil 5 mm für Hälften der Version 2 mit Mittelteil (`mittelteil = 5`), 2× drucken |
+| `trichter_haelfte_mittelteilversion_2x.stl` | 9 | Original | Optional: Trichterhälfte für die Verwendung mit Mittelteil (137,75 × 207,5 × 59), 2× drucken |
+| `trichter_v2_mittelteil.3mf` | 9 | Original | Optional: Trichter mit Mittelteil, je Platte eine Hälfte und ein Mittelteil |
 
 ## Teile
 
@@ -68,15 +70,15 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 | `seitenwand` | 2 | 120 × 134 × 5 | Seitenwand (∩): zwei Stege 20 × 4 mm, Quersteg, Steckzapfen mit Rastzunge; Höhe `wand_h` |
 | `rastprobe` | 1 + 1 | 38 × 62 × 14 | Taschenblock mit Plattenstück und kurzes Wandstück zum Probieren von Spiel und Rastkraft |
 | `schmalseite` | 2 | 239,75 × 124 | Band mit einem Haken und Griffschlaufe, nur bei `schmalseite_typ = "band"` (Version 2) |
-| `trichter` | 2 | 137,75 × 207,5 × 59 | Trichterhälfte, Keilwand, Laschen mit M3-Löchern an der Fuge |
-| `mittelteil` | 2 | 5 × 207,5 × 59 | Zwischenstück je Längsseite zwischen den Trichterhälften |
+| `trichter` | 2 | 140,25 × 207,5 × 59 | Trichterhälfte, Keilwand, Laschen mit M3-Löchern an der Fuge (mit `mittelteil = 5`: 137,75) |
+| `mittelteil` | 2 | 5 × 207,5 × 59 | **Optional** (nur bei `mittelteil > 0`, Standard 0): Zwischenstück je Längsseite zwischen den Trichterhälften, z. B. um schon gedruckte Hälften weiterzuverwenden |
 | `lehre` | 2 | Hälften | Passlehre für den Trichterkragen – zuerst drucken und im Eimer prüfen |
 
 | Plattform | Bügel Langseite | Band Schmalseite | Trichterhälfte |
 |---|---|---|---|
 | ![Plattform](bilder/plattform.png) | ![Bügel](bilder/buegel_langseite.png) | ![Band](bilder/band_schmalseite.png) | ![Trichterhälfte](bilder/trichter_haelfte.png) |
 
-**Kaufteile:** 8 Edelstahlschrauben M3 × 20 mit Muttern für die Trichterfugen (Länge mit Mittelteil, siehe Konsolenausgabe). Optional 2K-Epoxid für die Fugen.
+**Kaufteile:** 8 Edelstahlschrauben M3 × 16 mit Muttern für die Trichterfugen (mit Mittelteil M3 × 20, siehe Konsolenausgabe). Optional 2K-Epoxid für die Fugen.
 
 ## Bedienung der SCAD-Datei
 
@@ -99,7 +101,7 @@ Die Maße stehen im Abschnitt „Eimer – gemessen“:
 | `absatz` | 3 | Rücksprung der Wand je Seite am Absatz |
 | `absatz_z` | 275 | Höhe des Absatzes über dem **Innenboden** – noch nicht nachgemessen |
 | `absatz_bis_rand` | 15 | Absatz bis Oberkante Eimer |
-| `mittelteil` | 5 | Dicke des Zwischenstücks je Längsseite; die Eimerlänge bleibt wie gemessen |
+| `mittelteil` | 0 | Optionales Zwischenstück je Längsseite (z. B. 5); 0 = keins. Die Eimerlänge bleibt wie gemessen, die Öffnung 217 mm |
 | `oeffnung_l`, `oeffnung_b` | 217, 172 | Trichteröffnung, **fest** (nicht mehr von der Plattform abhängig) |
 | `schmalseite_typ` | wand | `wand` = Seitenwand (Version 3), `band` = Band mit Griffschlaufe (Version 2) |
 | `wand_h` | 100 | Wandhöhe ab Plattenoberseite; andere Höhen passen in dieselbe Plattform |
@@ -136,7 +138,7 @@ Bei den großen Flächen ggf. eine Brim verwenden. Für die Trichterhälften gib
 ## Montage
 
 1. Passlehre in den Eimer legen und prüfen. Bei Bedarf `flansch_spiel` oder `trichter_spiel` anpassen.
-2. Trichterhälften und Mittelteile mit M3-Schrauben und Muttern verbinden und in den Eimer legen.
+2. Trichterhälften (und, falls verwendet, die Mittelteile) mit M3-Schrauben und Muttern verbinden und in den Eimer legen.
 3. Bügel waagerecht nach außen liegend von oben auf die abgeflachten Stifte der Plattform setzen und hochklappen. Aufgeklappt halten die Haken fest.
 4. Seitenwände senkrecht von oben mit den Zapfen in die Taschen an den Schmalseiten stecken, bis die Schulter auf der Plattform aufliegt und die Rastnase unter dem Block einschnappt. Lösen: Nase von unten mit dem Daumen eindrücken und die Wand nach oben abziehen. Zum Reinigen alles abnehmen (Plattform ohne Sackloch, die Taschen sind unten offen).
 5. Sack auf die Plattform stellen und den Korb durch die Trichteröffnung einsetzen.
@@ -170,7 +172,7 @@ Die Griffbänder der Schmalseiten sind durch zwei steife, abnehmbare **∩-förm
 - **Clip:** Jeder Steg endet in einem 14 mm breiten, 20 mm langen Zapfen. Er wird von oben in eine unten offene Tasche der Plattform gesteckt (14 mm Führung, Spiel 0,2 mm je Seite). Die Stegkanten neben dem Zapfen bilden die Schulter auf der Plattenoberseite. In der Mitte des Zapfens liegt eine federnde Rastzunge (8 mm breit, 17 mm lang) mit 1 mm hoher Nase, die unter dem Taschenblock einschnappt (Haltefläche 0,8 mm, Dehnung beim Einrasten ca. 2,5 %). Hinter der Zunge hat die Tasche ein Relief, in das die Zunge einfedert.
 - **Taschenblöcke:** Sie sitzen als Ohr an der Plattenkante und reichen bis x = ±106,7, also 1,8 mm vor die feste Trichteröffnung (±108,5). Die Wand selbst liegt bei x = ±100,5 … ±104,5, 0,5 mm vom Sack und 4 mm von der Öffnung.
 - **Plattform:** wächst im Wandmodus auf 210 mm (`platte_l_wand`); die Eckfüße rücken auf x = ±78,6, damit sie die Taschenblöcke nicht berühren.
-- **Trichteröffnung:** fest 217 × 172 mm. Trichterhälfte, Mittelteil und Bügel sind geometrisch unverändert (nachgerechnet: Eckpunktabweichung 0,0000 mm gegenüber Stand 9).
+- **Trichteröffnung:** fest 217 × 172 mm, unabhängig von Plattform und Mittelteil. Mit `mittelteil = 5` sind Trichterhälfte, Mittelteil und Bügel geometrisch unverändert gegenüber Stand 9 (Eckpunktabweichung 0,0000 mm); Standard ist seit V3-3 `mittelteil = 0` (Hälften 140,25 mm).
 - **Wand tauschen:** Zapfen, Rastzunge und Tasche hängen nicht von der Höhe ab. Andere Höhen drucken (`wand_h` ändern, Datei `seitenwand_h<Höhe>_2x.stl`) und in dieselbe Plattform stecken. Die Konsole warnt, wenn die Wand an die Eimerkante reicht (bei angenommenem `absatz_z` ab etwa 230 mm).
 - **Zuerst drucken:** `teil = "rastprobe"` (Taschenblock mit Wandstück), um Spiel und Rastkraft zu prüfen. Nicht gedruckt, nicht im Eimer erprobt.
 - **Version 2 bleibt wählbar:** `schmalseite_typ = "band"` erzeugt wieder Plattform (206 mm, Scharniere an den Schmalseiten) und Bänder.

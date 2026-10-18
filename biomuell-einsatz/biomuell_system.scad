@@ -43,7 +43,7 @@
 
 /* [Ausgabe] */
 // Welches Teil?
-teil = "uebersicht"; // [uebersicht:Übersicht im Eimer, plattform:Plattform, langseite:Bügel/Band Langseite (2x drucken), seitenwand:Seitenwand Schmalseite (2x drucken), schmalseite:Band Schmalseite (nur bei schmalseite_typ = band, 2x drucken), trichter:Trichter, mittelteil:Trichter-Mittelteil (je Längsseite 1x), lehre:Passlehre Trichterrand, rastprobe:Rastprobe (Tasche + Wandstück, vorab drucken)]
+teil = "uebersicht"; // [uebersicht:Übersicht im Eimer, plattform:Plattform, langseite:Bügel/Band Langseite (2x drucken), seitenwand:Seitenwand Schmalseite (2x drucken), schmalseite:Band Schmalseite (nur bei schmalseite_typ = band, 2x drucken), trichter:Trichter, mittelteil:Trichter-Mittelteil (optional, nur bei mittelteil > 0; je Längsseite 1x), lehre:Passlehre Trichterrand, rastprobe:Rastprobe (Tasche + Wandstück, vorab drucken)]
 // -1 = alle Stücke nebeneinander, 0,1,2 … = einzelnes druckfertiges Stück
 stueck = -1;
 
@@ -259,9 +259,10 @@ druckhilfe_steg_h = 0.5;
 druckhilfe_steg_b = 4;
 
 /* [Trichter-Mittelteil] */
-// Zwischenstück je Längsseite, das zwischen die beiden Trichterhälften geschraubt wird (0 = keins).
-// Die Hälften werden um dieses Maß kürzer erzeugt; Trichter gesamt = Eimerlänge wie gemessen.
-mittelteil = 5;
+// OPTIONAL: Zwischenstück je Längsseite (z. B. 5), das zwischen die beiden Trichterhälften geschraubt wird (0 = keins, Standard).
+// Standard 0: zwei Hälften je Eimerlänge/2 (140,25 mm), Öffnung fest 217 x 172. Mit Mittelteil werden die Hälften um dieses Maß
+// kürzer erzeugt (Trichter gesamt = Eimerlänge wie gemessen); nur sinnvoll, um bereits gedruckte Hälften weiterzuverwenden.
+mittelteil = 0;
 
 /* [Verbindungen (Plattform, Bänder)] */
 schwalbe_tiefe = 10;
@@ -990,7 +991,7 @@ if (scharniere_lang > 0)
              HAKEN_UNTEN_Z + LEN_LANG, " mm über Boden -> ", band_n(LEN_LANG), " Stück(e), 2x drucken"));
 if (mit_trichter) {
     echo(str("Trichter ", T_L + (T_NX == 2 ? MT : 0), " x ", T_B, " x ", kragen_t + trichter_tiefe + kragen_unten_h, " mm -> ", T_N,
-             " Stücke", MT > 0 && T_NX == 2 ? str(" (Hälften je ", T_L / 2, " mm + 2 Mittelteile ", MT, " mm)") : "", ", Öffnung ", 2 * LIP[0] + (T_NX == 2 ? MT : 0), " x ", 2 * LIP[1], " mm, Schräge ", round(ALPHA_X), "°/", round(ALPHA_Y), "°, Ecken ", round(ALPHA_C), "°"));
+             " Stücke", MT > 0 && T_NX == 2 ? str(" (Hälften je ", T_L / 2 - MT / 2, " mm + 2 Mittelteile ", MT, " mm)") : T_NX == 2 ? str(" (Hälften je ", T_L / 2, " mm, ohne Mittelteil)") : "", ", Öffnung ", 2 * LIP[0] + (T_NX == 2 ? MT : 0), " x ", 2 * LIP[1], " mm, Schräge ", round(ALPHA_X), "°/", round(ALPHA_Y), "°, Ecken ", round(ALPHA_C), "°"));
     echo(str("Sack ", sack_b, " x ", sack_t, " in Öffnung: Abstand je Seite ", OEFF[0] - sack_b / 2, " / ", OEFF[1] - sack_t / 2,
              " mm", WAND ? "" : str(" (davon Band ", kante_versatz + hals_t, " mm)"), ", Öffnungs-Unterkante ", absatz_z - trichter_tiefe - kragen_unten_h, " mm über Boden"));
     if (T_N > 1) echo(str("Trichter-Verbindung: je Fuge ", 2 * len(lasche_zs(len(T_CX) > 0 ? T_TOP[1] - T_BOT[1] : T_TOP[0] - T_BOT[0], 0, -trichter_tiefe)),

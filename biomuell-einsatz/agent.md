@@ -61,6 +61,7 @@ Alles steht in **einer parametrischen OpenSCAD-Datei** (`biomuell_system.scad`).
   - **Stand 4, 10:19 Uhr:** **`trichter_v2_druckhilfe.3mf`:** Der Steg ist als eigenes Teil „Druckhilfe - nach dem Druck abtrennen“ im Trichter-Objekt angelegt (2 Wände, 15 % Gitter, 2 Haltestege), `druckhilfe_steg.stl` ist das Einzelteil. Als echter Support lässt er sich nicht definieren: Der Slicer erzeugt Support nur unter Überhängen, und Support haftet absichtlich locker und würde die offene U-Seite nicht versteifen. In PrusaSlicer als getrennte, dichte Teile erkannt.
   - **Stand 5, 11:31 Uhr:** **Scharnier gegen Abfallen:** Der 6-mm-Stift in der Plattform ist an zwei Seiten senkrecht auf 4,2 mm abgeflacht (`stift_flach = 4.2`), die Haken haben statt der Schnappöffnung einen geraden Kanal von 4,7 mm (`kanal_spiel = 0.25`, Einführfase `kanal_fase = 0.6`). Aufrecht im Eimer liegt der Kanal quer zur Abflachung, der Haken ist gefangen. Nur bei waagerecht nach außen liegendem Band (±7°) lässt er sich von oben aufstecken und abziehen; im 2D-Schnitt geprüft: abnehmbar nur bei ca. 83–95° aus der Senkrechten. Alle drei Teile (Plattform, Bügel, Bänder) neu drucken, alte und neue passen nicht zusammen. `stift_flach = 0` = alter Schnapphaken.
   - **Stand 6, 12:32 Uhr:** **`korb_v2.3mf`:** 5 Platten (Plattform, Bügel Langseite A/B, Band Schmalseite A/B). Zwei Bänder nebeneinander sind breiter als das Druckbett, ineinander verschachteln geht nicht, weil die Griffschlaufen an die Beine der Bügel stoßen. Einstellungen je Objekt: Plattform 4 Wände, 25 % Gyroid, 5/5, Brim 5 mm; Bügel und Bänder 3 Wände, 100 %, 5/5, kein Brim; keine Stützen. Empfehlung: zuerst ein Band mit der Plattform drucken und die Passung des Hakens prüfen.
+  - **Stand 7, 16:10 Uhr:** **Laschenlöcher korrigiert.** Vorher hatte jede Lasche 2 volle und 2 angeschnittene Löcher: Die Lasche reicht nur bis zur Eimerkontur und ist oben am Kragen wenige Millimeter breit, das obere Loch wurde von der Außenkante angeschnitten. Jetzt werden die Lochpositionen aus der tatsächlichen Laschenbreite berechnet (`lasche_zs`, `loch_rand_min = 1.5`): je Lasche 2 volle Löcher mit mindestens 1,5 mm Material ringsum, ca. 9 mm übereinander im unteren, voll ausgebildeten Teil. Je Fuge 4 Schrauben M3 × 16 mit Mutter; beide Hälften sind gleich aufgebaut, die Löcher fluchten. Klarstellung: Die zwei kleinen Stege auf der Plattform der Projekt-3MF sind keine Messstege, sondern die beiden Hälften der Passlehre.
 
 ### Kennwerte mit Standardwerten (Konsolenausgabe)
 
@@ -69,7 +70,7 @@ Alles steht in **einer parametrischen OpenSCAD-Datei** (`biomuell_system.scad`).
 - Bügel Langseite und Band Schmalseite: je 239,75 mm, 1 Stück, je 2× drucken. Griff-Oberkante 280 mm über Boden.
 - Trichter 275,5 × 207,5 × 59: 2 Hälften à 137,75. Öffnung 212 × 172. Außenschräge 54°/69°, Ecken 52°.
 - Sack in der Öffnung: 6 mm Abstand je Seite (davon 2,3 mm Band). Öffnungs-Unterkante 220 mm über Boden.
-- Trichterfuge: 4 Schrauben M3 × 16 (Edelstahl) + Muttern, optional 2K-Epoxid. Bis Stand 6 saß das obere Loch jeder Lasche angeschnitten.
+- Trichterfuge: 4 Schrauben M3 × 16 (Edelstahl) + Muttern, optional 2K-Epoxid.
 
 ### Wichtige Parameter
 
@@ -81,6 +82,7 @@ Alles steht in **einer parametrischen OpenSCAD-Datei** (`biomuell_system.scad`).
 - Eimer (gemessen): `eimer_l = 278`, `eimer_gerade_l = 240`, `eimer_b = 210`, `eimer_gerade_b = 170`.
 - Keilwand: `innenform = "keil"`, `ring_x = 10`, `ring_y = 6`; Druckhilfe `druckhilfe = false`.
 - Scharnier: `stift_flach = 4.2`, `kanal_spiel = 0.25`, `kanal_fase = 0.6`.
+- Laschenlöcher: `loch_rand_min = 1.5`, 2 Löcher je Lasche, Lage aus der Laschenbreite.
 
 ### Koordinaten
 

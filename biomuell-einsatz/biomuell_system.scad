@@ -626,15 +626,25 @@ module laschen(cx, cy, a, za, b, zb, clip) {
     }
 }
 // M3-Löcher durch die Laschen, je Fuge und Seite zwei
+// Die Lasche reicht von der Trichter-Außenfläche bis zur Eimerkontur (max. rippe_h). Oben ist sie
+// deshalb schmal. Löcher nur dort, wo rundum mindestens loch_rand_min Material steht.
+loch_rand_min = 1.5;
+function lasche_zs(D, za, zb) = let(
+    H = za - zb,
+    t_min = (schraube_d + 2 * loch_rand_min) / D,                    // ab hier breit genug
+    t2 = 1 - (schraube_d / 2 * sqrt(2) + loch_rand_min) / H,          // unterstes Loch (Tropfenspitze beachten)
+    t1 = t2 - (schraube_d + 6) / H)                                   // Abstand für Mutter/Schraubenkopf
+    t2 < t_min ? [] : t1 >= t_min ? [za - t1 * H, za - t2 * H] : [za - t2 * H];
+function lasche_mitte(D, oben, z, za, zb) = let(t = (za - z) / (za - zb), w = min(rippe_h, D * t))
+    oben - D * t + w / 2;
 module laschen_loecher(cx, cy, a, za, b, zb) {
-    zs = [za + 0.3 * (zb - za), za + 0.72 * (zb - za)];
-    for (c = cx, s = [-1, 1], z = zs)
-        let(yo = b[1] + (a[1] - b[1]) * (z - zb) / (za - zb))
-        translate([c, s * (yo + rippe_h / 2 + 0.3), z]) rotate([90, 0, 90])
+    DY = a[1] - b[1];
+    DX = a[0] - b[0];
+    for (c = cx, s = [-1, 1], z = lasche_zs(DY, za, zb))
+        translate([c, s * lasche_mitte(DY, a[1], z, za, zb), z]) rotate([90, 0, 90])
             linear_extrude(2 * rippe_t + 2, center = true) tropfenloch2d(schraube_d);
-    for (c = cy, s = [-1, 1], z = zs)
-        let(xo = b[0] + (a[0] - b[0]) * (z - zb) / (za - zb))
-        translate([s * (xo + rippe_h / 2 + 0.3), c, z]) rotate([90, 0, 0])
+    for (c = cy, s = [-1, 1], z = lasche_zs(DX, za, zb))
+        translate([s * lasche_mitte(DX, a[0], z, za, zb), c, z]) rotate([90, 0, 0])
             linear_extrude(2 * rippe_t + 2, center = true) tropfenloch2d(schraube_d);
 }
 
@@ -761,7 +771,8 @@ if (mit_trichter) {
              " Stücke, Öffnung ", 2 * LIP[0], " x ", 2 * LIP[1], " mm, Schräge ", round(ALPHA_X), "°/", round(ALPHA_Y), "°, Ecken ", round(ALPHA_C), "°"));
     echo(str("Sack ", sack_b, " x ", sack_t, " in Öffnung: Abstand je Seite ", LIP[0] - sack_b / 2, " / ", LIP[1] - sack_t / 2,
              " mm (davon Band ", kante_versatz + hals_t, " mm), Öffnungs-Unterkante ", absatz_z - trichter_tiefe - kragen_unten_h, " mm über Boden"));
-    if (T_N > 1) echo("Trichter-Verbindung: je Fuge 4 Schrauben M3 x 16 (Edelstahl) + Muttern, optional 2K-Epoxid");
+    if (T_N > 1) echo(str("Trichter-Verbindung: je Fuge ", 2 * len(lasche_zs(len(T_CX) > 0 ? T_TOP[1] - T_BOT[1] : T_TOP[0] - T_BOT[0], 0, -trichter_tiefe)),
+                          " Schrauben M3 x 16 (Edelstahl) + Muttern, optional 2K-Epoxid"));
     if (innenform == "keil") {
         echo(str("Keilwand: Innenschräge ", round(BETA_X), "°/", round(BETA_Y), "°, Ecken ", round(BETA_C),
                  "° (Überhang beim Druck ", round(90 - BETA_X), "°/", round(90 - BETA_Y), "°/", round(90 - BETA_C),

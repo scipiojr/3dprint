@@ -184,7 +184,7 @@ ring_y = 6;
 
 /* [Druckhilfe Trichter] */
 // Steg auf dem Druckbett, der die offene Seite jeder Trichterhälfte schließt. Nach dem Druck abbrechen.
-druckhilfe = true;
+druckhilfe = false;
 druckhilfe_b = 4;
 druckhilfe_h = 5;
 // Abstand Steg <-> Trennfuge

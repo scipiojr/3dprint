@@ -36,10 +36,10 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 
 | Datei | Stand | Herkunft | Inhalt |
 |---|---|---|---|
-| `biomuell_system.scad` | 1 | rekonstruiert | Hauptdatei, Stand 1 (Keilwand, Druckhilfe an, Eimer 278 mm, Schnapphaken) |
+| `biomuell_system.scad` | 3 | rekonstruiert | Hauptdatei, Stand 3 (`druckhilfe = false`) |
 | `vergleich_v1_v2.png` | 1 | Original | Vergleich Version 1 (rot) und Version 2 (grün), Schnitte durch die Trichterschräge |
-| `trichter_v2_haelfte_2x.stl` | 1 | rekonstruiert | Trichterhälfte mit Druckhilfe, Eimer 278 mm: 143,25 × 207,5 × 59, 2× drucken |
-| `trichter_v2.3mf` | 2 | rekonstruiert | Trichter, beide Hälften mit Druckhilfe auf je einer Platte, Druckeinstellungen je Objekt |
+| `trichter_v2_haelfte_2x.stl` | 3 | rekonstruiert | Trichterhälfte ohne Druckhilfe, Eimer 278 mm: 137,75 × 207,5 × 59, 2× drucken |
+| `trichter_v2.3mf` | 3 | rekonstruiert | Trichter, beide Hälften ohne Druckhilfe auf je einer Platte |
 
 ## Teile
 
@@ -48,7 +48,7 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 | `plattform` | 1 | 206 × 166 × 56 | Massive 6-mm-Platte mit 9 Langlöchern, 4 runde Füße (50 mm Bodenabstand), 6 Scharnierstifte (rund, Schnapphaken) |
 | `langseite` | 2 | 239,75 × 134 | Bügel mit zwei Haken und Griffschlaufe |
 | `schmalseite` | 2 | 239,75 × 124 | Band mit einem Haken und Griffschlaufe |
-| `trichter` | 2 | 143,25 × 207,5 × 59 (mit Druckhilfe; ohne 137,75) | Trichterhälfte, Keilwand, Laschen mit M3-Löchern an der Fuge (bis Stand 6 mit angeschnittenem oberen Loch) |
+| `trichter` | 2 | 137,75 × 207,5 × 59 | Trichterhälfte, Keilwand, Laschen mit M3-Löchern an der Fuge (bis Stand 6 mit angeschnittenem oberen Loch) |
 | `lehre` | 2 | Hälften | Passlehre für den Trichterkragen – zuerst drucken und im Eimer prüfen |
 
 | Plattform | Bügel Langseite | Band Schmalseite | Trichterhälfte |
@@ -92,14 +92,14 @@ PETG, 0,4-mm-Düse, alle Teile ohne Stützen.
 | Trichterhälfte | Kragenoberseite unten | 4 | 100 % | 5/5 |
 | Passlehre | Kragen unten | 2 | 15 % | 3/3 |
 
-Bei den großen Flächen ggf. eine Brim verwenden. Für die Trichterhälften ist standardmäßig eine abbrechbare Druckhilfe eingeschaltet (`druckhilfe = true`), die die offene Seite beim Druck zum Ring schließt.
+Bei den großen Flächen ggf. eine Brim verwenden. Für die Trichterhälften gibt es optional eine abbrechbare Druckhilfe (`druckhilfe = true`), die die offene Seite beim Druck zum Ring schließt.
 
 ### Slicer-Hinweise (Anycubic Kobra S1)
 
 - Jede Trichterhälfte auf ein eigenes Druckbett.
 - Außenwand 60–80 mm/s, Wandbeschleunigung höchstens 3000.
 - 240–245 °C, Lüfter 30–40 %, Überhang-Lüfter höchstens 50 %.
-- Stützen aus, Brim 5–8 mm.
+- Stützen aus, Brim 8–10 mm.
 - In `trichter_v2*.3mf` hinterlegt: 4 Wände (Arachne), 40 % Gyroid, oben/unten 5 Lagen, 0,2 mm, Brim 6 mm, Außenwand 70 mm/s, Innenwand 100 mm/s, Beschleunigung 2000/3000, Naht hinten. Temperatur und Lüfter stehen nicht in der 3MF (Filamentprofil).
 - Die 3MFs sind in PrusaSlicer geprüft (Teile dicht), im Anycubic Slicer Next nicht geöffnet.
 
@@ -118,6 +118,7 @@ Jeder Konstruktionsstand ist ein eigener Commit mit allen erzeugten Dateien. Det
 |---|---|---|
 | 1 | 10:04 | Trichter Version 2: Keilwand (innen steilere Schräge, oben dickere Wand), abbrechbare Druckhilfe (Standard an), Eimer weiter 278 mm. Neue Trichterhälfte (STL) und Vergleich V1/V2. |
 | 2 | 10:13 | `trichter_v2.3mf`: beide Hälften auf je einer Platte, Druckeinstellungen je Objekt. |
+| 3 | 10:17 | `druckhilfe = false` als Standard (der Steg stünde im fertigen Trichter quer in der Öffnung). STL, 3MF und SCAD neu. |
 
 ## Stand
 

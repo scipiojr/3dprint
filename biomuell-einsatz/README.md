@@ -40,6 +40,8 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 | `vergleich_v1_v2.png` | 1 | Original | Vergleich Version 1 (rot) und Version 2 (grün), Schnitte durch die Trichterschräge |
 | `trichter_v2_haelfte_2x.stl` | 3 | rekonstruiert | Trichterhälfte ohne Druckhilfe, Eimer 278 mm: 137,75 × 207,5 × 59, 2× drucken |
 | `trichter_v2.3mf` | 3 | rekonstruiert | Trichter, beide Hälften ohne Druckhilfe auf je einer Platte |
+| `druckhilfe_steg.stl` | 4 | rekonstruiert | Druckhilfe-Steg (6,5 × 205,5 × 5), Eimer 278 mm |
+| `trichter_v2_druckhilfe.3mf` | 4 | rekonstruiert | Trichter mit Druckhilfe als eigenem, abtrennbarem Teil („Druckhilfe - nach dem Druck abtrennen“), je Hälfte eine Platte |
 
 ## Teile
 
@@ -119,6 +121,7 @@ Jeder Konstruktionsstand ist ein eigener Commit mit allen erzeugten Dateien. Det
 | 1 | 10:04 | Trichter Version 2: Keilwand (innen steilere Schräge, oben dickere Wand), abbrechbare Druckhilfe (Standard an), Eimer weiter 278 mm. Neue Trichterhälfte (STL) und Vergleich V1/V2. |
 | 2 | 10:13 | `trichter_v2.3mf`: beide Hälften auf je einer Platte, Druckeinstellungen je Objekt. |
 | 3 | 10:17 | `druckhilfe = false` als Standard (der Steg stünde im fertigen Trichter quer in der Öffnung). STL, 3MF und SCAD neu. |
+| 4 | 10:19 | `trichter_v2_druckhilfe.3mf`: Druckhilfe als eigenes, abtrennbares Teil; `druckhilfe_steg.stl`. |
 
 ## Stand
 

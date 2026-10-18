@@ -59,6 +59,7 @@ Alles steht in **einer parametrischen OpenSCAD-Datei** (`biomuell_system.scad`).
   - **Stand 2, 10:13 Uhr:** **`trichter_v2.3mf`:** beide Hälften (mit Druckhilfe) auf je einer Platte, druckfertig mit der Kragenoberseite unten. Plattenraster aus dem Projekt der Nutzerin für den Kobra S1 übernommen (Spaltenabstand 314,4 mm). Einstellungen je Objekt: 4 Wände (Arachne), 40 % Gyroid, oben/unten 5 Lagen, 0,2 mm, keine Stützen, Brim 6 mm außen, Außenwand 70 mm/s, Innenwand 100 mm/s, Beschleunigung 2000/3000, Naht hinten. Temperatur und Lüfter lassen sich nicht je Objekt in der 3MF speichern (Filamentprofil: 240–245 °C, Lüfter 30–40 %, Überhang-Lüfter höchstens 50 %). In PrusaSlicer geprüft (beide Hälften dicht); im Anycubic Slicer Next nicht geöffnet.
   - **Stand 3, 10:17 Uhr:** **`druckhilfe = false` als Standard.** Der Steg war nur als Druckhilfe gedacht und stünde im zusammengebauten Trichter quer in der Öffnung. Hälfte wieder 137,75 × 207,5 × 59 mm. Ohne Steg fehlt die Versteifung der offenen U-Seite: Brim auf 8–10 mm stellen und die Enden an der Fuge beobachten. STL, 3MF und SCAD neu.
   - **Stand 4, 10:19 Uhr:** **`trichter_v2_druckhilfe.3mf`:** Der Steg ist als eigenes Teil „Druckhilfe - nach dem Druck abtrennen“ im Trichter-Objekt angelegt (2 Wände, 15 % Gitter, 2 Haltestege), `druckhilfe_steg.stl` ist das Einzelteil. Als echter Support lässt er sich nicht definieren: Der Slicer erzeugt Support nur unter Überhängen, und Support haftet absichtlich locker und würde die offene U-Seite nicht versteifen. In PrusaSlicer als getrennte, dichte Teile erkannt.
+  - **Stand 5, 11:31 Uhr:** **Scharnier gegen Abfallen:** Der 6-mm-Stift in der Plattform ist an zwei Seiten senkrecht auf 4,2 mm abgeflacht (`stift_flach = 4.2`), die Haken haben statt der Schnappöffnung einen geraden Kanal von 4,7 mm (`kanal_spiel = 0.25`, Einführfase `kanal_fase = 0.6`). Aufrecht im Eimer liegt der Kanal quer zur Abflachung, der Haken ist gefangen. Nur bei waagerecht nach außen liegendem Band (±7°) lässt er sich von oben aufstecken und abziehen; im 2D-Schnitt geprüft: abnehmbar nur bei ca. 83–95° aus der Senkrechten. Alle drei Teile (Plattform, Bügel, Bänder) neu drucken, alte und neue passen nicht zusammen. `stift_flach = 0` = alter Schnapphaken.
 
 ### Kennwerte mit Standardwerten (Konsolenausgabe)
 
@@ -78,6 +79,7 @@ Alles steht in **einer parametrischen OpenSCAD-Datei** (`biomuell_system.scad`).
 
 - Eimer (gemessen): `eimer_l = 278`, `eimer_gerade_l = 240`, `eimer_b = 210`, `eimer_gerade_b = 170`.
 - Keilwand: `innenform = "keil"`, `ring_x = 10`, `ring_y = 6`; Druckhilfe `druckhilfe = false`.
+- Scharnier: `stift_flach = 4.2`, `kanal_spiel = 0.25`, `kanal_fase = 0.6`.
 
 ### Koordinaten
 

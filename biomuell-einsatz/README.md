@@ -36,18 +36,22 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 
 | Datei | Stand | Herkunft | Inhalt |
 |---|---|---|---|
-| `biomuell_system.scad` | 3 | rekonstruiert | Hauptdatei, Stand 3 (`druckhilfe = false`) |
+| `biomuell_system.scad` | 5 | Original | Hauptdatei, Stand 5 (abgeflachter Scharnierstift) |
 | `vergleich_v1_v2.png` | 1 | Original | Vergleich Version 1 (rot) und Version 2 (grün), Schnitte durch die Trichterschräge |
 | `trichter_v2_haelfte_2x.stl` | 3 | rekonstruiert | Trichterhälfte ohne Druckhilfe, Eimer 278 mm: 137,75 × 207,5 × 59, 2× drucken |
 | `trichter_v2.3mf` | 3 | rekonstruiert | Trichter, beide Hälften ohne Druckhilfe auf je einer Platte |
 | `druckhilfe_steg.stl` | 4 | rekonstruiert | Druckhilfe-Steg (6,5 × 205,5 × 5), Eimer 278 mm |
 | `trichter_v2_druckhilfe.3mf` | 4 | rekonstruiert | Trichter mit Druckhilfe als eigenem, abtrennbarem Teil („Druckhilfe - nach dem Druck abtrennen“), je Hälfte eine Platte |
+| `plattform.stl` | 5 | Original | Plattform 206 × 166 × 56 mit abgeflachten Scharnierstiften, 1× drucken |
+| `buegel_langseite_2x.stl` | 5 | Original | Bügel Langseite mit 2 Haken (Kanal), 239,75 × 134, 2× drucken |
+| `band_schmalseite_2x.stl` | 5 | Original | Band Schmalseite mit 1 Haken (Kanal), 239,75 × 124, 2× drucken |
+| `scharnier_flachlage.png` | 5 | Original | Scharnier in drei Stellungen: aufrecht (hält), waagerecht (löst), dazwischen |
 
 ## Teile
 
 | `teil` | Anzahl | Maße (mm) | Beschreibung |
 |---|---|---|---|
-| `plattform` | 1 | 206 × 166 × 56 | Massive 6-mm-Platte mit 9 Langlöchern, 4 runde Füße (50 mm Bodenabstand), 6 Scharnierstifte (rund, Schnapphaken) |
+| `plattform` | 1 | 206 × 166 × 56 | Massive 6-mm-Platte mit 9 Langlöchern, 4 runde Füße (50 mm Bodenabstand), 6 abgeflachte Scharnierstifte |
 | `langseite` | 2 | 239,75 × 134 | Bügel mit zwei Haken und Griffschlaufe |
 | `schmalseite` | 2 | 239,75 × 124 | Band mit einem Haken und Griffschlaufe |
 | `trichter` | 2 | 137,75 × 207,5 × 59 | Trichterhälfte, Keilwand, Laschen mit M3-Löchern an der Fuge (bis Stand 6 mit angeschnittenem oberen Loch) |
@@ -109,7 +113,7 @@ Bei den großen Flächen ggf. eine Brim verwenden. Für die Trichterhälften gib
 
 1. Passlehre in den Eimer legen und prüfen. Bei Bedarf `flansch_spiel` oder `trichter_spiel` anpassen.
 2. Trichterhälften mit M3-Schrauben und Muttern verbinden und in den Eimer legen.
-3. Bügel und Bänder auf die Stifte der Plattform aufschnappen und hochklappen.
+3. Bügel und Bänder waagerecht nach außen liegend von oben auf die abgeflachten Stifte der Plattform setzen und hochklappen. Aufgeklappt halten die Haken fest.
 4. Sack auf die Plattform stellen und den Korb durch die Trichteröffnung einsetzen.
 
 ## Verlauf
@@ -122,6 +126,7 @@ Jeder Konstruktionsstand ist ein eigener Commit mit allen erzeugten Dateien. Det
 | 2 | 10:13 | `trichter_v2.3mf`: beide Hälften auf je einer Platte, Druckeinstellungen je Objekt. |
 | 3 | 10:17 | `druckhilfe = false` als Standard (der Steg stünde im fertigen Trichter quer in der Öffnung). STL, 3MF und SCAD neu. |
 | 4 | 10:19 | `trichter_v2_druckhilfe.3mf`: Druckhilfe als eigenes, abtrennbares Teil; `druckhilfe_steg.stl`. |
+| 5 | 11:31 | Scharnier: Stift mit zwei Abflachungen (`stift_flach = 4.2`, `kanal_spiel = 0.25`, `kanal_fase = 0.6`), Haken mit Kanal, Lösefenster ±7°. Neue Plattform, Bügel und Bänder. |
 
 ## Stand
 

@@ -115,7 +115,14 @@ stift_z = -10;
 haken_b = 24;
 haken_spiel = 0.35;
 haken_wand = 2.4;
-// Übermaß der Schnappöffnung
+// Stift mit zwei Abflachungen (Maß über die Flächen): Der Haken geht nur bei waagerecht
+// nach außen liegendem Band auf den Stift (von oben) und wieder ab. 0 = runder Stift mit Schnapphaken (alt)
+stift_flach = 4.2;
+// Spiel des Hakenkanals je Seite zur Abflachung
+kanal_spiel = 0.25;
+// Einführfase am Kanal (gleicht auch den Elefantenfuß aus)
+kanal_fase = 0.6;
+// Übermaß der Schnappöffnung (nur bei stift_flach = 0)
 schnapp = 0.5;
 tropfen = 0.6;
 schlitz_spiel = 1.0;
@@ -244,6 +251,12 @@ BOSS_V = SLOT_V + 5;
 _th = R_IN + tropfen;
 _ts = stift_d - schnapp;
 GAP_TO = acos((R_IN * R_IN + _th * _th - _ts * _ts) / (2 * R_IN * _th));
+FLACH = stift_flach > 0;
+KANAL_B = stift_flach + 2 * kanal_spiel;     // lichte Kanalbreite im Haken
+// Lösefenster: Drehwinkel aus der Flachlage, in dem der Stift noch durch den Kanal passt
+function stift_breite(phi) = let(r = stift_d / 2, f = stift_flach / 2)
+    abs(cos(phi)) * r <= f ? 2 * r : 2 * (f * abs(cos(phi)) + sqrt(r * r - f * f) * abs(sin(phi)));
+LOESE_WINKEL = max([for (p = [0:0.25:90]) if (stift_breite(p) <= KANAL_B) p]);
 
 // Plattform
 L2 = platte_l / 2;
@@ -416,7 +429,11 @@ module plattform_roh() {
         for (q = LOECHER) translate([q[0], q[1], 0]) loch_schnitt();
     }
     for (s = STRAPS) am_rand(s[0], s[1])
-        translate([0, -PIN_V, stift_z]) rotate([0, 90, 0]) cylinder(d = stift_d, h = 2 * (SLOT_U + 1), center = true, $fn = 40);
+        translate([0, -PIN_V, stift_z]) intersection() {
+            rotate([0, 90, 0]) cylinder(d = stift_d, h = 2 * (SLOT_U + 1), center = true, $fn = 40);
+            // Abflachungen senkrecht (zur Plattenmitte und nach außen): unten bleibt der Stift rund und trägt voll
+            if (FLACH) cube([2 * (SLOT_U + 2), stift_flach, stift_d + 2], center = true);
+        }
 }
 
 PL_NX = ceil(platte_l / UX);
@@ -470,16 +487,28 @@ module fenster_schnitt(T, r, c) hull() {
 }
 module rrect(x0, x1, y0, y1, r) translate([x0 + r, y0 + r]) offset(r = r) square([x1 - x0 - 2 * r, y1 - y0 - 2 * r]);
 
+// Hakenprofil (u = Bandlänge X, v = Banddicke Z; v < 0 zeigt zum Druckbett bzw. im Eimer zur Wand)
 module haken2d() difference() {
     intersection() {
-        hull() { circle(R_OUT, $fn = 64); translate([0, R_OUT * sqrt(2)]) circle(0.01); }
+        hull() {
+            circle(R_OUT, $fn = 64);
+            translate([0, R_OUT * sqrt(2)]) circle(0.01);
+            // flache Standfläche, damit beide Kanalwangen auf dem Bett stehen
+            if (FLACH) translate([-0.75 * R_OUT, -R_OUT]) square([1.5 * R_OUT, 0.01]);
+        }
         translate([-2 * R_OUT, -2 * R_OUT]) square([4 * R_OUT, 3 * R_OUT]);
     }
     intersection() {
         hull() { circle(R_IN, $fn = 64); translate([0, R_IN * sqrt(2)]) circle(0.01); }
         translate([-2 * R_OUT, -2 * R_OUT]) square([4 * R_OUT, 2 * R_OUT + R_IN + tropfen]);
     }
-    polygon(concat([[0, 0]], [for (k = [0:16]) let(t = GAP_TO * k / 16) [3 * R_OUT * sin(t), 3 * R_OUT * cos(t)]]));
+    if (FLACH) {
+        // gerader Kanal zur Bettseite: lässt den Stift nur in Richtung der Abflachungen durch
+        translate([-KANAL_B / 2, -2 * R_OUT]) square([KANAL_B, 2 * R_OUT]);
+        polygon([[-KANAL_B / 2 - kanal_fase - 1, -R_OUT - 1], [KANAL_B / 2 + kanal_fase + 1, -R_OUT - 1],
+                 [KANAL_B / 2, -R_OUT + kanal_fase], [-KANAL_B / 2, -R_OUT + kanal_fase]]);
+    } else
+        polygon(concat([[0, 0]], [for (k = [0:16]) let(t = GAP_TO * k / 16) [3 * R_OUT * sin(t), 3 * R_OUT * cos(t)]]));
 }
 
 // Kennwerte eines Bandes: [lx0, gx0, ramp0, neck_end, lw2]
@@ -498,16 +527,18 @@ module band_roh(Lb, legs, side_w, stoesse = []) {
     hk = haken_b / 2;
     single = len(legs) == 1;
     leg_end = single ? gx0 + 1 : lx0 + 1;
+    // Bandansatz am Haken: bei Kanal-Haken erst hinter dem Kanal, damit der Kanal frei bleibt
+    xn = FLACH ? Xc + KANAL_B / 2 + kanal_fase : Xc - 2;
     union() {
         for (L = legs) {
             translate([0, L, 0]) rotate([90, 0, 0]) linear_extrude(haken_b, center = true) translate([Xc, Xc]) haken2d();
             hull() {
-                schnitt_band(Xc - 2, L - hk, L + hk, hals_t, band_r, band_c);
-                schnitt_band(Xc, L - hk, L + hk, hals_t, band_r, band_c);
-                schnitt_band(Xc + 4, L - hb, L + hb, hals_t, band_r, band_c);
+                schnitt_band(xn, L - hk, L + hk, hals_t, band_r, band_c);
+                schnitt_band(max(Xc, xn + 1), L - hk, L + hk, hals_t, band_r, band_c);
+                schnitt_band(xn + 6, L - hb, L + hb, hals_t, band_r, band_c);
             }
             hull() {
-                schnitt_band(Xc - 2, L - hb, L + hb, hals_t, band_r, band_c);
+                schnitt_band(xn, L - hb, L + hb, hals_t, band_r, band_c);
                 schnitt_band(neck_end, L - hb, L + hb, hals_t, band_r, band_c);
             }
             hull() {
@@ -739,6 +770,12 @@ if (mit_trichter) {
             echo("WARNUNG: Keilwand stellenweise dünner als 'wand' – ring_x/ring_y vergrößern.");
         if (TOP_IN[2] <= 0 || TOP_IN[3] <= 0) echo("WARNUNG: ring_x/ring_y passen nicht zur Eckschräge.");
     }
+}
+if (FLACH) {
+    echo(str("Scharnier: Stift ", stift_d, " mm, abgeflacht auf ", stift_flach, " mm; Hakenkanal ", KANAL_B,
+             " mm -> Haken nur bei waagerecht nach außen liegendem Band (±", LOESE_WINKEL, "°) von oben auf-/abnehmbar"));
+    if (KANAL_B >= stift_d - 0.5) echo("WARNUNG: Hakenkanal fast so breit wie der Stift – Haken hält nicht sicher.");
+    if (KANAL_B <= stift_flach) echo("WARNUNG: Hakenkanal schmaler als die Abflachung – Haken geht nicht auf.");
 }
 if (kragen_t > absatz_bis_rand) echo("WARNUNG: Trichterkragen steht über den Eimerrand!");
 if (GRIFF_Z + 0 > absatz_z + absatz_bis_rand - 3 || (laenge_lang > 0 && HAKEN_UNTEN_Z + laenge_lang > absatz_z + absatz_bis_rand - 3)

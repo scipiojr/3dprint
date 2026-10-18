@@ -1,6 +1,25 @@
 # Version 3 – Plan: abnehmbare Seitenwände an den Schmalseiten
 
-Stand: 18.10.2026, 18:30 Uhr (Planungsstand, noch nichts umgesetzt). Sprache mit der Nutzerin: Deutsch.
+Stand: 18.10.2026. Plan um 18:30 Uhr (Stand 1), **umgesetzt in V3, Stand 2 (18:55 Uhr)**. Sprache mit der Nutzerin: Deutsch.
+
+## Umsetzungsstand (V3, Stand 2) und Abweichungen vom Plan
+
+Alles Folgende steht in `biomuell_system.scad`; der ursprüngliche Plan darunter bleibt zur Nachvollziehbarkeit unverändert.
+
+| Plan | Umgesetzt | Grund |
+|---|---|---|
+| Zapfen 4 mm dick, ca. 16 mm lang, mit Schulter | Zapfen 14 mm breit (`zapfen_b`), 20 mm lang (`zapfen_l`), Tasche 14 mm tief; die Stegkanten (Steg 20 mm) bilden die Schulter | einfachste Schulter ohne zusätzliches Bauteil, Führung 14 mm |
+| Block unter der Plattformkante | Block als **Ohr** über die Plattenkante, bis x = ±106,7 (1,8 mm vor der Öffnung) | die Wand (x = 100,5 … 104,5) liegt fast bündig mit der Plattenkante (105); ohne Ohr bliebe 0,3 mm Material neben dem Schlitz |
+| Rastzunge mit Nase | zusätzlich **Relief** (`tasche_relief = 1,2`) hinter der Zunge in der Tasche | die 1 mm hohe Nase passt nur durch den Schlitz, wenn die Zunge einfedern kann (Schlitzspiel nur 0,2 mm) |
+| Eckfüße rücken nach innen | x = ±78,6 statt ±82, berechnet aus den Blöcken (`FX`) | Fußteller (32 mm) hätten die Blöcke berührt |
+| Plattform ≈ 210 mm | `platte_l_wand = 210` (nur im Wandmodus), `platte_l = 206` bleibt für `"band"` | wie geplant |
+| `oeffnung_l/b` fest | `oeffnung_l = 217`, `oeffnung_b = 172`, `oeffnung_fase = 16` ersetzen `oeffnung_spiel` | wie geplant; Trichterhälfte, Mittelteil, Bügel mit Eckpunktabweichung 0,0000 mm gegenüber Stand 9 |
+| Stege bündig nach der Eckschräge | `wand_eck_abstand = 0`, Stege y = ±47 … ±67 | wie geplant; der Block reicht dabei bis y = ±67 (1,8 mm zur Öffnung) |
+| Durchbiegung 3–4 mm bei 5 N | 3,7 mm (Stege), mit Spiel im Zapfen bis 6,6 mm | Spiel 0,2 mm je Seite über 14 mm Führung kippt die Wand oben um bis ca. 2,9 mm; die Konsole meldet beides |
+
+Geprüft (Standardwerte): Netze dicht, Wand und Plattform durchdringen sich nicht, waagerechter Abstand zur Öffnung Block 1,8 mm / Wand mit Nase 3,0 mm, Rastzunge Dehnung ca. 2,5 % bei 0,8 mm Haltefläche, `korb_v3.3mf` gültig. **Nicht geprüft:** Einstecken und Rasten am Probedruck, Passung im Eimer, Slicer-Import.
+
+Neu gerendert wurden Plattform, Seitenwand und Rastprobe; Trichter, Mittelteil und Bügel sind unverändert.
 
 ## Wunsch der Nutzerin
 
@@ -103,7 +122,7 @@ Das vorhandene Scharnier mit abgeflachtem Stift: Wand wie ein Band einhängen, h
 
 ## Offene Fragen
 
-Stand jetzt keine offenen Rückfragen an die Nutzerin. Zu bestätigen bleibt nach dem Probedruck:
+Keine offenen Rückfragen an die Nutzerin. Zu bestätigen bleibt nach dem Probedruck:
 
 - Passung und Rastkraft des Zapfens (`zapfen_spiel`, `rast_nase`) – dafür gibt es die Rastprobe.
 - Ob 100 mm Wandhöhe passen oder mehr bzw. weniger gewünscht ist.

@@ -23,6 +23,7 @@ OUT.mkdir(parents=True, exist_ok=True)
 FARBE = {
     "plattform": "#3f8f6b",
     "baender": "#c98a4b",
+    "waende": "#d9772b",
     "trichter": "#4a78a8",
     "mittelteil": "#e08a2c",
     "eimer": "#9aa0a8",
@@ -85,6 +86,8 @@ def kanten(tri, farbe="#6b7079"):
 
 # ---------------------------------------------------------------- SVG-Schnitte
 def svg_pfade(name):
+    if not (W / name).exists():      # leere Baugruppe (z. B. keine Bänder bei schmalseite_typ = wand)
+        return []
     txt = (W / name).read_text()
     polys = []
     for d in re.findall(r'd="([^"]+)"', txt, re.S):
@@ -96,7 +99,7 @@ def svg_pfade(name):
 
 
 def schnitt_zeichnen(ax, praefix, umrechnen):
-    reihenfolge = ["sack", "eimer", "plattform", "baender", "trichter"]
+    reihenfolge = ["sack", "eimer", "plattform", "baender", "waende", "trichter"]
     for k in reihenfolge:
         polys = svg_pfade(f"{praefix}_{k}.svg")
         if not polys:
@@ -131,10 +134,11 @@ def schnittbild():
     from matplotlib.patches import Patch
     leg = [Patch(fc=FARBE["trichter"], ec="#222", label="Trichter"),
            Patch(fc=FARBE["plattform"], ec="#222", label="Plattform"),
-           Patch(fc=FARBE["baender"], ec="#222", label="Bänder / Bügel"),
+           Patch(fc=FARBE["baender"], ec="#222", label="Bügel"),
+           Patch(fc=FARBE["waende"], ec="#222", label="Seitenwände"),
            Patch(fc=FARBE["sack"], alpha=0.45, ec="#a8946c", ls="--", label="Papiersack (Platzhalter)"),
            Patch(fc=FARBE["eimer"], ec="#222", label="Eimerwand")]
-    fig.legend(handles=leg, loc="lower center", ncol=5, frameon=False)
+    fig.legend(handles=leg, loc="lower center", ncol=6, frameon=False)
     fig.tight_layout(rect=(0, 0.06, 1, 1))
     fig.savefig(OUT / "schnitt.png", facecolor="white")
     plt.close(fig)
@@ -145,18 +149,52 @@ def schnittbild():
 eimer = stl("asm_eimer.stl")
 pl = stl("asm_plattform.stl")
 ba = stl("asm_baender.stl")
+wa = stl("asm_waende.stl")
 tr = stl("asm_trichter.stl")
 mt = stl("asm_mittelteil.stl")
 
-ansicht([kanten(eimer), (pl, FARBE["plattform"], 1), (ba, FARBE["baender"], 1),
+ansicht([kanten(eimer), (pl, FARBE["plattform"], 1), (ba, FARBE["baender"], 1), (wa, FARBE["waende"], 1),
          (tr, FARBE["trichter"], 1), (mt, FARBE["mittelteil"], 1)],
         "uebersicht.png", elev=28, azim=-55, zoom=1.15)
-ansicht([(pl, FARBE["plattform"], 1), (ba, FARBE["baender"], 1)],
+ansicht([(pl, FARBE["plattform"], 1), (ba, FARBE["baender"], 1), (wa, FARBE["waende"], 1)],
         "korb.png", elev=22, azim=-55, zoom=1.15)
 ansicht([(tr, FARBE["trichter"], 1), (mt, FARBE["mittelteil"], 1)],
         "trichter.png", elev=38, azim=-60, zoom=1.0)
 ansicht([(stl("plattform.stl"), FARBE["plattform"], 1)], "plattform.png", elev=55, azim=-60, zoom=1.1)
 ansicht([(stl("langseite.stl"), FARBE["baender"], 1)], "buegel_langseite.png", elev=60, azim=-80, zoom=1.0)
 ansicht([(stl("schmalseite.stl"), FARBE["baender"], 1)], "band_schmalseite.png", elev=60, azim=-80, zoom=1.0)
+ansicht([(stl("seitenwand.stl"), FARBE["waende"], 1)], "seitenwand.png", elev=55, azim=-70, zoom=1.0)
+ansicht([(stl("rastprobe.stl"), FARBE["waende"], 1)], "rastprobe.png", elev=40, azim=-60, zoom=1.0)
 ansicht([(stl("trichter0.stl"), FARBE["trichter"], 1)], "trichter_haelfte.png", elev=40, azim=-50, zoom=1.1)
 schnittbild()
+
+
+def wandschnitt():
+    """Schnitt durch einen Seitensteg: links ganze Wand, rechts Zapfen in der Tasche mit Rastnase."""
+    fig, axs = plt.subplots(1, 2, figsize=(11, 6), dpi=150, gridspec_kw={"width_ratios": [1, 1]})
+    for ax, (x0, x1, z0, z1) in zip(axs, [(85, 115, 30, 165), (92, 112, 30, 62)]):
+        for k in ["plattform", "waende"]:
+            polys = svg_pfade(f"sw_{k}.svg")
+            verts, codes = [], []
+            for p in polys:
+                verts += list(p) + [p[0]]
+                codes += [MPath.MOVETO] + [MPath.LINETO] * (len(p) - 1) + [MPath.CLOSEPOLY]
+            if verts:
+                ax.add_patch(PathPatch(MPath(np.array(verts), codes), facecolor=FARBE[k], edgecolor="#222", lw=0.5))
+        ax.axvline(100, color="#a8946c", ls="--", lw=1)
+        ax.text(99.7, z1 - (z1 - z0) * 0.04, "Sack", ha="right", va="top", color="#a8946c", fontsize=8)
+        ax.set_xlim(x0, x1)
+        ax.set_ylim(z0, z1)
+        ax.set_aspect("equal")
+        ax.grid(alpha=0.25, lw=0.5)
+        ax.set_xlabel("x ab Mitte [mm]")
+    axs[0].set_ylabel("Höhe über Innenboden [mm]")
+    axs[0].set_title("Seitenwand im Schnitt (durch einen Steg)")
+    axs[1].set_title("Zapfen in der Tasche, Rastnase unter dem Block")
+    fig.tight_layout()
+    fig.savefig(OUT / "schnitt_wand.png", facecolor="white")
+    plt.close(fig)
+    print("Bild schnitt_wand.png")
+
+
+wandschnitt()

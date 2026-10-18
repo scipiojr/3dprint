@@ -7,6 +7,11 @@
 //  -------
 //  * KORB: Plattform mit Füßen + Tragebänder/Bügel, die direkt am Sack
 //    hochlaufen. Der Sack steht auf der Plattform.
+//    Version 3: An den Schmalseiten stecken statt der Bänder zwei steife,
+//    abnehmbare Seitenwände (nach unten offenes U, Höhe einstellbar). Jeder
+//    Seitensteg endet in einem Zapfen, der von oben in eine Tasche der
+//    Plattform gesteckt wird und mit einer Rastzunge einschnappt.
+//    Gehoben wird nur an den Bügeln der Langseiten.
 //  * TRICHTER: liegt rundum auf dem Absatz des Eimers und bleibt immer drin.
 //    Seine Öffnung umschließt Sack + Tragebänder: der Sack ragt durch den
 //    Trichter auf und wird von ihm in Position gehalten. Die Griffe der
@@ -38,7 +43,7 @@
 
 /* [Ausgabe] */
 // Welches Teil?
-teil = "uebersicht"; // [uebersicht:Übersicht im Eimer, plattform:Plattform, langseite:Bügel/Band Langseite (2x drucken), schmalseite:Bügel/Band Schmalseite (2x drucken), trichter:Trichter, mittelteil:Trichter-Mittelteil (je Längsseite 1x), lehre:Passlehre Trichterrand]
+teil = "uebersicht"; // [uebersicht:Übersicht im Eimer, plattform:Plattform, langseite:Bügel/Band Langseite (2x drucken), seitenwand:Seitenwand Schmalseite (2x drucken), schmalseite:Band Schmalseite (nur bei schmalseite_typ = band, 2x drucken), trichter:Trichter, mittelteil:Trichter-Mittelteil (je Längsseite 1x), lehre:Passlehre Trichterrand, rastprobe:Rastprobe (Tasche + Wandstück, vorab drucken)]
 // -1 = alle Stücke nebeneinander, 0,1,2 … = einzelnes druckfertiges Stück
 stueck = -1;
 
@@ -73,8 +78,10 @@ sack_t = 160;
 sack_h = 360;
 
 /* [Plattform] */
-// Länge: Sack + Bänder (passt durch die Trichteröffnung)
+// Länge: Sack + Bänder (passt durch die Trichteröffnung); gilt bei schmalseite_typ = "band"
 platte_l = 206;
+// Länge bei schmalseite_typ = "wand": Sack + Wand + Tasche (liegt innerhalb der festen Trichteröffnung)
+platte_l_wand = 210;
 platte_b = 166;
 // Schenkellänge der 45°-Eckschrägen
 platte_fase = 16;
@@ -104,7 +111,7 @@ mittelfuss = false;
 scharniere_lang = 2; // [0, 1, 2]
 // Abstand der zwei Scharniere einer Langseite
 scharnier_abstand_lang = 110;
-// Scharniere je Schmalseite
+// Scharniere je Schmalseite (nur bei schmalseite_typ = "band"; bei "wand" entfallen sie)
 scharniere_kurz = 1; // [0, 1, 2]
 scharnier_abstand_kurz = 80;
 
@@ -161,12 +168,63 @@ zwickel_l = 45;
 seitensteg_band = 8;
 seitensteg_buegel = 12;
 
+/* [Seitenwände Schmalseiten (Version 3)] */
+// "wand" = steife, abnehmbare U-Wand mit Steckzapfen (Version 3), "band" = Band mit Griffschlaufe (Version 2)
+schmalseite_typ = "wand"; // [wand:Seitenwand (Version 3), band:Band mit Griffschlaufe (Version 2)]
+// Wandhöhe ab Plattenoberseite (frei wählbar; Zapfen/Tasche bleiben gleich, andere Höhen passen in dieselbe Plattform)
+wand_h = 100;
+// Wanddicke: bestimmt die Steifigkeit (Durchbiegung ~ 1/Dicke³)
+wand_t = 4;
+// Breite der beiden Seitenstege
+wand_steg_b = 20;
+// Höhe des Querstegs oben
+wand_quer_h = 20;
+// Seitenstege nach innen versetzen (0 = Außenkante direkt nach der Eckschräge der Plattform)
+wand_eck_abstand = 0;
+// Spiel zwischen Wand und Sack (Wand innen <-> sack_b/2)
+wand_sack_spiel = 0.5;
+// Zapfenlänge unter der Schulter (Führung + Rastbereich)
+zapfen_l = 20;
+// Zapfenbreite (schmaler als der Steg: die Stegkante bildet die Schulter, die auf der Platte aufliegt)
+zapfen_b = 14;
+// Spiel Zapfen <-> Tasche (je Seite); kleiner = weniger Wackeln, aber enger
+zapfen_spiel = 0.2;
+// Tiefe der Tasche unter der Plattenoberseite (Führungslänge, Plattenstärke + Block)
+tasche_tiefe = 14;
+// Wandstärke des Taschenblocks nach außen (Rest zur Trichteröffnung beachten!)
+tasche_wand = 2.0;
+// Freiraum hinter der Rastzunge in der Tasche (Zunge federt hierhin ein)
+tasche_relief = 1.2;
+// Höhe der Rastnase (Überstand nach außen)
+rast_nase = 1.0;
+// Breite der federnden Rastzunge
+rast_zunge_b = 8;
+// Breite der beiden Schlitze neben der Zunge
+rast_schlitz = 1.0;
+// Abstand der Schlitz-Enden (Zungenwurzel) von der Schulter
+rast_wurzel = 3;
+// Länge der Auflaufschräge der Nase
+rast_rampe = 3;
+// Länge der ebenen Rastfläche der Nase
+rast_flach = 1.2;
+// senkrechtes Spiel zwischen Nase und Blockunterseite
+rast_spiel_z = 0.3;
+// Kantenrundung der Wand (Oberseite) und Fase (Bettseite)
+wand_r = 1.2;
+wand_c = 0.5;
+// Fase des Taschenblocks
+tasche_kante = 0.6;
+
 /* [Trichter] */
 mit_trichter = true;
 // Tiefe der Trichterschräge unter dem Absatz
 trichter_tiefe = 40;
-// Spiel Trichteröffnung <-> Plattform (je Seite)
-oeffnung_spiel = 3;
+// Lichte Weite der Trichteröffnung in Längsrichtung (gesamt, inkl. Mittelteil). FEST: ändert sich nicht mit der Plattform
+oeffnung_l = 217;
+// Lichte Weite der Trichteröffnung in Querrichtung (fest)
+oeffnung_b = 172;
+// Schenkellänge der 45°-Eckschrägen der Öffnung (fest)
+oeffnung_fase = 16;
 // senkrechter Haltekragen an der Öffnung (hält Sack + Bänder)
 kragen_unten_h = 15;
 wand = 2.5;
@@ -264,7 +322,10 @@ function stift_breite(phi) = let(r = stift_d / 2, f = stift_flach / 2)
 LOESE_WINKEL = max([for (p = [0:0.25:90]) if (stift_breite(p) <= KANAL_B) p]);
 
 // Plattform
-L2 = platte_l / 2;
+WAND = schmalseite_typ == "wand";
+SCH_KURZ = WAND ? 0 : scharniere_kurz;           // Scharniere (Bänder) je Schmalseite
+PL = WAND ? platte_l_wand : platte_l;            // Plattformlänge
+L2 = PL / 2;
 W2 = platte_b / 2;
 ZB = -platte_t;
 ZF = ZB - bodenabstand;
@@ -273,9 +334,23 @@ PLATTE_OKT = [L2, W2, platte_fase, platte_fase];
 
 function seite(e, n, a) = n == 2 ? [[e, -a / 2], [e, a / 2]] : n == 1 ? [[e, 0]] : [];
 STRAPS = concat(seite("+y", scharniere_lang, scharnier_abstand_lang), seite("-y", scharniere_lang, scharnier_abstand_lang),
-                seite("+x", scharniere_kurz, scharnier_abstand_kurz), seite("-x", scharniere_kurz, scharnier_abstand_kurz));
-// Eckfüße möglichst weit außen, ohne die Scharnierblöcke zu berühren
-FX = L2 - fuss_fuss / 2 - 7;
+                seite("+x", SCH_KURZ, scharnier_abstand_kurz), seite("-x", SCH_KURZ, scharnier_abstand_kurz));
+
+// Seitenwand (Version 3): Lage der Wand und der Taschen (x ab Plattenmitte)
+WX_I = sack_b / 2 + wand_sack_spiel;             // Wand innen
+WX_O = WX_I + wand_t;                            // Wand außen
+YE = W2 - platte_fase - wand_eck_abstand;        // Außenkante der Seitenstege (y)
+YC = YE - wand_steg_b / 2;                       // Stegmitte (y)
+// Taschenblock lokal (am_rand: y = 0 ist die Plattenkante, innen = negativ)
+SL_I = WX_I - zapfen_spiel - L2;                 // Schlitz innen
+SL_O = WX_O + zapfen_spiel - L2;                 // Schlitz außen
+TL_I = SL_I - tasche_relief - tasche_wand;       // Block innen
+TL_O = SL_O + tasche_wand;                       // Block außen (ragt als Ohr über die Plattenkante)
+BH = max(wand_steg_b / 2, zapfen_b / 2 + zapfen_spiel + tasche_wand);  // halbe Blockbreite
+POCKETS = WAND ? [for (e = ["+x", "-x"], s = [-1, 1]) [e, s * YC]] : [];
+// Eckfüße möglichst weit außen, ohne die Scharnier- bzw. Taschenblöcke zu berühren
+FX0 = L2 - fuss_fuss / 2 - 7;
+FX = WAND ? min(FX0, L2 + TL_I - 2.5 - fuss_fuss / 2) : FX0;
 FY = scharniere_lang > 0 ? W2 - BOSS_V - 4 - fuss_fuss / 2 - 2 : W2 - fuss_fuss / 2 - 7;
 FEET = concat([[-FX, -FY], [FX, -FY], [-FX, FY], [FX, FY]], mittelfuss ? [[0, 0]] : []);
 
@@ -288,8 +363,13 @@ RIM = [(eimer_l - MT) / 2, eimer_b / 2, (eimer_l - eimer_gerade_l) / 2, (eimer_b
 UNTEN = okt_off(RIM_E, absatz);                       // Eimer innen unterhalb des Absatzes
 T_TOP = okt_off(RIM, absatz + trichter_spiel);      // Trichter außen, Höhe Absatz
 RATIO = T_TOP[3] / T_TOP[2];
-// Trichteröffnung (lichte Weite): Plattform + Spiel, Eckschrägen parallel zum Trichter
-LIP = [L2 + oeffnung_spiel, W2 + oeffnung_spiel, platte_fase, platte_fase * RATIO];
+// Trichteröffnung (lichte Weite): FEST (oeffnung_l/b), Hälften um das halbe Mittelteil kürzer, Eckschrägen parallel zum Trichter
+LIP = [oeffnung_l / 2 - MT / 2, oeffnung_b / 2, oeffnung_fase, oeffnung_fase * RATIO];
+// Öffnung im montierten Zustand (mit Mittelteil)
+OEFF = [oeffnung_l / 2, oeffnung_b / 2, oeffnung_fase, oeffnung_fase * RATIO];
+// Abstand eines Punktes (x, y) von der Öffnungskante (positiv = innerhalb)
+function oeff_abstand(x, y) = let(s = sqrt(OEFF[2] * OEFF[2] + OEFF[3] * OEFF[3]))
+    min(OEFF[0] - abs(x), OEFF[1] - abs(y), okt_k(OEFF) - (OEFF[3] * abs(x) + OEFF[2] * abs(y)) / s);
 ALPHA_X = atan(trichter_tiefe / (T_TOP[0] - LIP[0]));
 ALPHA_Y = atan(trichter_tiefe / (T_TOP[1] - LIP[1]));
 ALPHA_C = atan(trichter_tiefe / (okt_k(T_TOP) - okt_k(LIP)));
@@ -327,9 +407,9 @@ LEN_KURZ = laenge_kurz > 0 ? laenge_kurz : GRIFF_Z - HAKEN_UNTEN_Z;
 LEN_LANG = laenge_lang > 0 ? laenge_lang : GRIFF_Z - HAKEN_UNTEN_Z;
 LOOP_H = rahmen_b + fenster_h + griff_h;
 function legs(n, a) = n == 2 ? [-a / 2, a / 2] : [0];
-LEGS_KURZ = legs(scharniere_kurz, scharnier_abstand_kurz);
+LEGS_KURZ = legs(SCH_KURZ, scharnier_abstand_kurz);
 LEGS_LANG = legs(scharniere_lang, scharnier_abstand_lang);
-SW_KURZ = scharniere_kurz == 2 ? seitensteg_buegel : seitensteg_band;
+SW_KURZ = SCH_KURZ == 2 ? seitensteg_buegel : seitensteg_band;
 SW_LANG = scharniere_lang == 2 ? seitensteg_buegel : seitensteg_band;
 
 // =====================================================================
@@ -380,7 +460,10 @@ function keep_rand(e, pos) = let(u = BOSS_U + 6, v = BOSS_V + 4)
     e == "-y" ? [-pos - u, -pos + u, -W2 - 1, -W2 + v] :
     e == "+x" ? [L2 - v, L2 + 1, pos - u, pos + u] :
                 [-L2 - 1, -L2 + v, pos - u, pos + u];
-KEEP = [for (s = STRAPS) keep_rand(s[0], s[1])];
+function keep_tasche(e, pos) = let(u = BH + 3)
+    e == "+x" ? [L2 + TL_I - 3, L2 + TL_O + 1, pos - u, pos + u] :
+                [-L2 - TL_O - 1, -L2 - TL_I + 3, pos - u, pos + u];
+KEEP = concat([for (s = STRAPS) keep_rand(s[0], s[1])], [for (t = POCKETS) keep_tasche(t[0], t[1])]);
 function edist(x, y) = min(L2 - abs(x), W2 - abs(y), (L2 + W2 - platte_fase - abs(x) - abs(y)) / sqrt(2));
 LL = loch_form == "rund" ? loch_b : loch_l;
 PX = LL + loch_steg;
@@ -416,6 +499,33 @@ module schlitz_schnitt() {
         polygon([[SLOT_U - 0.5, -fase_seite - 0.5], [SLOT_U - 0.5, 1], [SLOT_U + fase_seite + 1, 1]]);
 }
 
+// ---------------------------------------------------------------------
+//  Tasche für den Wandzapfen (lokales Kantensystem von am_rand: x entlang der Kante,
+//  y = 0 Plattenkante, innen negativ, z = 0 Plattenoberseite)
+//  Block: unten offen (durchgehender Schlitz), oben bündig mit der Platte, als Ohr über die Kante.
+//  Der Schlitz geht durch Platte und Block; hinter der Rastzunge liegt ein Relief, in das die
+//  Zunge beim Einstecken einfedert. Die Nase rastet unter der Blockunterseite ein.
+// ---------------------------------------------------------------------
+module tasche_block() hull() {
+    k = tasche_kante;
+    translate([-BH + k, TL_I + k, -tasche_tiefe]) cube([2 * BH - 2 * k, TL_O - TL_I - 2 * k, EPS]);
+    translate([-BH, TL_I, -tasche_tiefe + k]) cube([2 * BH, TL_O - TL_I, tasche_tiefe - 2 * k]);
+    translate([-BH + k, TL_I + k, -EPS]) cube([2 * BH - 2 * k, TL_O - TL_I - 2 * k, EPS]);
+}
+module tasche_schnitt() {
+    sw = zapfen_b / 2 + zapfen_spiel;
+    // Schlitz für den Zapfen, durch Platte und Block (unten offen)
+    translate([-sw, SL_I, -tasche_tiefe - 1]) cube([2 * sw, SL_O - SL_I, tasche_tiefe + 2]);
+    // Relief hinter der Rastzunge (nach innen)
+    translate([-(rast_zunge_b / 2 + 0.3), SL_I - tasche_relief, -tasche_tiefe - 1])
+        cube([rast_zunge_b + 0.6, tasche_relief + 0.5, tasche_tiefe + 2]);
+    // Einführfase oben am Schlitz
+    hull() {
+        translate([-sw, SL_I, -0.8]) cube([2 * sw, SL_O - SL_I, EPS]);
+        translate([-sw - 0.8, SL_I - 0.8, 0]) cube([2 * sw + 1.6, SL_O - SL_I + 1.6, 1]);
+    }
+}
+
 module plattform_roh() {
     difference() {
         union() {
@@ -433,8 +543,11 @@ module plattform_roh() {
             }
             for (s = STRAPS) am_rand(s[0], s[1])
                 translate([-BOSS_U, -BOSS_V, boss_unten]) cube([2 * BOSS_U, BOSS_V, ZB - boss_unten + EPS]);
+            // Taschenblöcke der Seitenwände (reichen als Ohr bis über die Plattenkante)
+            for (t = POCKETS) am_rand(t[0], t[1]) tasche_block();
         }
         for (s = STRAPS) am_rand(s[0], s[1]) schlitz_schnitt();
+        for (t = POCKETS) am_rand(t[0], t[1]) tasche_schnitt();
         for (q = LOECHER) translate([q[0], q[1], 0]) loch_schnitt();
     }
     for (s = STRAPS) am_rand(s[0], s[1])
@@ -445,9 +558,9 @@ module plattform_roh() {
         }
 }
 
-PL_NX = ceil(platte_l / UX);
+PL_NX = ceil(PL / UX);
 PL_NY = ceil(platte_b / UY);
-PL_CX = teilung(PL_NX, platte_l);
+PL_CX = teilung(PL_NX, PL);
 PL_CY = teilung(PL_NY, platte_b);
 PL_N = PL_NX * PL_NY;
 
@@ -455,7 +568,7 @@ module plattform_stueck(k) {
     i = k % PL_NX;
     j = floor(k / PL_NX);
     // druckfertig: Oberseite aufs Bett, Füße nach oben
-    rotate([180, 0, 0]) translate([-mitte(i, PL_CX, platte_l), -mitte(j, PL_CY, platte_b), 0])
+    rotate([180, 0, 0]) translate([-mitte(i, PL_CX, PL), -mitte(j, PL_CY, platte_b), 0])
         intersection() {
             plattform_roh();
             if (PL_N > 1) linear_extrude(400, center = true) intersection() {
@@ -610,6 +723,72 @@ module band_stueck(k, Lb, legs, side_w) {
         if (n > 1) linear_extrude(100, center = true) bereich_x(k, cuts, legs);
     }
 }
+
+// =====================================================================
+//  SEITENWAND (Version 3)  Druckkoordinaten: X = Länge ab Zapfenspitze (X = 0),
+//  Y = quer (Mitte der Wand = 0), Z = Dicke; Z = 0 ist die Innenseite (zum Sack, auf dem Bett),
+//  die Außenseite mit der Rastnase zeigt nach oben. Montiert zeigt X nach oben.
+// =====================================================================
+WL = zapfen_l + wand_h;                              // Gesamtlänge Zapfenspitze bis Oberkante
+// Nase: Auflaufschräge unten, ebene Rastfläche, Rastkante bei X_RAST (oben)
+X_RAST = zapfen_l - tasche_tiefe - rast_spiel_z;
+module wand_bein(yc, h) {
+    difference() {
+        union() {
+            // Steg ab der Schulter bis in den Quersteg
+            rund_platte(wand_t, wand_r, wand_c) rrect(zapfen_l, zapfen_l + max(h - wand_quer_h / 2, 1), yc - wand_steg_b / 2, yc + wand_steg_b / 2, 3);
+            // Zapfen
+            rund_platte(wand_t, wand_r, wand_c) rrect(0, zapfen_l + 1, yc - zapfen_b / 2, yc + zapfen_b / 2, 1.5);
+            // Rastnase auf der Außenseite der Zunge
+            translate([0, yc, 0]) rotate([90, 0, 0]) linear_extrude(rast_zunge_b - 1, center = true)
+                polygon([[X_RAST, wand_t - 0.3], [X_RAST, wand_t + rast_nase], [X_RAST - rast_flach, wand_t + rast_nase],
+                         [X_RAST - rast_flach - rast_rampe, wand_t - 0.3]]);
+        }
+        // Schlitze neben der Zunge (Ende gerundet)
+        for (sg = [-1, 1]) {
+            y0 = yc + sg * (rast_zunge_b / 2 + rast_schlitz / 2) - rast_schlitz / 2;
+            hull() {
+                translate([-1, y0, -1]) cube([1, rast_schlitz, wand_t + 4 * rast_nase]);
+                translate([zapfen_l - rast_wurzel - rast_schlitz / 2, y0 + rast_schlitz / 2, -1]) cylinder(d = rast_schlitz, h = wand_t + 4 * rast_nase, $fn = 16);
+            }
+        }
+    }
+}
+// Wand: zwei Seitenstege + Quersteg (nach unten offenes U)
+module wand_roh(h = wand_h, beine = [-YC, YC], quer = true) {
+    union() {
+        for (yc = beine) wand_bein(yc, h);
+        if (quer) {
+            xq = zapfen_l + h - wand_quer_h;
+            rund_platte(wand_t, wand_r, wand_c) rrect(xq, zapfen_l + h, -YE, YE, 3);
+            // Fase in den Innenecken (Steg <-> Quersteg), kein Absatz für Schmutz
+            f = 8;
+            for (sg = [-1, 1]) let(yi = sg * (YE - wand_steg_b))
+                rund_platte(wand_t, wand_r, wand_c) polygon([[xq - f, yi + sg * 2], [xq + 2, yi + sg * 2], [xq + 2, yi - sg * f]]);
+        }
+    }
+}
+// druckfertig: flach, Mitte der Länge im Ursprung
+module seitenwand_stueck() translate([-WL / 2, 0, 0]) wand_roh();
+
+// Wand im Eimer (am +x- bzw. -x-Rand)
+module wand_am_rand(e) {
+    m = [[0, 0, 1, WX_I], [0, 1, 0, 0], [1, 0, 0, PLATTE_OBEN_Z - zapfen_l], [0, 0, 0, 1]];
+    if (e == "+x") multmatrix(m) wand_roh();
+    else mirror([1, 0, 0]) multmatrix(m) wand_roh();
+}
+module waende_alle() if (WAND) for (e = ["+x", "-x"]) wand_am_rand(e);
+
+// Rastprobe: Taschenblock mit Plattenstück + kurzes Wandstück (Spiel und Rastkraft vorab prüfen)
+PROBE_H = 25;
+module tasche_probe() rotate([180, 0, 0]) difference() {
+    union() {
+        translate([-BH - 6, TL_I - 6, ZB]) cube([2 * BH + 12, -TL_I + 6, -ZB]);   // Plattenstück
+        tasche_block();
+    }
+    tasche_schnitt();
+}
+module wand_probe() translate([-(zapfen_l + PROBE_H) / 2, 0, 0]) wand_roh(h = PROBE_H, beine = [0], quer = false);
 
 // Lage eines Bandes im Eimer (am Scharnier der Kante e)
 module band_am_rand(e, pos) rotate([0, 0, e_ang(e)])
@@ -773,13 +952,14 @@ module eimer_geist() {
     }
 }
 module baender_alle() {
-    if (scharniere_kurz > 0) for (e = ["+x", "-x"]) band_am_rand(e, 0) band_roh(LEN_KURZ, LEGS_KURZ, SW_KURZ);
+    if (SCH_KURZ > 0) for (e = ["+x", "-x"]) band_am_rand(e, 0) band_roh(LEN_KURZ, LEGS_KURZ, SW_KURZ);
     if (scharniere_lang > 0) for (e = ["+y", "-y"]) band_am_rand(e, 0) band_roh(LEN_LANG, LEGS_LANG, SW_LANG);
 }
 module uebersicht() {
     eimer_geist();
     color("seagreen") translate([0, 0, PLATTE_OBEN_Z]) plattform_roh();
     color("peru") baender_alle();
+    color("darkorange") waende_alle();
     if (mit_trichter) {
         color("steelblue") translate([0, 0, absatz_z]) trichter_montiert();
     }
@@ -791,19 +971,28 @@ module uebersicht() {
 //  PRÜFUNGEN & BERICHT
 // =====================================================================
 echo(str("=== Biomüll-System | Druckraum nutzbar ", UX, " x ", UY, " x ", bett_z, " mm ==="));
-echo(str("Plattform ", platte_l, " x ", platte_b, ", Höhe ", PLATTE_OBEN_Z, " mm -> ", PL_N, " Stück(e)",
-         PL_N > 1 ? " (Schwalbenschwanz, kleben)" : "", ", ", len(LOECHER), " Löcher"));
-if (scharniere_kurz > 0)
-    echo(str("Schmalseite: ", scharniere_kurz == 2 ? "Bügel" : "Band", ", Länge ", LEN_KURZ, " mm, Griff-Oberkante ",
+echo(str("Plattform ", PL, " x ", platte_b, ", Höhe ", PLATTE_OBEN_Z, " mm -> ", PL_N, " Stück(e)",
+         PL_N > 1 ? " (Schwalbenschwanz, kleben)" : "", ", ", len(LOECHER), " Löcher, Eckfüße bei x = ±", FX, ", y = ±", FY));
+if (SCH_KURZ > 0)
+    echo(str("Schmalseite: ", SCH_KURZ == 2 ? "Bügel" : "Band", ", Länge ", LEN_KURZ, " mm, Griff-Oberkante ",
              HAKEN_UNTEN_Z + LEN_KURZ, " mm über Boden -> ", band_n(LEN_KURZ), " Stück(e), 2x drucken"));
+if (WAND) {
+    echo(str("Schmalseite: Seitenwand ", WL, " x ", 2 * YE, " mm (Höhe ab Plattenoberseite ", wand_h, ", Dicke ", wand_t,
+             "), Oberkante ", PLATTE_OBEN_Z + wand_h, " mm über Boden, 2x drucken -> seitenwand_h", wand_h, "_2x.stl"));
+    echo(str("Wand: innen x = ", WX_I, ", außen x = ", WX_O, " (Sack ", sack_b / 2, ", Öffnung ", OEFF[0], "); Stege y = ±",
+             YE - wand_steg_b, " … ±", YE, "; Taschenblock bis x = ", L2 + TL_O, ", Rest zur Öffnung ", OEFF[0] - (L2 + TL_O), " mm"));
+    echo(str("Rastzunge: Länge ", zapfen_l - rast_wurzel, " mm, Einfederung ", rast_nase + zapfen_spiel, " mm, Dehnung ca. ",
+             round(1000 * RAST_DEHNUNG) / 10, " %, Haltefläche ", rast_nase - zapfen_spiel, " mm; Durchbiegung der Wand oben bei 5 N ca. ",
+             round(10 * WAND_DURCH) / 10, " mm (Biegung der Stege), mit Spiel im Zapfen höchstens ", round(10 * WAND_SPIEL_OBEN) / 10, " mm"));
+}
 if (scharniere_lang > 0)
     echo(str("Langseite: ", scharniere_lang == 2 ? "Bügel" : "Band", ", Länge ", LEN_LANG, " mm, Griff-Oberkante ",
              HAKEN_UNTEN_Z + LEN_LANG, " mm über Boden -> ", band_n(LEN_LANG), " Stück(e), 2x drucken"));
 if (mit_trichter) {
     echo(str("Trichter ", T_L + (T_NX == 2 ? MT : 0), " x ", T_B, " x ", kragen_t + trichter_tiefe + kragen_unten_h, " mm -> ", T_N,
              " Stücke", MT > 0 && T_NX == 2 ? str(" (Hälften je ", T_L / 2, " mm + 2 Mittelteile ", MT, " mm)") : "", ", Öffnung ", 2 * LIP[0] + (T_NX == 2 ? MT : 0), " x ", 2 * LIP[1], " mm, Schräge ", round(ALPHA_X), "°/", round(ALPHA_Y), "°, Ecken ", round(ALPHA_C), "°"));
-    echo(str("Sack ", sack_b, " x ", sack_t, " in Öffnung: Abstand je Seite ", LIP[0] - sack_b / 2, " / ", LIP[1] - sack_t / 2,
-             " mm (davon Band ", kante_versatz + hals_t, " mm), Öffnungs-Unterkante ", absatz_z - trichter_tiefe - kragen_unten_h, " mm über Boden"));
+    echo(str("Sack ", sack_b, " x ", sack_t, " in Öffnung: Abstand je Seite ", OEFF[0] - sack_b / 2, " / ", OEFF[1] - sack_t / 2,
+             " mm", WAND ? "" : str(" (davon Band ", kante_versatz + hals_t, " mm)"), ", Öffnungs-Unterkante ", absatz_z - trichter_tiefe - kragen_unten_h, " mm über Boden"));
     if (T_N > 1) echo(str("Trichter-Verbindung: je Fuge ", 2 * len(lasche_zs(len(T_CX) > 0 ? T_TOP[1] - T_BOT[1] : T_TOP[0] - T_BOT[0], 0, -trichter_tiefe)),
                           " Schrauben M3 x ", SCHRAUBE_L, " (Edelstahl) + Muttern, optional 2K-Epoxid"));
     if (innenform == "keil") {
@@ -829,22 +1018,56 @@ if (GRIFF_Z + 0 > absatz_z + absatz_bis_rand - 3 || (laenge_lang > 0 && HAKEN_UN
 if (mit_trichter && (LIP[0] > T_TOP[0] - 3 || LIP[1] > T_TOP[1] - 3))
     echo("WARNUNG: Plattform ist fast so groß wie der Eimer – Trichter wird sehr schmal.");
 if (mit_trichter && ALPHA_MIN < 45) echo("WARNUNG: Trichterschräge flacher als 45°.");
-if (platte_l < sack_b || platte_b < sack_t) echo("WARNUNG: Plattform kleiner als der Sackboden.");
+if (PL < sack_b || platte_b < sack_t) echo("WARNUNG: Plattform kleiner als der Sackboden.");
 if (scharniere_lang > 0 && W2 - kante_versatz - hals_t < sack_t / 2) echo("WARNUNG: Bänder Langseite stehen im Sack – platte_b vergrößern.");
-if (scharniere_kurz > 0 && L2 - kante_versatz - hals_t < sack_b / 2) echo("WARNUNG: Bänder Schmalseite stehen im Sack – platte_l vergrößern.");
-if (scharniere_kurz > 0 && LEN_KURZ - LOOP_H - zwickel_l < R_OUT + hals_l + 8) echo("WARNUNG: Band Schmalseite zu kurz für Griffschlaufe.");
+if (SCH_KURZ > 0 && L2 - kante_versatz - hals_t < sack_b / 2) echo("WARNUNG: Bänder Schmalseite stehen im Sack – platte_l vergrößern.");
+if (SCH_KURZ > 0 && LEN_KURZ - LOOP_H - zwickel_l < R_OUT + hals_l + 8) echo("WARNUNG: Band Schmalseite zu kurz für Griffschlaufe.");
 if (scharniere_lang > 0 && LEN_LANG - LOOP_H - zwickel_l < R_OUT + hals_l + 8) echo("WARNUNG: Band Langseite zu kurz für Griffschlaufe.");
-if (scharniere_kurz > 0 && band_info(LEN_KURZ, LEGS_KURZ, SW_KURZ)[4] > W2 - platte_fase / 2)
+if (SCH_KURZ > 0 && band_info(LEN_KURZ, LEGS_KURZ, SW_KURZ)[4] > W2 - platte_fase / 2)
     echo("WARNUNG: Griffschlaufe Schmalseite breiter als die Plattform.");
 if (scharniere_lang > 0 && band_info(LEN_LANG, LEGS_LANG, SW_LANG)[4] > L2 - platte_fase / 2)
     echo("WARNUNG: Griffschlaufe Langseite breiter als die Plattform.");
-for (b = [[LEN_KURZ, LEGS_KURZ, SW_KURZ], [LEN_LANG, LEGS_LANG, SW_LANG]]) {
+for (b = concat(SCH_KURZ > 0 ? [[LEN_KURZ, LEGS_KURZ, SW_KURZ]] : [], [[LEN_LANG, LEGS_LANG, SW_LANG]])) {
     cs = band_cuts(b[0], b[1], b[2]);
     st = concat([0], cs, [b[0]]);
     if (max([for (i = [0:len(st) - 2]) st[i + 1] - st[i]]) > UX)
         echo(str("WARNUNG: Band ", b[0], " mm lässt sich nicht passend teilen – Schlaufe/Griff verkleinern."));
 }
 if (PLATTE_OBEN_Z > bett_z || kragen_t + trichter_tiefe + kragen_unten_h > bett_z) echo("WARNUNG: Teil höher als der Druckraum.");
+
+// ---- Seitenwand und Öffnung (Version 3 und feste Trichteröffnung)
+// größte Dehnung der Rastzunge beim Einrasten (Kragarm, Dicke wand_t, Länge zapfen_l - rast_wurzel)
+RAST_DEHNUNG = 1.5 * wand_t * (rast_nase + zapfen_spiel) / pow(zapfen_l - rast_wurzel, 2);
+// Durchbiegung der Wandoberkante bei 5 N (zwei Stege 20 x 4, E = 2100 MPa), und Zusatz durch das Spiel im Zapfen
+WAND_DURCH = 5 * pow(wand_h, 3) / (3 * 2100 * 2 * (wand_steg_b * pow(wand_t, 3) / 12));
+WAND_SPIEL_OBEN = WAND_DURCH + 2 * zapfen_spiel / tasche_tiefe * wand_h;
+// Abstand eines Punktes zum Rechteck [x0, x1, y0, y1] (für Fuß <-> Block)
+function rechteck_abstand(x, y, r) = norm([max(r[0] - x, 0, x - r[1]), max(r[2] - y, 0, y - r[3])]);
+function tasche_rechteck(t) = let(u = BH) t[0] == "+x" ? [L2 + TL_I, L2 + TL_O, t[1] - u, t[1] + u] : [-L2 - TL_O, -L2 - TL_I, t[1] - u, t[1] + u];
+if (WAND) {
+    if (OEFF[0] - WX_O < 1.5) echo("WARNUNG: Seitenwand liegt zu nah an der Trichteröffnung (< 1,5 mm) – wand_t/wand_sack_spiel verkleinern.");
+    if (OEFF[0] - (L2 + TL_O) < 1.5) echo("WARNUNG: Taschenblock liegt zu nah an der Trichteröffnung (< 1,5 mm) – tasche_wand verkleinern.");
+    if (oeff_abstand(L2 + TL_O, YE) < 1.5 || oeff_abstand(WX_O, YE) < 1.5)
+        echo("WARNUNG: Wand oder Taschenblock kommt im Eckbereich zu nah an die Öffnung (Eckschräge) – wand_eck_abstand vergrößern.");
+    if (WX_I < sack_b / 2) echo("WARNUNG: Wand berührt den Sack – wand_sack_spiel erhöhen.");
+    if (YE - wand_steg_b <= 0) echo("WARNUNG: Seitenstege überlappen – wand_steg_b oder wand_eck_abstand ändern.");
+    if (len([for (f = FEET, t = POCKETS) if (rechteck_abstand(f[0], f[1], tasche_rechteck(t)) < fuss_fuss / 2 + 1) 1]) > 0)
+        echo("WARNUNG: Fuß kollidiert mit einem Taschenblock.");
+    if (RAST_DEHNUNG > 0.03) echo("WARNUNG: Rastzunge zu kurz oder zu steif (Dehnung beim Einrasten über 3 %) – rast_wurzel verkleinern, zapfen_l vergrößern oder rast_nase verkleinern.");
+    if (rast_nase <= zapfen_spiel + 0.3) echo("WARNUNG: Haltefläche der Rastnase zu klein (rast_nase gegen zapfen_spiel).");
+    if (X_RAST - rast_flach - rast_rampe < 0.2) echo("WARNUNG: Zapfen zu kurz für die Rastnase (zapfen_l vergrößern oder tasche_tiefe verkleinern).");
+    if (zapfen_l - rast_wurzel < tasche_tiefe - rast_wurzel) echo("WARNUNG: Zapfen kürzer als die Tasche.");
+    if (PLATTE_OBEN_Z + wand_h > absatz_z + absatz_bis_rand - 3) echo("WARNUNG: Wand reicht bis an/über die Eimerkante (Ablage!) – wand_h verkleinern.");
+    if (PLATTE_OBEN_Z + wand_h > absatz_z - trichter_tiefe - kragen_unten_h) echo("HINWEIS: Wand ragt in die Trichteröffnung hinein (Höhe über der Öffnungs-Unterkante); der Korb geht trotzdem durch, weil die Wand innerhalb des Öffnungsumrisses liegt.");
+    if (WAND_SPIEL_OBEN > 8) echo("HINWEIS: Wand gibt oben bei 5 N mehr als 8 mm nach – wand_t erhöhen (bis 6) oder wand_h verkleinern.");
+    if (WL > UX || 2 * YE > UY) echo("WARNUNG: Wand größer als der Druckraum.");
+    if (platte_l_wand / 2 > OEFF[0] - 1.5) echo("WARNUNG: Plattform fast so lang wie die Trichteröffnung.");
+}
+if (!WAND && PL / 2 > OEFF[0] - 1.5) echo("WARNUNG: Plattform fast so lang wie die Trichteröffnung.");
+if (W2 > OEFF[1] - 1.5) echo("WARNUNG: Plattform fast so breit wie die Trichteröffnung.");
+if (oeff_abstand(L2, W2 - platte_fase) < 1.5 || oeff_abstand(L2 - platte_fase, W2) < 1.5)
+    echo("WARNUNG: Plattform kommt im Eckbereich zu nah an die Trichteröffnung (< 1,5 mm).");
+
 
 // =====================================================================
 //  AUSGABE
@@ -853,9 +1076,18 @@ if (teil == "uebersicht") {
     uebersicht();
 } else if (teil == "plattform") {
     for (k = (stueck < 0 ? [0:PL_N - 1] : [stueck])) if (k < PL_N)
-        translate(stueck < 0 ? [(k % PL_NX) * (platte_l / PL_NX + 40), floor(k / PL_NX) * (platte_b / PL_NY + 40), 0] : [0, 0, 0])
+        translate(stueck < 0 ? [(k % PL_NX) * (PL / PL_NX + 40), floor(k / PL_NX) * (platte_b / PL_NY + 40), 0] : [0, 0, 0])
             plattform_stueck(k);
-} else if (teil == "schmalseite" && scharniere_kurz > 0) {
+} else if (teil == "seitenwand") {
+    if (!WAND) echo("HINWEIS: schmalseite_typ = band – keine Seitenwand.");
+    else seitenwand_stueck();
+} else if (teil == "rastprobe") {
+    if (!WAND) echo("HINWEIS: schmalseite_typ = band – keine Rastprobe.");
+    else {
+        if (stueck != 1) tasche_probe();
+        if (stueck != 0) translate([0, 2 * BH + 30, 0]) wand_probe();
+    }
+} else if (teil == "schmalseite" && SCH_KURZ > 0) {
     n = band_n(LEN_KURZ);
     for (k = (stueck < 0 ? [0:n - 1] : [stueck])) if (k < n)
         translate([stueck < 0 ? k * (LEN_KURZ / n + 40) : 0, 0, 0]) band_stueck(k, LEN_KURZ, LEGS_KURZ, SW_KURZ);

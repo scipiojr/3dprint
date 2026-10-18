@@ -33,19 +33,23 @@ TR_HAELFTEN='for (i = [0, 1]) translate([(i == 0 ? -1 : 1) * MT / 2, 0, 0]) inte
 
 baugruppe asm_plattform.stl  'translate([0,0,PLATTE_OBEN_Z]) plattform_roh();' &
 baugruppe asm_baender.stl    'baender_alle();' &
+baugruppe asm_waende.stl     'waende_alle();' &
 baugruppe asm_trichter.stl   "translate([0,0,absatz_z]) { $TR_HAELFTEN }" &
 baugruppe asm_mittelteil.stl 'translate([0,0,absatz_z]) mittelteil_roh();' &
 baugruppe asm_eimer.stl      'eimer_geist();' &
-for p in plattform langseite schmalseite; do
+for p in plattform langseite seitenwand rastprobe; do
     oscad "$SCAD" -o "$TMP/$p.stl" -D "teil=\"$p\"" > "$TMP/$p.log" 2>&1 &
 done
 oscad "$SCAD" -o "$TMP/trichter0.stl" -D 'teil="trichter"' -D 'stueck=0' > "$TMP/trichter0.log" 2>&1 &
+# Band der Schmalseite (Version 2, nur bei schmalseite_typ = band)
+oscad "$SCAD" -o "$TMP/schmalseite.stl" -D 'teil="schmalseite"' -D 'schmalseite_typ="band"' > "$TMP/schmalseite.log" 2>&1 &
 wait
 
-# Schnitte als SVG: Längsschnitt y = 0 und Querschnitt x = 55 (durch ein Bügelbein)
+# Schnitte als SVG: Längsschnitt y = 0 und Querschnitt x = 55 (durch ein Bügelbein), Schnitt durch die Wandstege
 declare -A TEIL=(
     [plattform]='translate([0,0,PLATTE_OBEN_Z]) plattform_roh();'
     [baender]='baender_alle();'
+    [waende]='waende_alle();'
     [trichter]='translate([0,0,absatz_z]) trichter_montiert();'
     [eimer]='eimer_geist();'
     [sack]='translate([-sack_b / 2, -sack_t / 2, PLATTE_OBEN_Z]) cube([sack_b, sack_t, absatz_z + absatz_bis_rand - 5 - PLATTE_OBEN_Z]);'
@@ -53,6 +57,12 @@ declare -A TEIL=(
 for k in "${!TEIL[@]}"; do
     baugruppe "sy_$k.svg" "projection(cut=true) rotate([90,0,0]) { ${TEIL[$k]} }" &
     baugruppe "sx_$k.svg" "projection(cut=true) rotate([0,-90,0]) translate([-55,0,0]) { ${TEIL[$k]} }" &
+done
+wait
+
+# Schnitt durch einen Seitensteg der Wand (y = YC): Zapfen, Tasche, Rastnase (x, z)
+for k in plattform waende; do
+    baugruppe "sw_$k.svg" "projection(cut=true) rotate([90,0,0]) translate([0,-YC,0]) { ${TEIL[$k]} }" &
 done
 wait
 

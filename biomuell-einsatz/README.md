@@ -6,15 +6,15 @@ Einsatz für einen Biomülleimer in einem Küchenauszug. Ein Papier-Biomüllsack
 
 ## Prinzip
 
-- **Korb:** Eine Plattform auf vier Füßen trägt den Sack. An ihren Kanten sind zwei Bügel (Langseiten) und zwei Bänder (Schmalseiten) eingehängt. Sie laufen am Sack hoch und enden in Griffschlaufen.
+- **Korb:** Eine Plattform auf vier Füßen trägt den Sack. An den Langseiten sind zwei Bügel eingehängt, die am Sack hochlaufen und in Griffschlaufen enden. An den Schmalseiten stecken zwei steife, abnehmbare **Seitenwände** (Version 3, siehe unten). Gehoben wird nur an den Bügeln.
 - **Trichter:** Der Kragen liegt auf dem 3-mm-Absatz des Eimers. Darunter folgt eine 40 mm tiefe Schräge bis zur Öffnung, an der ein 15 mm hoher senkrechter Haltekragen hängt.
-- Der Sack ragt durch die Trichteröffnung nach oben. Die Bänder laufen zwischen Sack und Trichterrand. Die Griffe liegen dort greifbar, 10 mm unter der Eimerkante.
+- Der Sack ragt durch die Trichteröffnung nach oben. Bügel und Seitenwände laufen zwischen Sack und Trichterrand. Die Griffe liegen dort greifbar, 10 mm unter der Eimerkante.
 - Zum Leeren wird der ganze Korb mit dem Sack **durch die Trichteröffnung** gehoben. Der Trichter bleibt im Eimer.
 - Nichts ragt über die Eimerkante, weil der Eimer unter eine Ablage fährt.
 
 ![Schnitte durch den eingebauten Zustand](bilder/schnitt.png)
 
-| Korb (Plattform + Bügel + Bänder) | Trichter (2 Hälften + 2 Mittelteile) |
+| Korb (Plattform + Bügel + Seitenwände) | Trichter (2 Hälften + 2 Mittelteile) |
 |---|---|
 | ![Korb](bilder/korb.png) | ![Trichter](bilder/trichter.png) |
 
@@ -27,9 +27,9 @@ Einsatz für einen Biomülleimer in einem Küchenauszug. Ein Papier-Biomüllsack
 | `biomuell_system.3mf` | Bambu-Studio-Projekt vom ersten Druckdurchgang (Trichter Version 1), Teile mit Druckeinstellungen auf Platten verteilt. Enthält zusätzlich zwei Testobjekte. |
 | `bilder/` | Vorschaubilder, erzeugt mit `werkzeuge/bilder.sh`. |
 | `archiv/` | Zwischenstände vom 16.10.2026: Python-Generator (V0) und erste SCAD-Version (V1), jeweils mit Vorschau und Kennwerten. |
-| `werkzeuge/` | Skripte für die Bilder und OpenSCAD als WebAssembly (für Umgebungen ohne OpenSCAD). |
+| `werkzeuge/` | Skripte für die Bilder, OpenSCAD als WebAssembly (für Umgebungen ohne OpenSCAD), STL-Prüfungen (`stl_pruefung.py`) und der 3MF-Generator (`korb_3mf.py`). |
 | `agent.md` | Arbeitsstand, Konzeptentscheidungen und Arbeitsweise für KI-Agenten. |
-| `v3_plan.md` | Plan für Version 3 (abnehmbare Seitenwände an den Schmalseiten), Entscheidungen, Parameter, Ablauf. |
+| `v3_plan.md` | Plan und Umsetzungsstand von Version 3 (abnehmbare Seitenwände an den Schmalseiten). |
 
 Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt in diesem Ordner, jeder Stand ist ein eigener Commit (siehe [Verlauf](#verlauf)). Neu erzeugen aus der SCAD-Datei: `teil` wählen, `stueck` setzen, F6, als STL exportieren.
 
@@ -37,17 +37,21 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 
 | Datei | Stand | Herkunft | Inhalt |
 |---|---|---|---|
-| `biomuell_system.scad` | 9 | Original | Hauptdatei, Stand 9 (Parameter `mittelteil`, Teil „mittelteil“) |
+| `biomuell_system.scad` | V3-2 | Original | Hauptdatei, Version 3 (`schmalseite_typ`, Seitenwand, feste Trichteröffnung) |
 | `vergleich_v1_v2.png` | 1 | Original | Vergleich Version 1 (rot) und Version 2 (grün), Schnitte durch die Trichterschräge |
 | `trichter_v2_haelfte_2x.stl` | 8 | Original | Trichterhälfte, Eimer 283 mm, ohne Mittelteil: 140,25 × 207,5 × 59, 2× drucken |
 | `trichter_v2.3mf` | 8 | Original | Trichter ohne Druckhilfe, Eimer 283 mm, ohne Mittelteil |
 | `druckhilfe_steg.stl` | 8 | Original | Druckhilfe-Steg für Eimer 283 mm |
 | `trichter_v2_druckhilfe.3mf` | 8 | Original | wie zuvor, Eimer 283 mm, ohne Mittelteil |
-| `plattform.stl` | 5 | Original | Plattform 206 × 166 × 56 mit abgeflachten Scharnierstiften, 1× drucken |
+| `plattform.stl` | V3-2 | Original | Plattform **210** × 166 × 56 (213,4 mit den Ohren der Taschenblöcke) mit abgeflachten Scharnierstiften an den Langseiten und vier Taschen für die Seitenwände, Eckfüße bei x = ±78,6, 1× drucken. Die Plattform der Version 2 (206 mm, mit Scharnier an den Schmalseiten) steht in der Git-Historie; sie passt zu `band_schmalseite_2x.stl`. |
 | `buegel_langseite_2x.stl` | 5 | Original | Bügel Langseite mit 2 Haken (Kanal), 239,75 × 134, 2× drucken |
-| `band_schmalseite_2x.stl` | 5 | Original | Band Schmalseite mit 1 Haken (Kanal), 239,75 × 124, 2× drucken |
+| `band_schmalseite_2x.stl` | 5 | Original | Band Schmalseite mit 1 Haken (Kanal), 239,75 × 124, 2× drucken. Nur für die Plattform der Version 2 (`schmalseite_typ = "band"`). |
 | `scharnier_flachlage.png` | 5 | Original | Scharnier in drei Stellungen: aufrecht (hält), waagerecht (löst), dazwischen |
-| `korb_v2.3mf` | 6 | Original | Korb auf 5 Platten: Plattform, 2 Bügel, 2 Bänder, Druckeinstellungen je Objekt |
+| `korb_v2.3mf` | 6 | Original | Korb Version 2 auf 5 Platten: Plattform, 2 Bügel, 2 Bänder, Druckeinstellungen je Objekt |
+| `seitenwand_h100_2x.stl` | V3-2 | Original | Seitenwand 120 × 134 × 5 (Höhe 100 mm über der Plattenoberseite), flach, 2× drucken |
+| `rastprobe.stl` | V3-2 | Original | Rastprobe: Taschenblock mit Plattenstück und ein kurzes Wandstück, vorab drucken |
+| `korb_v3.3mf` | V3-2 | Original | Korb Version 3 auf 5 Platten: Plattform, 2 Bügel, 2 Seitenwände (4 Wände, 100 %), erzeugt mit `werkzeuge/korb_3mf.py` |
+| `schnitt_wand.png` | V3-2 | Original | Schnitt durch einen Wandsteg: Zapfen in der Tasche, Rastnase unter dem Block |
 | `lasche_loecher.png` | 7 | Original | Schnitt durch die Laschen, je 2 volle Schraublöcher |
 | `lehre_haelfte_2x.stl` | 9 | Original | Passlehre 5 mm kürzer (137,75 × 207,5 × 10), 2× drucken; in der Mitte bleibt Platz für das Mittelteil |
 | `mittelteil_v1_5mm_2x.stl` | 9 | Original | Mittelteil 5 mm für die alten Hälften (Version 1) aus `mittelteil_v1.scad`, 2× drucken |
@@ -59,9 +63,11 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 
 | `teil` | Anzahl | Maße (mm) | Beschreibung |
 |---|---|---|---|
-| `plattform` | 1 | 206 × 166 × 56 | Massive 6-mm-Platte mit 9 Langlöchern, 4 runde Füße (50 mm Bodenabstand), 6 abgeflachte Scharnierstifte |
+| `plattform` | 1 | 210 × 166 × 56 | Massive 6-mm-Platte mit 9 Langlöchern, 4 runde Füße (50 mm Bodenabstand), 4 abgeflachte Scharnierstifte (Bügel) und 4 Taschen für die Seitenwände |
 | `langseite` | 2 | 239,75 × 134 | Bügel mit zwei Haken und Griffschlaufe |
-| `schmalseite` | 2 | 239,75 × 124 | Band mit einem Haken und Griffschlaufe |
+| `seitenwand` | 2 | 120 × 134 × 5 | Seitenwand (∩): zwei Stege 20 × 4 mm, Quersteg, Steckzapfen mit Rastzunge; Höhe `wand_h` |
+| `rastprobe` | 1 + 1 | 38 × 62 × 14 | Taschenblock mit Plattenstück und kurzes Wandstück zum Probieren von Spiel und Rastkraft |
+| `schmalseite` | 2 | 239,75 × 124 | Band mit einem Haken und Griffschlaufe, nur bei `schmalseite_typ = "band"` (Version 2) |
 | `trichter` | 2 | 137,75 × 207,5 × 59 | Trichterhälfte, Keilwand, Laschen mit M3-Löchern an der Fuge |
 | `mittelteil` | 2 | 5 × 207,5 × 59 | Zwischenstück je Längsseite zwischen den Trichterhälften |
 | `lehre` | 2 | Hälften | Passlehre für den Trichterkragen – zuerst drucken und im Eimer prüfen |
@@ -94,8 +100,12 @@ Die Maße stehen im Abschnitt „Eimer – gemessen“:
 | `absatz_z` | 275 | Höhe des Absatzes über dem **Innenboden** – noch nicht nachgemessen |
 | `absatz_bis_rand` | 15 | Absatz bis Oberkante Eimer |
 | `mittelteil` | 5 | Dicke des Zwischenstücks je Längsseite; die Eimerlänge bleibt wie gemessen |
+| `oeffnung_l`, `oeffnung_b` | 217, 172 | Trichteröffnung, **fest** (nicht mehr von der Plattform abhängig) |
+| `schmalseite_typ` | wand | `wand` = Seitenwand (Version 3), `band` = Band mit Griffschlaufe (Version 2) |
+| `wand_h` | 100 | Wandhöhe ab Plattenoberseite; andere Höhen passen in dieselbe Plattform |
+| `wand_t` | 4 | Wanddicke (Steifigkeit ~ Dicke³) |
 
-Bandlänge und Griffhöhe werden aus `absatz_z` berechnet (`laenge_lang/kurz = 0`). Die Trichteröffnung ergibt sich aus der Plattform plus `oeffnung_spiel`.
+Bügellänge und Griffhöhe werden aus `absatz_z` berechnet (`laenge_lang/kurz = 0`). Die Trichteröffnung ist fest (`oeffnung_l/b`); Plattform, Wand und Taschenblöcke müssen hineinpassen, die Konsole warnt bei weniger als 1,5 mm Abstand.
 
 ## Druck
 
@@ -105,6 +115,7 @@ PETG, 0,4-mm-Düse, alle Teile ohne Stützen.
 |---|---|---|---|---|
 | Plattform | Oberseite unten, Füße oben | 4 | 25 % Gyroid | 5/5 |
 | Bügel / Band | flach | 3 | 100 % | 5/5 |
+| Seitenwand | flach, Außenseite (Rastnase) oben | 4 | 100 % | 5/5 |
 | Trichterhälfte | Kragenoberseite unten | 4 | 100 % | 5/5 |
 | Mittelteil | Profil flach | 4 | 100 % | 5/5 |
 | Passlehre | Kragen unten | 2 | 15 % | 3/3 |
@@ -119,14 +130,16 @@ Bei den großen Flächen ggf. eine Brim verwenden. Für die Trichterhälften gib
 - Stützen aus, Brim 8–10 mm.
 - In `trichter_v2*.3mf` hinterlegt: 4 Wände (Arachne), 40 % Gyroid, oben/unten 5 Lagen, 0,2 mm, Brim 6 mm, Außenwand 70 mm/s, Innenwand 100 mm/s, Beschleunigung 2000/3000, Naht hinten. Temperatur und Lüfter stehen nicht in der 3MF (Filamentprofil).
 - `korb_v2.3mf`: Plattform 4 Wände, 25 % Gyroid, 5/5, Brim 5 mm; Bügel und Bänder 3 Wände, 100 %, 5/5, kein Brim.
-- Die 3MFs sind in PrusaSlicer geprüft (Teile dicht), im Anycubic Slicer Next nicht geöffnet.
+- `korb_v3.3mf`: wie V2, aber statt der Bänder zwei Seitenwände (4 Wände, 100 %, 5/5, kein Brim). Die Datei ist noch in keinem Slicer geöffnet (die Netze sind geprüft dicht).
+- Die Trichter-3MFs sind in PrusaSlicer geprüft (Teile dicht), im Anycubic Slicer Next nicht geöffnet.
 
 ## Montage
 
 1. Passlehre in den Eimer legen und prüfen. Bei Bedarf `flansch_spiel` oder `trichter_spiel` anpassen.
 2. Trichterhälften und Mittelteile mit M3-Schrauben und Muttern verbinden und in den Eimer legen.
-3. Bügel und Bänder waagerecht nach außen liegend von oben auf die abgeflachten Stifte der Plattform setzen und hochklappen. Aufgeklappt halten die Haken fest.
-4. Sack auf die Plattform stellen und den Korb durch die Trichteröffnung einsetzen.
+3. Bügel waagerecht nach außen liegend von oben auf die abgeflachten Stifte der Plattform setzen und hochklappen. Aufgeklappt halten die Haken fest.
+4. Seitenwände senkrecht von oben mit den Zapfen in die Taschen an den Schmalseiten stecken, bis die Schulter auf der Plattform aufliegt und die Rastnase unter dem Block einschnappt. Lösen: Nase von unten mit dem Daumen eindrücken und die Wand nach oben abziehen. Zum Reinigen alles abnehmen (Plattform ohne Sackloch, die Taschen sind unten offen).
+5. Sack auf die Plattform stellen und den Korb durch die Trichteröffnung einsetzen.
 
 ## Verlauf
 
@@ -144,10 +157,25 @@ Jeder Konstruktionsstand ist ein eigener Commit mit allen erzeugten Dateien. Det
 | 8 | 16:13 | Eimer nachgemessen: `eimer_l` 278 → 283, `eimer_gerade_l` 240 → 245. Hälften 140,25 mm lang, ohne Mittelteil. Passlehre `lehre_haelfte_2x.stl`. |
 | 9 | 16:19 | Parameter `mittelteil` (5 mm): Hälften wieder 137,75 mm, je Längsseite ein Mittelteil. `mittelteil_v1.scad` für die alten Hälften der Version 1. |
 | V3-1 | 18:30 | Plan für Version 3 eingecheckt ([`v3_plan.md`](v3_plan.md)): abnehmbare ∩-Seitenwände statt Schmalseiten-Bänder. Noch keine Geometrie. |
+| V3-2 | 18:55 | Version 3 umgesetzt: `schmalseite_typ = "wand"`, Seitenwand `wand_h = 100` / `wand_t = 4` mit Steckzapfen und Rastzunge, Taschenblöcke an der Plattform (210 mm), Eckfüße bei x = ±78,6, feste Trichteröffnung 217 × 172 (Trichter, Bügel, Mittelteil geometrisch unverändert), `teil = "seitenwand"` und `"rastprobe"`, STL, `korb_v3.3mf`, Bilder. |
 
-## Version 3 (in Planung)
+## Version 3: abnehmbare Seitenwände an den Schmalseiten
 
-Geplant: Die Griffbänder an den Schmalseiten werden durch zwei steife, abnehmbare **∩-förmige Seitenwände** ersetzt (Standardhöhe 100 mm, Wandhöhe parametrierbar, Dicke 4 mm). Sie werden mit Steckzapfen und Rastzunge in die Plattform geclippt und lassen sich zum Reinigen abnehmen. Gehoben wird dann nur an den Längsbügeln. Die Trichteröffnung (217 × 172 mm) bleibt unverändert; die Plattform wird in Längsrichtung etwa 4 mm länger. Das bisherige Band bleibt über `schmalseite_typ = "band"` wählbar. Details und Entscheidungen: [`v3_plan.md`](v3_plan.md). Noch nicht umgesetzt.
+![Schnitt durch einen Wandsteg](bilder/schnitt_wand.png)
+
+Die Griffbänder der Schmalseiten sind durch zwei steife, abnehmbare **∩-förmige Wände** ersetzt (Standardhöhe 100 mm ab Plattenoberseite, `wand_h` frei einstellbar). Gehoben wird nur an den beiden Bügeln der Langseiten.
+
+- **Form:** zwei Seitenstege 20 × 4 mm, die direkt nach den Eckschrägen der Plattform beginnen (y = ±47 … ±67), und ein Quersteg 20 mm hoch. Alle Kanten gerundet, Innenecken gefast.
+- **Steifigkeit:** 4 mm dick, 100 % Füllung, flach gedruckt (Biegelast entlang der Schichten). Rechnerisch gibt die Oberkante bei 5 N etwa 3,7 mm nach (ein Griffband wäre rund 30-mal weicher), plus höchstens 2,9 mm Spiel im Zapfen. Für höhere Wände `wand_t` erhöhen (bis 6 mm; die Konsole meldet Durchbiegung und Abstand zur Öffnung).
+- **Clip:** Jeder Steg endet in einem 14 mm breiten, 20 mm langen Zapfen. Er wird von oben in eine unten offene Tasche der Plattform gesteckt (14 mm Führung, Spiel 0,2 mm je Seite). Die Stegkanten neben dem Zapfen bilden die Schulter auf der Plattenoberseite. In der Mitte des Zapfens liegt eine federnde Rastzunge (8 mm breit, 17 mm lang) mit 1 mm hoher Nase, die unter dem Taschenblock einschnappt (Haltefläche 0,8 mm, Dehnung beim Einrasten ca. 2,5 %). Hinter der Zunge hat die Tasche ein Relief, in das die Zunge einfedert.
+- **Taschenblöcke:** Sie sitzen als Ohr an der Plattenkante und reichen bis x = ±106,7, also 1,8 mm vor die feste Trichteröffnung (±108,5). Die Wand selbst liegt bei x = ±100,5 … ±104,5, 0,5 mm vom Sack und 4 mm von der Öffnung.
+- **Plattform:** wächst im Wandmodus auf 210 mm (`platte_l_wand`); die Eckfüße rücken auf x = ±78,6, damit sie die Taschenblöcke nicht berühren.
+- **Trichteröffnung:** fest 217 × 172 mm. Trichterhälfte, Mittelteil und Bügel sind geometrisch unverändert (nachgerechnet: Eckpunktabweichung 0,0000 mm gegenüber Stand 9).
+- **Wand tauschen:** Zapfen, Rastzunge und Tasche hängen nicht von der Höhe ab. Andere Höhen drucken (`wand_h` ändern, Datei `seitenwand_h<Höhe>_2x.stl`) und in dieselbe Plattform stecken. Die Konsole warnt, wenn die Wand an die Eimerkante reicht (bei angenommenem `absatz_z` ab etwa 230 mm).
+- **Zuerst drucken:** `teil = "rastprobe"` (Taschenblock mit Wandstück), um Spiel und Rastkraft zu prüfen. Nicht gedruckt, nicht im Eimer erprobt.
+- **Version 2 bleibt wählbar:** `schmalseite_typ = "band"` erzeugt wieder Plattform (206 mm, Scharniere an den Schmalseiten) und Bänder.
+
+Plan, Entscheidungen und Abweichungen vom Plan: [`v3_plan.md`](v3_plan.md).
 
 ## Stand
 

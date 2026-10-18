@@ -17,7 +17,7 @@ Arbeitsanweisung und Projektstand für KI-Agenten. Sprache mit der Nutzerin: **D
 
 Für einen Biomülleimer werden 3D-Druck-Teile aus PETG entworfen:
 
-- ein **Korb** (Plattform mit Bügeln und Bändern), mit dem ein Papier-Biomüllsack herausgehoben wird,
+- ein **Korb** (Plattform mit Bügeln an den Langseiten und, ab Version 3, abnehmbaren Seitenwänden an den Schmalseiten; Version 2: Bänder), mit dem ein Papier-Biomüllsack herausgehoben wird,
 - ein **Trichter**, der rundum auf dem Absatz am oberen Eimerrand aufliegt.
 
 Alles steht in **einer parametrischen OpenSCAD-Datei** (`biomuell_system.scad`). Zu große Teile teilt sie automatisch und versieht sie mit Klebe- bzw. Schraubverbindungen.
@@ -67,21 +67,32 @@ Alles steht in **einer parametrischen OpenSCAD-Datei** (`biomuell_system.scad`).
      - `mittelteil_v1.scad` (eigenständig): Mittelteil für die schon gedruckten Hälften der Version 1 (gleich dicke Wand, Eimer 278 mm, Schraublöcher an den alten Positionen; das obere Loch ist wie bei den alten Hälften angeschnitten, mit `obere_loecher = false` weglassen). Profil gegen die Fugenfläche einer hochgeladenen Hälfte geprüft: Flächenabweichung 0,000 mm².
      - `mittelteil_5mm_2x.stl` passt nur zu Hälften der Version 2 (`trichter_haelfte_mittelteilversion_2x.stl`); `mittelteil_v1_5mm_2x.stl` nur zu den alten Hälften der Version 1.
 
+- **18.10.2026 – Version 3** (Plan: [`v3_plan.md`](v3_plan.md)):
+  - **Stand 1, 18:30 Uhr:** Plan eingecheckt (`v3_plan.md`), keine Geometrie.
+  - **Stand 2, 18:55 Uhr:** **Seitenwände statt Schmalseiten-Bänder umgesetzt.** Wunsch der Nutzerin: zwei dünne, steife Wände (nach unten offenes U, Höhe parametrierbar, Standard 10 cm), Seitenstege erst nach den Eckschrägen, eingeclipst und zum Reinigen abnehmbar, steifer als die Griffbänder; Trichteröffnung unverändert; Stege dürfen leicht nach innen versetzt werden; Griffe nur an den Längsbügeln.
+     - **Parameter** (Gruppe „Seitenwände Schmalseiten“): `schmalseite_typ = "wand"` (oder `"band"` = Version 2), `wand_h = 100` (ab Plattenoberseite), `wand_t = 4`, `wand_steg_b = 20`, `wand_quer_h = 20`, `wand_eck_abstand = 0`, `wand_sack_spiel = 0.5`; Zapfen/Tasche: `zapfen_l = 20`, `zapfen_b = 14`, `zapfen_spiel = 0.2`, `tasche_tiefe = 14`, `tasche_wand = 2`, `tasche_relief = 1.2`; Rast: `rast_nase = 1`, `rast_zunge_b = 8`, `rast_schlitz = 1`, `rast_wurzel = 3`, `rast_rampe = 3`, `rast_flach = 1.2`, `rast_spiel_z = 0.3`. Neu: `platte_l_wand = 210`, `oeffnung_l = 217`, `oeffnung_b = 172`, `oeffnung_fase = 16` (ersetzen `oeffnung_spiel`). Neue Teile: `teil = "seitenwand"`, `"rastprobe"`.
+     - **Mechanismus (Abweichungen vom Plan):** Der Zapfen ist 14 mm breit (Steg 20 mm); die Stegkanten daneben bilden die Schulter auf der Platte. Zapfen 20 mm lang, Tasche 14 mm tief (Führung). Der Taschenblock steht als Ohr über die Plattenkante (bis x = ±106,7, 1,8 mm vor der Öffnung), weil die Wand (x = 100,5 … 104,5) fast bündig mit der Plattenkante (105) liegt. Hinter der Rastzunge liegt ein Relief (1,2 mm) in der Tasche, in das die Zunge beim Einstecken einfedert, sonst wäre kein Durchstecken der 1 mm hohen Nase möglich. Die Nase rastet 0,3 mm unter der Blockunterseite ein.
+     - **Plattform:** 210 × 166 im Wandmodus, Eckfüße bei x = ±78,6 statt ±82 (Block-Kollision), Lochraster weicht den Taschen über `KEEP` aus (weiter 9 Löcher).
+     - **Trichteröffnung fest** (217 × 172): `LIP` und `OEFF` aus `oeffnung_*`, nicht mehr aus der Plattform. Nachgerechnet: Trichterhälfte, Mittelteil und Bügel haben gegenüber Stand 9 Eckpunktabweichung 0,0000 mm (also nichts neu drucken außer Plattform).
+     - **Prüfungen** (Standardwerte): alle Netze dicht (offene Kanten 0); Wand ↔ Plattform durchdringen sich nicht (Schnittmenge leer), kleinster Abstand ca. 0,2 mm (Zapfenspiel); waagerechter Abstand zur Trichteröffnung: Taschenblock 1,8 mm, Wand samt Nase 3,0 mm, Bügel 3,3 mm; Wand innen 0,5 mm vom Sack. Rastzunge: Dehnung ca. 2,5 %, Haltefläche 0,8 mm. Wand-Durchbiegung oben bei 5 N ca. 3,7 mm (Biegung), mit Spiel im Zapfen höchstens 6,6 mm.
+     - **Nicht geprüft:** Einstecken und Rasten am Probedruck, Passung im Eimer, Slicer-Import der `korb_v3.3mf` (Netze dicht, XML gültig).
+
 ### Kennwerte mit Standardwerten (Konsolenausgabe)
 
 - Druckraum nutzbar 250 × 250 (`bett_rand = 5`).
-- Plattform 206 × 166, Höhe 56, 1 Stück, 9 Langlöcher.
-- Bügel Langseite und Band Schmalseite: je 239,75 mm, 1 Stück, je 2× drucken. Griff-Oberkante 280 mm über Boden.
+- Plattform 210 × 166 (mit Ohren 213,4), Höhe 56, 1 Stück, 9 Langlöcher, Eckfüße bei x = ±78,6, y = ±43,5.
+- Bügel Langseite: 239,75 mm, 1 Stück, 2× drucken. Griff-Oberkante 280 mm über Boden. Seitenwand Schmalseite: 120 × 134 × 5 mm (`wand_h = 100`), 1 Stück, 2× drucken, Oberkante 156 mm über Boden.
 - Trichter 280,5 × 207,5 × 59: 2 Hälften à 137,75 + 2 Mittelteile à 5. Öffnung 217 × 172. Außenschräge 54°/69°, Ecken 52°.
-- Sack in der Öffnung: 6 mm Abstand je Seite (davon 2,3 mm Band). Öffnungs-Unterkante 220 mm über Boden.
+- Sack in der Öffnung: 8,5 mm (Längsrichtung, mit Mittelteil) / 6 mm (Querrichtung) Abstand je Seite. Öffnungs-Unterkante 220 mm über Boden.
 - Trichterfugen: je Fuge 4 Schrauben M3 × 20 (Edelstahl) + Muttern, optional 2K-Epoxid.
 
 ### Wichtige Parameter
 
 - `absatz_z = 275`: Absatz über dem **Innenboden**. **Nur angenommen** (altes Skript: 290 Innentiefe − 15). Bandlänge und Griffhöhe hängen davon ab.
-- Plattform: `platte_l/b = 206/166`, `platte_fase = 16`, `platte_t = 6` (massiv, keine Rippen – Wunsch: wenig Ablagerung, leicht zu reinigen), `bodenabstand = 50`, Langlöcher 44 × 22.
-- Scharniere: `scharniere_lang = 2` (Bügel, Haken bei x = ±55), `scharniere_kurz = 1` (Band).
-- Trichter: `trichter_tiefe = 40`, `oeffnung_spiel = 3`, `kragen_unten_h = 15`, `wand = 2.5`, `kragen_t = 4`, `flansch_spiel = 1.25`, `trichter_spiel = 1.0`.
+- Plattform: `platte_l/b = 206/166` (206 nur bei `schmalseite_typ = "band"`, sonst `platte_l_wand = 210`), `platte_fase = 16`, `platte_t = 6` (massiv, keine Rippen – Wunsch: wenig Ablagerung, leicht zu reinigen), `bodenabstand = 50`, Langlöcher 44 × 22.
+- Scharniere: `scharniere_lang = 2` (Bügel, Haken bei x = ±55), `scharniere_kurz = 1` (Band, nur bei `schmalseite_typ = "band"`).
+- Seitenwand (Version 3): `schmalseite_typ = "wand"`, `wand_h = 100`, `wand_t = 4`, Zapfen/Tasche/Rast siehe Verlauf Stand V3-2.
+- Trichter: `trichter_tiefe = 40`, `oeffnung_l/b = 217/172` (fest), `oeffnung_fase = 16`, `kragen_unten_h = 15`, `wand = 2.5`, `kragen_t = 4`, `flansch_spiel = 1.25`, `trichter_spiel = 1.0`.
 
 - Eimer (gemessen): `eimer_l = 283`, `eimer_gerade_l = 245`, `eimer_b = 210`, `eimer_gerade_b = 170`.
 - Keilwand: `innenform = "keil"`, `ring_x = 10`, `ring_y = 6`; Druckhilfe `druckhilfe = false`.
@@ -94,17 +105,7 @@ Alles steht in **einer parametrischen OpenSCAD-Datei** (`biomuell_system.scad`).
 - Übersicht: X = Eimer-Längsachse, Y = Querachse, Z = 0 auf dem Innenboden.
 - Trichter: lokal mit z = 0 auf der Absatzebene.
 - Bänder: Druckkoordinaten X = Länge, Y = Breite, Z = Dicke; Z = 0 ist die Außenseite zur Eimerwand.
-
-## Version 3 (in Planung)
-
-Plan: [`v3_plan.md`](v3_plan.md) (Stand 18.10.2026, 18:30). Noch keine Geometrie umgesetzt.
-
-- Schmalseiten: statt Band mit Griffschlaufe zwei steife, abnehmbare ∩-Wände (zwei Seitenstege + Quersteg), `wand_h = 100` (variabel, ab Plattenoberseite), `wand_t = 4`. Seitenstege beginnen nach den Eckschrägen (`wand_eck_abstand = 0`, nach innen verschiebbar).
-- Befestigung: Steckzapfen mit Rastzunge in unten offener Tasche (Taschenblöcke an der Plattform, y ≈ ±57); Lösen per Daumendruck von unten.
-- Plattform im Wandmodus `platte_l` ≈ 210. **Trichteröffnung bleibt 217 × 172** (feste Parameter `oeffnung_l/b`, vom Trichter nicht abhängig von der Plattform); Trichter und Mittelteil bleiben unverändert.
-- Griffe nur an den Längsbügeln (Entscheidung der Nutzerin). `schmalseite_typ = "band"` hält Version 2 wählbar.
-- Neue Teile: `teil = "seitenwand"` (2×), `teil = "rastprobe"` (Testdruck). Eckfüße rücken nach innen, wenn sie mit den Taschenblöcken kollidieren.
-- Arbeitsweise ab jetzt: jeder Zwischenstand von Version 3 wird sofort committet und gepusht (Commit-Messages mit Uhrzeit und „V3, Stand n“).
+- Seitenwand: Druckkoordinaten X = Länge ab Zapfenspitze, Y = quer, Z = Dicke; Z = 0 ist die Innenseite (zum Sack, auf dem Bett), die Rastnase zeigt nach oben. Taschen: lokales Kantensystem von `am_rand` (y = 0 Plattenkante, innen negativ).
 
 ## Offene Punkte
 
@@ -116,7 +117,11 @@ Plan: [`v3_plan.md`](v3_plan.md) (Stand 18.10.2026, 18:30). Noch keine Geometrie
 6. Unten hat die Plattform Spiel zum Eimer; zentriert wird oben durch die Trichteröffnung.
 7. Griffwölbung (`griff_t = 8`) zeigt zum Sack und drückt etwa 5 mm ins Papier; ggf. verkleinern.
 8. Geklebte Fugen: 2K-Epoxid; Trichter bevorzugt mit Edelstahlschrauben.
-9. Druckeinstellungen in der 3MF sind nicht für Version 2 aktualisiert.
+9. Druckeinstellungen in den 3MFs sind nicht für Version 2 aktualisiert. `korb_v3.3mf` ist neu erzeugt (Seitenwand 4 Wände, 100 %), in keinem Slicer geöffnet.
+10. **Version 3:** Rastprobe drucken und Spiel (`zapfen_spiel`), Rastkraft (`rast_nase`) und Wackeln der Wand prüfen. Das Spiel im Zapfen erlaubt oben bis ca. 3 mm Kippen; bei Bedarf `zapfen_spiel` verkleinern (0,15) oder die Tasche tiefer machen.
+11. **Version 3:** Wand liegt nur 0,5 mm vom nominellen Sack (200 mm). Ein praller Sack kann an der Wand schleifen; `wand_sack_spiel` ggf. erhöhen (Rest zur Öffnung 4 mm, Block 1,8 mm).
+12. **Version 3:** Bügel tragen jetzt allein (4 Haken). Mit gefülltem Sack erproben.
+13. Alte Schmalseiten-Bänder passen nur zur Plattform der Version 2 (206 mm); `schmalseite_typ = "band"` erzeugt sie wieder.
 
 ## Werkzeuge
 
@@ -124,5 +129,7 @@ Plan: [`v3_plan.md`](v3_plan.md) (Stand 18.10.2026, 18:30). Noch keine Geometrie
   - `werkzeuge/openscad_wasm.mjs <ein.scad> <aus.stl|.svg> [-D name=wert …]` führt ihn unter Node aus (`OPENSCAD_WASM_DIR` zeigt auf den Ordner mit den beiden Dateien).
   - `include <…>` geht dort nicht. Für Baugruppen die Datei verketten und einen Aufruf anhängen, mit `-D teil="keins"` (siehe `bilder.sh`).
   - Renderzeiten: Trichter ca. 3 s, Plattform und Bügel 20–30 s.
+- **STL-Prüfung:** `werkzeuge/stl_pruefung.py` (`info`: Dichtheit, Volumen, Box; `vergleich`: Eckpunktabweichung zweier STLs, z. B. neu gerendert gegen vorherigen Stand; `abstand`: kleinster Abstand zweier Teile). Mit `python3 -I` aufrufen.
+- **3MF:** `werkzeuge/korb_3mf.py <plattform.stl> <buegel.stl> <seitenwand.stl> <aus.3mf>` baut `korb_v3.3mf` (5 Platten, Einstellungen je Objekt).
 - **Bilder:** `werkzeuge/bilder.sh` rendert Baugruppen und Einzelteile, exportiert zwei Schnitte als SVG (`projection(cut=true)`) und zeichnet daraus mit `werkzeuge/bilder.py` (numpy, matplotlib) die PNGs in `bilder/`.
 - **Prüfungen** (bisher ad hoc in Python mit numpy/scipy): Dichtheit und Kantenzählung der STLs, Volumen, Bounding-Box, Abstände zwischen Teilen über Oberflächenpunkte und `cKDTree`.

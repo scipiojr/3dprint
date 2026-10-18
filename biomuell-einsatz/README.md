@@ -26,6 +26,7 @@ Einsatz für einen Biomülleimer in einem Küchenauszug. Ein Papier-Biomüllsack
 | `mittelteil_v1.scad` | Mittelteil für bereits gedruckte Trichterhälften der Version 1 (Eimerlänge 278 mm). |
 | `biomuell_system.3mf` | Bambu-Studio-Projekt vom ersten Druckdurchgang (Trichter Version 1), Teile mit Druckeinstellungen auf Platten verteilt. Enthält zusätzlich zwei Testobjekte. |
 | `bilder/` | Vorschaubilder, erzeugt mit `werkzeuge/bilder.sh`. |
+| `archiv/` | Zwischenstände vom 16.10.2026: Python-Generator (V0) und erste SCAD-Version (V1), jeweils mit Vorschau und Kennwerten. |
 | `werkzeuge/` | Skripte für die Bilder und OpenSCAD als WebAssembly (für Umgebungen ohne OpenSCAD). |
 | `agent.md` | Arbeitsstand, Konzeptentscheidungen und Arbeitsweise für KI-Agenten. |
 

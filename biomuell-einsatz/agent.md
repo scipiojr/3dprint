@@ -47,7 +47,9 @@ Alles steht in **einer parametrischen OpenSCAD-Datei** (`biomuell_system.scad`).
 
 ### Verlauf
 
-- **16.10.2026 – Version 1:** Plattform, Bügel, Bänder, Trichter (gleich dicke Wand), Passlehre. Eimer mit 278 × 210 mm angenommen. Teile dieses Stands wurden gedruckt (`biomuell_system.3mf`).
+- **Vor dem 16.10.2026 – Version 0 (Python):** Plattform 250 × 195 mit Rippen und 4-mm-Löchern, Schnapphaken-Bänder, kein Trichter. Quellen und 3MF in `archiv/2026-10-16_v0_python/`.
+- **16.10.2026, 01:55 – Version 1 (SCAD):** Massive Plattform 206 × 166, Bügel, Bänder, Trichter (gleich dicke Wand), Passlehre. Eimer mit 278 × 210 mm angenommen. Quellen, damaliges Übergabedokument und 3MF in `archiv/2026-10-16_v1_scad/`; darauf beruht das erste Druckprojekt (`biomuell_system.3mf`).
+  Die V1-SCAD erzeugt Maße und Volumen der damaligen STLs exakt (geprüft am 18.10.). Alte STLs werden nicht eingecheckt; bei Bedarf neu exportieren.
 - **18.10.2026 – Version 2:**
   - Eimer nachgemessen: `eimer_l = 283`, `eimer_gerade_l = 245` (vorher 278 / 240).
   - **Trichter-Mittelteil** (`mittelteil = 5`): je Längsseite ein Zwischenstück zwischen den Hälften. Die Hälften bleiben 137,75 mm lang, der Trichter wird 280,5 mm lang.

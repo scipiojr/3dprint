@@ -1,2 +1,1 @@
-*.stl
-*.json
+# Alle Dateien werden eingecheckt (STL, 3MF, ZIP, PNG, JSON). Kein Git LFS.

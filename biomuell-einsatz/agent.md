@@ -8,7 +8,8 @@ Arbeitsanweisung und Projektstand für KI-Agenten. Sprache mit der Nutzerin: **D
 - **Jede Änderung wird committet und sofort nach `origin/main` gepusht**, ohne Rückfrage. So hat es die Nutzerin festgelegt.
 - Commit-Messages auf Deutsch, sprechend: Betreffzeile im Imperativ (≤ 72 Zeichen), darunter kurz *was* und *warum*.
 - Vor dem Push `git pull --rebase origin main` (die Nutzerin committet auch selbst).
-- STL-Dateien werden nicht eingecheckt (`.gitignore`). Die SCAD-Datei ist die Quelle.
+- STL-Dateien werden eingecheckt. Die SCAD-Datei ist die Quelle.
+- Jeder neue Konstruktionsstand ist ein eigener Commit mit allen erzeugten Dateien im Projektordner. Der Verlauf steht in der Git-Historie.
 - Bilder nach Geometrieänderungen neu erzeugen: `werkzeuge/bilder.sh` (siehe unten) und mitcommitten.
 - README und dieses Dokument aktuell halten, wenn sich Parameter, Teile oder Entscheidungen ändern.
 
@@ -50,22 +51,20 @@ Alles steht in **einer parametrischen OpenSCAD-Datei** (`biomuell_system.scad`).
 - **Vor dem 16.10.2026 – Version 0 (Python):** Plattform 250 × 195 mit Rippen und 4-mm-Löchern, Schnapphaken-Bänder, kein Trichter. Quellen und 3MF in `archiv/2026-10-16_v0_python/`.
 - **16.10.2026, 01:55 – Version 1 (SCAD):** Massive Plattform 206 × 166, Bügel, Bänder, Trichter (gleich dicke Wand), Passlehre. Eimer mit 278 × 210 mm angenommen. Quellen, damaliges Übergabedokument und 3MF in `archiv/2026-10-16_v1_scad/`; darauf beruht das erste Druckprojekt (`biomuell_system.3mf`).
   Die V1-SCAD erzeugt Maße und Volumen der damaligen STLs exakt (geprüft am 18.10.). Alte STLs werden nicht eingecheckt; bei Bedarf neu exportieren.
-- **18.10.2026 – Version 2:**
-  - Eimer nachgemessen: `eimer_l = 283`, `eimer_gerade_l = 245` (vorher 278 / 240).
-  - **Trichter-Mittelteil** (`mittelteil = 5`): je Längsseite ein Zwischenstück zwischen den Hälften. Die Hälften bleiben 137,75 mm lang, der Trichter wird 280,5 mm lang.
-  - `mittelteil_v1.scad`: Mittelteil passend zu den schon gedruckten Hälften der Version 1 (Löcher an den alten Positionen).
-  - **Keilwand** (`innenform = "keil"`): Außenform unverändert, innen steilere Schräge (64°/75°, Ecken 60°) und breitere Kragen-Oberseite (10/6 mm) als Bettauflage.
-  - Optionale abbrechbare **Druckhilfe** für die Trichterhälften (`druckhilfe`).
-  - **Scharnier:** Stift mit zwei Abflachungen (`stift_flach = 4.2`), Haken mit Kanal. Der Haken geht nur bei waagerecht nach außen liegendem Band (±7°) auf den Stift und ab. `stift_flach = 0` = alter Schnapphaken.
+- **18.10.2026 – Version 2** (Entwicklungsstände, jeder ein Commit):
+  - **Stand 1, 10:04 Uhr:** **Trichter neu aufgebaut (Version 2).** Anlass: Die gedruckten Hälften der Version 1 rissen nach wenigen Millimetern der Schräge ab (Spaghetti, PETG, mehrere Drucker). Ursache laut Analyse: nicht der Überhang (nur 33–38° aus der Senkrechten), sondern eine sehr schmale Auflage auf dem Bett (3,5–6 mm breit, zusammen ca. 1860 mm²), eine dünne, nach innen geneigte 2,5-mm-Wand, die an der Fuge offene U-Form, dazu die Slicer-Einstellungen aus dem ersten Projekt (Kobra S1: Außenwand 200 mm/s, Innenwand 300 mm/s, Beschleunigung 10 000, Lüfter ab 10 % Überhang auf 90 %, 230 °C).
+     - **Keilwand** (`innenform = "keil"`, Standard; `"parallel"` = Wand der Version 1): Außenmaße und Außenform unverändert, innen steilere Schräge (64°/75°, Ecken 60°), Kragen-Oberseite `ring_x = 10`, `ring_y = 6` mm breit. Überhang beim Druck 26° (Schmalseite), 15° (Langseite), 30° (Ecken). Auflage auf dem Bett ca. 3470 mm² (mit Druckhilfe ca. 4302 mm²), ca. 50 % mehr Material, Griffraum an der Schmalseite oben 25 statt 31 mm. `ring_y` wurde im Lauf des Stands von 7,5 auf 6 mm gesenkt, damit an den Langseiten der Fingerraum nahe an Version 1 bleibt.
+     - **Druckhilfe** (`druckhilfe = true` in diesem Stand): 4 × 5 mm Steg auf dem Bett, schließt die offene Seite zum Ring, hängt an zwei 0,5 mm dünnen Haltestegen und wird nach dem Druck abgetrennt. Die Klebefläche der Fuge bleibt frei.
+     - Gedruckt war Version 2 noch nicht; sie ließ sich in PrusaSlicer ohne Fehler slicen.
 
 ### Kennwerte mit Standardwerten (Konsolenausgabe)
 
 - Druckraum nutzbar 250 × 250 (`bett_rand = 5`).
 - Plattform 206 × 166, Höhe 56, 1 Stück, 9 Langlöcher.
 - Bügel Langseite und Band Schmalseite: je 239,75 mm, 1 Stück, je 2× drucken. Griff-Oberkante 280 mm über Boden.
-- Trichter 280,5 × 207,5 × 59: 2 Hälften à 137,75 + 2 Mittelteile à 5. Öffnung 217 × 172. Außenschräge 54°/69°, Ecken 52°.
+- Trichter 275,5 × 207,5 × 59: 2 Hälften à 137,75. Öffnung 212 × 172. Außenschräge 54°/69°, Ecken 52°.
 - Sack in der Öffnung: 6 mm Abstand je Seite (davon 2,3 mm Band). Öffnungs-Unterkante 220 mm über Boden.
-- Trichterfugen: je Fuge 4 Schrauben M3 × 20 (Edelstahl) + Muttern, optional 2K-Epoxid.
+- Trichterfuge: 4 Schrauben M3 × 16 (Edelstahl) + Muttern, optional 2K-Epoxid. Bis Stand 6 saß das obere Loch jeder Lasche angeschnitten.
 
 ### Wichtige Parameter
 
@@ -73,6 +72,9 @@ Alles steht in **einer parametrischen OpenSCAD-Datei** (`biomuell_system.scad`).
 - Plattform: `platte_l/b = 206/166`, `platte_fase = 16`, `platte_t = 6` (massiv, keine Rippen – Wunsch: wenig Ablagerung, leicht zu reinigen), `bodenabstand = 50`, Langlöcher 44 × 22.
 - Scharniere: `scharniere_lang = 2` (Bügel, Haken bei x = ±55), `scharniere_kurz = 1` (Band).
 - Trichter: `trichter_tiefe = 40`, `oeffnung_spiel = 3`, `kragen_unten_h = 15`, `wand = 2.5`, `kragen_t = 4`, `flansch_spiel = 1.25`, `trichter_spiel = 1.0`.
+
+- Eimer (gemessen): `eimer_l = 278`, `eimer_gerade_l = 240`, `eimer_b = 210`, `eimer_gerade_b = 170`.
+- Keilwand: `innenform = "keil"`, `ring_x = 10`, `ring_y = 6`; Druckhilfe `druckhilfe = true`.
 
 ### Koordinaten
 

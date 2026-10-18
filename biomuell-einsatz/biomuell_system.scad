@@ -51,11 +51,11 @@ bett_rand = 5;
 
 /* [Eimer – gemessen] */
 // Innenlänge im oberen Randbereich (oberhalb des Absatzes)
-eimer_l = 278;
+eimer_l = 283;
 // Innenbreite im oberen Randbereich
 eimer_b = 210;
 // gerades Stück der Langseite zwischen den Eckschrägen
-eimer_gerade_l = 240;
+eimer_gerade_l = 245;
 // gerades Stück der Schmalseite zwischen den Eckschrägen
 eimer_gerade_b = 170;
 // Rücksprung je Seite am Absatz

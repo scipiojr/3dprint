@@ -36,18 +36,19 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 
 | Datei | Stand | Herkunft | Inhalt |
 |---|---|---|---|
-| `biomuell_system.scad` | 7 | rekonstruiert | Hauptdatei, Stand 7 (Laschenlöcher aus der Laschenbreite berechnet) |
+| `biomuell_system.scad` | 8 | Original | Hauptdatei, Stand 8 (`eimer_l = 283`, `eimer_gerade_l = 245`) |
 | `vergleich_v1_v2.png` | 1 | Original | Vergleich Version 1 (rot) und Version 2 (grün), Schnitte durch die Trichterschräge |
-| `trichter_v2_haelfte_2x.stl` | 7 | rekonstruiert | Trichterhälfte mit korrigierten Laschenlöchern, Eimer 278 mm: 137,75 × 207,5 × 59, 2× drucken |
-| `trichter_v2.3mf` | 7 | rekonstruiert | Trichter ohne Druckhilfe, korrigierte Laschenlöcher, Eimer 278 mm |
-| `druckhilfe_steg.stl` | 4 | rekonstruiert | Druckhilfe-Steg (6,5 × 205,5 × 5), Eimer 278 mm |
-| `trichter_v2_druckhilfe.3mf` | 7 | rekonstruiert | wie zuvor, mit korrigierten Laschenlöchern, Eimer 278 mm |
+| `trichter_v2_haelfte_2x.stl` | 8 | Original | Trichterhälfte, Eimer 283 mm, ohne Mittelteil: 140,25 × 207,5 × 59, 2× drucken |
+| `trichter_v2.3mf` | 8 | Original | Trichter ohne Druckhilfe, Eimer 283 mm, ohne Mittelteil |
+| `druckhilfe_steg.stl` | 8 | Original | Druckhilfe-Steg für Eimer 283 mm |
+| `trichter_v2_druckhilfe.3mf` | 8 | Original | wie zuvor, Eimer 283 mm, ohne Mittelteil |
 | `plattform.stl` | 5 | Original | Plattform 206 × 166 × 56 mit abgeflachten Scharnierstiften, 1× drucken |
 | `buegel_langseite_2x.stl` | 5 | Original | Bügel Langseite mit 2 Haken (Kanal), 239,75 × 134, 2× drucken |
 | `band_schmalseite_2x.stl` | 5 | Original | Band Schmalseite mit 1 Haken (Kanal), 239,75 × 124, 2× drucken |
 | `scharnier_flachlage.png` | 5 | Original | Scharnier in drei Stellungen: aufrecht (hält), waagerecht (löst), dazwischen |
 | `korb_v2.3mf` | 6 | Original | Korb auf 5 Platten: Plattform, 2 Bügel, 2 Bänder, Druckeinstellungen je Objekt |
 | `lasche_loecher.png` | 7 | Original | Schnitt durch die Laschen, je 2 volle Schraublöcher |
+| `lehre_haelfte_2x.stl` | 8 | Original | Passlehre für den Trichterrand, Eimer 283 mm (140,25 × 207,5 × 10), 2× drucken |
 
 ## Teile
 
@@ -56,7 +57,7 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 | `plattform` | 1 | 206 × 166 × 56 | Massive 6-mm-Platte mit 9 Langlöchern, 4 runde Füße (50 mm Bodenabstand), 6 abgeflachte Scharnierstifte |
 | `langseite` | 2 | 239,75 × 134 | Bügel mit zwei Haken und Griffschlaufe |
 | `schmalseite` | 2 | 239,75 × 124 | Band mit einem Haken und Griffschlaufe |
-| `trichter` | 2 | 137,75 × 207,5 × 59 | Trichterhälfte, Keilwand, Laschen mit M3-Löchern an der Fuge |
+| `trichter` | 2 | 140,25 × 207,5 × 59 | Trichterhälfte, Keilwand, Laschen mit M3-Löchern an der Fuge |
 | `lehre` | 2 | Hälften | Passlehre für den Trichterkragen – zuerst drucken und im Eimer prüfen |
 
 | Plattform | Bügel Langseite | Band Schmalseite | Trichterhälfte |
@@ -81,8 +82,8 @@ Die Maße stehen im Abschnitt „Eimer – gemessen“:
 
 | Parameter | Vorgabe | Bedeutung |
 |---|---|---|
-| `eimer_l`, `eimer_b` | 278, 210 | Innenmaß oberhalb des Absatzes |
-| `eimer_gerade_l`, `eimer_gerade_b` | 240, 170 | gerade Wandstücke zwischen den 45°-Eckschrägen |
+| `eimer_l`, `eimer_b` | 283, 210 | Innenmaß oberhalb des Absatzes |
+| `eimer_gerade_l`, `eimer_gerade_b` | 245, 170 | gerade Wandstücke zwischen den 45°-Eckschrägen |
 | `absatz` | 3 | Rücksprung der Wand je Seite am Absatz |
 | `absatz_z` | 275 | Höhe des Absatzes über dem **Innenboden** – noch nicht nachgemessen |
 | `absatz_bis_rand` | 15 | Absatz bis Oberkante Eimer |
@@ -132,6 +133,7 @@ Jeder Konstruktionsstand ist ein eigener Commit mit allen erzeugten Dateien. Det
 | 5 | 11:31 | Scharnier: Stift mit zwei Abflachungen (`stift_flach = 4.2`, `kanal_spiel = 0.25`, `kanal_fase = 0.6`), Haken mit Kanal, Lösefenster ±7°. Neue Plattform, Bügel und Bänder. |
 | 6 | 12:32 | `korb_v2.3mf`: Plattform, 2 Bügel und 2 Bänder auf 5 Platten. |
 | 7 | 16:10 | Laschenlöcher korrigiert: je Lasche 2 volle Löcher (M3 × 16), Lage aus der Laschenbreite berechnet (`loch_rand_min = 1.5`). Beide Trichter-3MFs neu. |
+| 8 | 16:13 | Eimer nachgemessen: `eimer_l` 278 → 283, `eimer_gerade_l` 240 → 245. Hälften 140,25 mm lang, ohne Mittelteil. Passlehre `lehre_haelfte_2x.stl`. |
 
 ## Stand
 

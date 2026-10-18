@@ -62,13 +62,14 @@ Alles steht in **einer parametrischen OpenSCAD-Datei** (`biomuell_system.scad`).
   - **Stand 5, 11:31 Uhr:** **Scharnier gegen Abfallen:** Der 6-mm-Stift in der Plattform ist an zwei Seiten senkrecht auf 4,2 mm abgeflacht (`stift_flach = 4.2`), die Haken haben statt der Schnappöffnung einen geraden Kanal von 4,7 mm (`kanal_spiel = 0.25`, Einführfase `kanal_fase = 0.6`). Aufrecht im Eimer liegt der Kanal quer zur Abflachung, der Haken ist gefangen. Nur bei waagerecht nach außen liegendem Band (±7°) lässt er sich von oben aufstecken und abziehen; im 2D-Schnitt geprüft: abnehmbar nur bei ca. 83–95° aus der Senkrechten. Alle drei Teile (Plattform, Bügel, Bänder) neu drucken, alte und neue passen nicht zusammen. `stift_flach = 0` = alter Schnapphaken.
   - **Stand 6, 12:32 Uhr:** **`korb_v2.3mf`:** 5 Platten (Plattform, Bügel Langseite A/B, Band Schmalseite A/B). Zwei Bänder nebeneinander sind breiter als das Druckbett, ineinander verschachteln geht nicht, weil die Griffschlaufen an die Beine der Bügel stoßen. Einstellungen je Objekt: Plattform 4 Wände, 25 % Gyroid, 5/5, Brim 5 mm; Bügel und Bänder 3 Wände, 100 %, 5/5, kein Brim; keine Stützen. Empfehlung: zuerst ein Band mit der Plattform drucken und die Passung des Hakens prüfen.
   - **Stand 7, 16:10 Uhr:** **Laschenlöcher korrigiert.** Vorher hatte jede Lasche 2 volle und 2 angeschnittene Löcher: Die Lasche reicht nur bis zur Eimerkontur und ist oben am Kragen wenige Millimeter breit, das obere Loch wurde von der Außenkante angeschnitten. Jetzt werden die Lochpositionen aus der tatsächlichen Laschenbreite berechnet (`lasche_zs`, `loch_rand_min = 1.5`): je Lasche 2 volle Löcher mit mindestens 1,5 mm Material ringsum, ca. 9 mm übereinander im unteren, voll ausgebildeten Teil. Je Fuge 4 Schrauben M3 × 16 mit Mutter; beide Hälften sind gleich aufgebaut, die Löcher fluchten. Klarstellung: Die zwei kleinen Stege auf der Plattform der Projekt-3MF sind keine Messstege, sondern die beiden Hälften der Passlehre.
+  - **Stand 8, 16:13 Uhr:** **Eimer nachgemessen:** `eimer_l = 283`, `eimer_gerade_l = 245` (vorher 278 / 240). Annahme: Die Eckschrägen bleiben gleich groß, deshalb wurde das gerade Stück der Langseite auf 245 mm verlängert. Der Trichter ist 280,5 × 207,5 mm (vorher 275,5 × 207,5), jede Hälfte 140,25 × 207,5 × 59 mm und passt weiter ins Druckbett. Die Öffnung (212 × 172) und damit der Korb bleiben unverändert. Außenschräge an der Schmalseite 52° statt 54°, Innenschräge 61° statt 64°, Überhang beim Druck höchstens 29° (Ecken 32°); der Griffraum wächst dort um 2,5 mm. Passlehre `lehre_haelfte_2x.stl` neu: zuerst drucken und in den Eimer legen.
 
 ### Kennwerte mit Standardwerten (Konsolenausgabe)
 
 - Druckraum nutzbar 250 × 250 (`bett_rand = 5`).
 - Plattform 206 × 166, Höhe 56, 1 Stück, 9 Langlöcher.
 - Bügel Langseite und Band Schmalseite: je 239,75 mm, 1 Stück, je 2× drucken. Griff-Oberkante 280 mm über Boden.
-- Trichter 275,5 × 207,5 × 59: 2 Hälften à 137,75. Öffnung 212 × 172. Außenschräge 54°/69°, Ecken 52°.
+- Trichter 280,5 × 207,5 × 59: 2 Hälften à 140,25 (ohne Mittelteil). Öffnung 212 × 172. Außenschräge 52°/69°, Ecken 51°.
 - Sack in der Öffnung: 6 mm Abstand je Seite (davon 2,3 mm Band). Öffnungs-Unterkante 220 mm über Boden.
 - Trichterfuge: 4 Schrauben M3 × 16 (Edelstahl) + Muttern, optional 2K-Epoxid.
 
@@ -79,7 +80,7 @@ Alles steht in **einer parametrischen OpenSCAD-Datei** (`biomuell_system.scad`).
 - Scharniere: `scharniere_lang = 2` (Bügel, Haken bei x = ±55), `scharniere_kurz = 1` (Band).
 - Trichter: `trichter_tiefe = 40`, `oeffnung_spiel = 3`, `kragen_unten_h = 15`, `wand = 2.5`, `kragen_t = 4`, `flansch_spiel = 1.25`, `trichter_spiel = 1.0`.
 
-- Eimer (gemessen): `eimer_l = 278`, `eimer_gerade_l = 240`, `eimer_b = 210`, `eimer_gerade_b = 170`.
+- Eimer (gemessen): `eimer_l = 283`, `eimer_gerade_l = 245`, `eimer_b = 210`, `eimer_gerade_b = 170`.
 - Keilwand: `innenform = "keil"`, `ring_x = 10`, `ring_y = 6`; Druckhilfe `druckhilfe = false`.
 - Scharnier: `stift_flach = 4.2`, `kanal_spiel = 0.25`, `kanal_fase = 0.6`.
 - Laschenlöcher: `loch_rand_min = 1.5`, 2 Löcher je Lasche, Lage aus der Laschenbreite.

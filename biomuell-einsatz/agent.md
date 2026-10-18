@@ -63,15 +63,18 @@ Alles steht in **einer parametrischen OpenSCAD-Datei** (`biomuell_system.scad`).
   - **Stand 6, 12:32 Uhr:** **`korb_v2.3mf`:** 5 Platten (Plattform, Bügel Langseite A/B, Band Schmalseite A/B). Zwei Bänder nebeneinander sind breiter als das Druckbett, ineinander verschachteln geht nicht, weil die Griffschlaufen an die Beine der Bügel stoßen. Einstellungen je Objekt: Plattform 4 Wände, 25 % Gyroid, 5/5, Brim 5 mm; Bügel und Bänder 3 Wände, 100 %, 5/5, kein Brim; keine Stützen. Empfehlung: zuerst ein Band mit der Plattform drucken und die Passung des Hakens prüfen.
   - **Stand 7, 16:10 Uhr:** **Laschenlöcher korrigiert.** Vorher hatte jede Lasche 2 volle und 2 angeschnittene Löcher: Die Lasche reicht nur bis zur Eimerkontur und ist oben am Kragen wenige Millimeter breit, das obere Loch wurde von der Außenkante angeschnitten. Jetzt werden die Lochpositionen aus der tatsächlichen Laschenbreite berechnet (`lasche_zs`, `loch_rand_min = 1.5`): je Lasche 2 volle Löcher mit mindestens 1,5 mm Material ringsum, ca. 9 mm übereinander im unteren, voll ausgebildeten Teil. Je Fuge 4 Schrauben M3 × 16 mit Mutter; beide Hälften sind gleich aufgebaut, die Löcher fluchten. Klarstellung: Die zwei kleinen Stege auf der Plattform der Projekt-3MF sind keine Messstege, sondern die beiden Hälften der Passlehre.
   - **Stand 8, 16:13 Uhr:** **Eimer nachgemessen:** `eimer_l = 283`, `eimer_gerade_l = 245` (vorher 278 / 240). Annahme: Die Eckschrägen bleiben gleich groß, deshalb wurde das gerade Stück der Langseite auf 245 mm verlängert. Der Trichter ist 280,5 × 207,5 mm (vorher 275,5 × 207,5), jede Hälfte 140,25 × 207,5 × 59 mm und passt weiter ins Druckbett. Die Öffnung (212 × 172) und damit der Korb bleiben unverändert. Außenschräge an der Schmalseite 52° statt 54°, Innenschräge 61° statt 64°, Überhang beim Druck höchstens 29° (Ecken 32°); der Griffraum wächst dort um 2,5 mm. Passlehre `lehre_haelfte_2x.stl` neu: zuerst drucken und in den Eimer legen.
+  - **Stand 9, 16:19 Uhr:** **Trichter-Mittelteil** (`mittelteil = 5`): je Längsseite ein Zwischenstück, das zwischen die beiden Hälften geschraubt wird. Die Hälften sind wieder 137,75 mm lang, der Trichter wird 280,5 mm lang (Eimerlänge weiter wie gemessen eintragen), die Öffnung 217 × 172 mm. Neue Teil-Auswahl `teil = "mittelteil"`; die Passlehre wird ebenfalls um das Maß kürzer erzeugt. Schrauben M3 × 20 statt M3 × 16.
+     - `mittelteil_v1.scad` (eigenständig): Mittelteil für die schon gedruckten Hälften der Version 1 (gleich dicke Wand, Eimer 278 mm, Schraublöcher an den alten Positionen; das obere Loch ist wie bei den alten Hälften angeschnitten, mit `obere_loecher = false` weglassen). Profil gegen die Fugenfläche einer hochgeladenen Hälfte geprüft: Flächenabweichung 0,000 mm².
+     - `mittelteil_5mm_2x.stl` passt nur zu Hälften der Version 2 (`trichter_haelfte_mittelteilversion_2x.stl`); `mittelteil_v1_5mm_2x.stl` nur zu den alten Hälften der Version 1.
 
 ### Kennwerte mit Standardwerten (Konsolenausgabe)
 
 - Druckraum nutzbar 250 × 250 (`bett_rand = 5`).
 - Plattform 206 × 166, Höhe 56, 1 Stück, 9 Langlöcher.
 - Bügel Langseite und Band Schmalseite: je 239,75 mm, 1 Stück, je 2× drucken. Griff-Oberkante 280 mm über Boden.
-- Trichter 280,5 × 207,5 × 59: 2 Hälften à 140,25 (ohne Mittelteil). Öffnung 212 × 172. Außenschräge 52°/69°, Ecken 51°.
+- Trichter 280,5 × 207,5 × 59: 2 Hälften à 137,75 + 2 Mittelteile à 5. Öffnung 217 × 172. Außenschräge 54°/69°, Ecken 52°.
 - Sack in der Öffnung: 6 mm Abstand je Seite (davon 2,3 mm Band). Öffnungs-Unterkante 220 mm über Boden.
-- Trichterfuge: 4 Schrauben M3 × 16 (Edelstahl) + Muttern, optional 2K-Epoxid.
+- Trichterfugen: je Fuge 4 Schrauben M3 × 20 (Edelstahl) + Muttern, optional 2K-Epoxid.
 
 ### Wichtige Parameter
 
@@ -84,6 +87,7 @@ Alles steht in **einer parametrischen OpenSCAD-Datei** (`biomuell_system.scad`).
 - Keilwand: `innenform = "keil"`, `ring_x = 10`, `ring_y = 6`; Druckhilfe `druckhilfe = false`.
 - Scharnier: `stift_flach = 4.2`, `kanal_spiel = 0.25`, `kanal_fase = 0.6`.
 - Laschenlöcher: `loch_rand_min = 1.5`, 2 Löcher je Lasche, Lage aus der Laschenbreite.
+- Mittelteil: `mittelteil = 5` (0 = keins), `teil = "mittelteil"`.
 
 ### Koordinaten
 

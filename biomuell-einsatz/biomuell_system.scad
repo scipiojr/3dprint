@@ -38,7 +38,7 @@
 
 /* [Ausgabe] */
 // Welches Teil?
-teil = "uebersicht"; // [uebersicht:Übersicht im Eimer, plattform:Plattform, langseite:Bügel/Band Langseite (2x drucken), schmalseite:Bügel/Band Schmalseite (2x drucken), trichter:Trichter, lehre:Passlehre Trichterrand]
+teil = "uebersicht"; // [uebersicht:Übersicht im Eimer, plattform:Plattform, langseite:Bügel/Band Langseite (2x drucken), schmalseite:Bügel/Band Schmalseite (2x drucken), trichter:Trichter, mittelteil:Trichter-Mittelteil (je Längsseite 1x), lehre:Passlehre Trichterrand]
 // -1 = alle Stücke nebeneinander, 0,1,2 … = einzelnes druckfertiges Stück
 stueck = -1;
 
@@ -200,6 +200,11 @@ druckhilfe_spalt = 1.5;
 druckhilfe_steg_h = 0.5;
 druckhilfe_steg_b = 4;
 
+/* [Trichter-Mittelteil] */
+// Zwischenstück je Längsseite, das zwischen die beiden Trichterhälften geschraubt wird (0 = keins).
+// Die Hälften werden um dieses Maß kürzer erzeugt; Trichter gesamt = Eimerlänge wie gemessen.
+mittelteil = 5;
+
 /* [Verbindungen (Plattform, Bänder)] */
 schwalbe_tiefe = 10;
 schwalbe_hals = 10;
@@ -275,8 +280,12 @@ FY = scharniere_lang > 0 ? W2 - BOSS_V - 4 - fuss_fuss / 2 - 2 : W2 - fuss_fuss 
 FEET = concat([[-FX, -FY], [FX, -FY], [-FX, FY], [FX, FY]], mittelfuss ? [[0, 0]] : []);
 
 // Eimer & Trichter
-RIM = [eimer_l / 2, eimer_b / 2, (eimer_l - eimer_gerade_l) / 2, (eimer_b - eimer_gerade_b) / 2];
-UNTEN = okt_off(RIM, absatz);                       // Eimer innen unterhalb des Absatzes
+MT = max(0, mittelteil);
+// Eimer wie gemessen (für die Übersicht)
+RIM_E = [eimer_l / 2, eimer_b / 2, (eimer_l - eimer_gerade_l) / 2, (eimer_b - eimer_gerade_b) / 2];
+// Grundform der Trichterhälften: um das Mittelteil kürzer, Eckschrägen unverändert
+RIM = [(eimer_l - MT) / 2, eimer_b / 2, (eimer_l - eimer_gerade_l) / 2, (eimer_b - eimer_gerade_b) / 2];
+UNTEN = okt_off(RIM_E, absatz);                       // Eimer innen unterhalb des Absatzes
 T_TOP = okt_off(RIM, absatz + trichter_spiel);      // Trichter außen, Höhe Absatz
 RATIO = T_TOP[3] / T_TOP[2];
 // Trichteröffnung (lichte Weite): Plattform + Spiel, Eckschrägen parallel zum Trichter
@@ -712,6 +721,30 @@ module trichter_stueck(k) {
     }
 }
 
+// Mittelteil: Profil des Trichters an der Fuge (x = 0, gerader Bereich der Langseiten), auf MT verlängert.
+// Enthält Wand, Kragen, Haltekragen, Lasche und die Schraublöcher. Zwei Stücke (je Längsseite eins).
+module mittelteil_roh() scale([MT, 1, 1]) intersection() {
+    trichter_roh();
+    translate([-0.5, -500, -200]) cube([1, 1000, 400]);
+}
+module mittelteil_stueck(k) {
+    s = k == 0 ? 1 : -1;
+    // druckfertig: Profil flach aufs Bett, Schraublöcher senkrecht
+    translate([0, 0, MT / 2]) rotate([0, 90, 0]) intersection() {
+        mittelteil_roh();
+        translate([-50, s > 0 ? 0 : -500, -200]) cube([100, 500, 400]);
+    }
+}
+// Trichter im Eimer, ggf. mit Mittelteilen
+module trichter_montiert() {
+    if (MT > 0 && T_NX == 2) {
+        for (i = [0, 1], j = [0:T_NY - 1]) translate([(i == 0 ? -1 : 1) * MT / 2, 0, 0])
+            intersection() { trichter_roh(); kasten(i, j, T_CX, T_CY); }
+        color("orange") mittelteil_roh();
+    } else trichter_roh();
+}
+SCHRAUBE_L = let(n = 2 * rippe_t + MT + 2.4 + 1.5) [for (l = [12, 16, 20, 25, 30, 35, 40]) if (l >= n) l][0];
+
 // Passlehre: Kragen + kurzer Kragenfuß -> vorab prüfen, ob der Trichter passt
 module lehre_roh() {
     linear_extrude(2) difference() { okt_poly(okt_off(RIM, flansch_spiel)); okt_poly(okt_off(T_TOP, 2)); }
@@ -734,8 +767,8 @@ module eimer_geist() {
             translate([0, 0, -1]) linear_extrude(absatz_z + 2) okt_poly(UNTEN);
         }
         translate([0, 0, absatz_z]) difference() {
-            linear_extrude(absatz_bis_rand) okt_poly(okt_off(RIM, -2.5));
-            translate([0, 0, -1]) linear_extrude(absatz_bis_rand + 2) okt_poly(RIM);
+            linear_extrude(absatz_bis_rand) okt_poly(okt_off(RIM_E, -2.5));
+            translate([0, 0, -1]) linear_extrude(absatz_bis_rand + 2) okt_poly(RIM_E);
         }
     }
 }
@@ -748,7 +781,7 @@ module uebersicht() {
     color("seagreen") translate([0, 0, PLATTE_OBEN_Z]) plattform_roh();
     color("peru") baender_alle();
     if (mit_trichter) {
-        color("steelblue") translate([0, 0, absatz_z]) trichter_roh();
+        color("steelblue") translate([0, 0, absatz_z]) trichter_montiert();
     }
     // Papiersack (zusammengesackt), nur als Geist
     %translate([-sack_b / 2, -sack_t / 2, PLATTE_OBEN_Z]) cube([sack_b, sack_t, absatz_z + absatz_bis_rand - 5 - PLATTE_OBEN_Z]);
@@ -767,12 +800,12 @@ if (scharniere_lang > 0)
     echo(str("Langseite: ", scharniere_lang == 2 ? "Bügel" : "Band", ", Länge ", LEN_LANG, " mm, Griff-Oberkante ",
              HAKEN_UNTEN_Z + LEN_LANG, " mm über Boden -> ", band_n(LEN_LANG), " Stück(e), 2x drucken"));
 if (mit_trichter) {
-    echo(str("Trichter ", T_L, " x ", T_B, " x ", kragen_t + trichter_tiefe + kragen_unten_h, " mm -> ", T_N,
-             " Stücke, Öffnung ", 2 * LIP[0], " x ", 2 * LIP[1], " mm, Schräge ", round(ALPHA_X), "°/", round(ALPHA_Y), "°, Ecken ", round(ALPHA_C), "°"));
+    echo(str("Trichter ", T_L + (T_NX == 2 ? MT : 0), " x ", T_B, " x ", kragen_t + trichter_tiefe + kragen_unten_h, " mm -> ", T_N,
+             " Stücke", MT > 0 && T_NX == 2 ? str(" (Hälften je ", T_L / 2, " mm + 2 Mittelteile ", MT, " mm)") : "", ", Öffnung ", 2 * LIP[0] + (T_NX == 2 ? MT : 0), " x ", 2 * LIP[1], " mm, Schräge ", round(ALPHA_X), "°/", round(ALPHA_Y), "°, Ecken ", round(ALPHA_C), "°"));
     echo(str("Sack ", sack_b, " x ", sack_t, " in Öffnung: Abstand je Seite ", LIP[0] - sack_b / 2, " / ", LIP[1] - sack_t / 2,
              " mm (davon Band ", kante_versatz + hals_t, " mm), Öffnungs-Unterkante ", absatz_z - trichter_tiefe - kragen_unten_h, " mm über Boden"));
     if (T_N > 1) echo(str("Trichter-Verbindung: je Fuge ", 2 * len(lasche_zs(len(T_CX) > 0 ? T_TOP[1] - T_BOT[1] : T_TOP[0] - T_BOT[0], 0, -trichter_tiefe)),
-                          " Schrauben M3 x 16 (Edelstahl) + Muttern, optional 2K-Epoxid"));
+                          " Schrauben M3 x ", SCHRAUBE_L, " (Edelstahl) + Muttern, optional 2K-Epoxid"));
     if (innenform == "keil") {
         echo(str("Keilwand: Innenschräge ", round(BETA_X), "°/", round(BETA_Y), "°, Ecken ", round(BETA_C),
                  "° (Überhang beim Druck ", round(90 - BETA_X), "°/", round(90 - BETA_Y), "°/", round(90 - BETA_C),
@@ -788,6 +821,7 @@ if (FLACH) {
     if (KANAL_B >= stift_d - 0.5) echo("WARNUNG: Hakenkanal fast so breit wie der Stift – Haken hält nicht sicher.");
     if (KANAL_B <= stift_flach) echo("WARNUNG: Hakenkanal schmaler als die Abflachung – Haken geht nicht auf.");
 }
+if (MT > 0 && T_NX != 2) echo("WARNUNG: Mittelteil nur bei zwei Trichterhälften (eine Fuge in der Mitte) vorgesehen.");
 if (kragen_t > absatz_bis_rand) echo("WARNUNG: Trichterkragen steht über den Eimerrand!");
 if (GRIFF_Z + 0 > absatz_z + absatz_bis_rand - 3 || (laenge_lang > 0 && HAKEN_UNTEN_Z + laenge_lang > absatz_z + absatz_bis_rand - 3)
     || (laenge_kurz > 0 && HAKEN_UNTEN_Z + laenge_kurz > absatz_z + absatz_bis_rand - 3))
@@ -833,6 +867,9 @@ if (teil == "uebersicht") {
     for (k = (stueck < 0 ? [0:T_N - 1] : [stueck])) if (k < T_N)
         translate(stueck < 0 ? [(k % T_NX) * (T_L / T_NX + 40), floor(k / T_NX) * (T_B / T_NY + 40), 0] : [0, 0, 0])
             trichter_stueck(k);
+} else if (teil == "mittelteil") {
+    if (MT <= 0) echo("HINWEIS: mittelteil = 0 – kein Mittelteil.");
+    else for (k = (stueck < 0 ? [0, 1] : [stueck])) if (k < 2) mittelteil_stueck(k);
 } else if (teil == "lehre") {
     for (k = (stueck < 0 ? [0:T_N - 1] : [stueck])) if (k < T_N)
         translate(stueck < 0 ? [(k % T_NX) * (T_L / T_NX + 40), floor(k / T_NX) * (T_B / T_NY + 40), 0] : [0, 0, 0])

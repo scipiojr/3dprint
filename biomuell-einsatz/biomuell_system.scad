@@ -122,9 +122,11 @@ stift_z = -10;
 haken_b = 24;
 haken_spiel = 0.35;
 haken_wand = 2.4;
-// Stift mit zwei Abflachungen (Maß über die Flächen): Der Haken geht nur bei waagerecht
-// nach außen liegendem Band auf den Stift (von oben) und wieder ab. 0 = runder Stift mit Schnapphaken (alt)
+// Stift mit zwei Abflachungen oben und unten (Maß über die Flächen, 4,2 mm hoch, 6 mm breit): Der Haken geht nur bei
+// senkrecht nach unten hängendem Band (180° aus der Senkrechten, ±7°) auf den Stift und wieder ab. 0 = runder Stift mit Schnapphaken (alt)
 stift_flach = 4.2;
+// Die Plattform tritt am Scharnier um dieses Maß zurück (Schlitz tiefer nach innen), damit die Hakenrundung nicht schabt
+schlitz_zugabe = 2;
 // Spiel des Hakenkanals je Seite zur Abflachung
 kanal_spiel = 0.25;
 // Einführfase am Kanal (gleicht auch den Elefantenfuß aus)
@@ -309,7 +311,7 @@ R_IN = stift_d / 2 + haken_spiel;
 R_OUT = R_IN + haken_wand;
 PIN_V = kante_versatz + R_OUT;
 SLOT_U = haken_b / 2 + schlitz_spiel;
-SLOT_V = PIN_V + R_OUT + 0.7;
+SLOT_V = PIN_V + R_OUT + 0.7 + schlitz_zugabe;
 BOSS_U = SLOT_U + wange;
 BOSS_V = SLOT_V + 5;
 _th = R_IN + tropfen;
@@ -554,8 +556,8 @@ module plattform_roh() {
     for (s = STRAPS) am_rand(s[0], s[1])
         translate([0, -PIN_V, stift_z]) intersection() {
             rotate([0, 90, 0]) cylinder(d = stift_d, h = 2 * (SLOT_U + 1), center = true, $fn = 40);
-            // Abflachungen senkrecht (zur Plattenmitte und nach außen): unten bleibt der Stift rund und trägt voll
-            if (FLACH) cube([2 * (SLOT_U + 2), stift_flach, stift_d + 2], center = true);
+            // Abflachungen waagerecht (oben und unten): Stift 4,2 mm hoch; ohne Stützen druckbar
+            if (FLACH) cube([2 * (SLOT_U + 2), stift_d + 2, stift_flach], center = true);
         }
 }
 
@@ -1007,7 +1009,7 @@ if (mit_trichter) {
 }
 if (FLACH) {
     echo(str("Scharnier: Stift ", stift_d, " mm, abgeflacht auf ", stift_flach, " mm; Hakenkanal ", KANAL_B,
-             " mm -> Haken nur bei waagerecht nach außen liegendem Band (±", LOESE_WINKEL, "°) von oben auf-/abnehmbar"));
+             " mm -> Haken nur bei senkrecht nach unten hängendem Band (180° ±", LOESE_WINKEL, "°) auf-/abnehmbar"));
     if (KANAL_B >= stift_d - 0.5) echo("WARNUNG: Hakenkanal fast so breit wie der Stift – Haken hält nicht sicher.");
     if (KANAL_B <= stift_flach) echo("WARNUNG: Hakenkanal schmaler als die Abflachung – Haken geht nicht auf.");
 }

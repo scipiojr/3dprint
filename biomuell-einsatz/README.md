@@ -42,6 +42,7 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 | V3-4 | 14:10 | Rastnase vergrößert: `rast_nase` 1,0 → 1,5 mm, `tasche_relief` 1,2 → 1,5, `rast_wurzel` 3 → 1 (Zunge 19 mm, Dehnung ca. 2,8 %, Haltefläche nominal 1,3 mm). Grund: Die Seitenwände rasteten nicht spürbar ein. Plattform, Seitenwand, Rastprobe und `korb.3mf` neu. |
 | V3-5 | 15:04 | Scharnier: Haken lässt sich nur noch bei 180° nach unten gedrehtem Bügel (±7°) einhängen und abnehmen (Abflachungen des Stifts jetzt oben/unten statt seitlich). Die Plattform tritt am Scharnier um 2 mm zurück (`schlitz_zugabe = 2`), damit die Hakenrundung nicht schabt. Bügel und Bänder bleiben unverändert, Plattform und `korb.3mf` neu. |
 | V3-6 | 15:49 | Plattform niedriger: Beine 10 mm kürzer (`bodenabstand` 50 → 40), Platte 2 mm dünner (`platte_t` 6 → 4). Plattenoberseite jetzt 44 statt 56 mm über dem Boden. Die Bügel werden dadurch 10 mm länger (249,75 statt 239,75 mm), damit die Griffe oben bleiben; `griff_ueber_absatz` 5 → 3, damit der Bügel unter 250 mm bleibt und ungeteilt druckbar ist. Plattform, Bügel, Band (V2) und `korb.3mf` neu. |
+| V3-7 | 16:01 | Rastnase 1,5 mm weiter heraus: `rast_nase` 1,5 → 3,0 mm. Folgen: Zapfen 20 → 28 mm (`zapfen_l`), damit die Rastzunge 27 mm lang bleibt (Dehnung ca. 2,6 %, Haltefläche nominal 2,8 mm); `tasche_relief` 1,5 → 3,0 (Einfederweg), `rast_rampe` 3 → 5 (flachere Auflaufschräge). Seitenwand jetzt 128 × 134 × 7 mm. Plattform, Seitenwand, Rastprobe und `korb.3mf` neu. |
 | `vergleich_v1_v2.png` | 1 | Original | Vergleich Version 1 (rot) und Version 2 (grün), Schnitte durch die Trichterschräge |
 | `trichter_haelfte_2x.stl` | V3-3 | Original | Trichterhälfte (Standard, ohne Mittelteil), Eimer 283 mm, Öffnung 217 × 172: 140,25 × 207,5 × 59, 2× drucken |
 | `trichter.3mf` | V3-3 | Original | Trichter ohne Druckhilfe, ohne Mittelteil (je Platte eine Hälfte), Einstellungen wie zuvor; mit `werkzeuge/trichter_3mf.py` neu erzeugt |
@@ -51,7 +52,7 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 | `buegel_langseite_2x.stl` | 5 | Original | Bügel Langseite mit 2 Haken (Kanal), 249,75 × 134, 2× drucken |
 | `band_schmalseite_2x.stl` | 5 | Original | Band Schmalseite mit 1 Haken (Kanal), 249,75 × 124, 2× drucken. Nur für die Plattform der Version 2 (`schmalseite_typ = "band"`). |
 | `scharnier_flachlage.png` | V3-5 | Original | Scharnier in vier Stellungen (aufrecht, waagerecht, 150°: gehalten; 180° nach unten: löst), 2D-Simulation mit `werkzeuge/scharnier_pruefung.py` |
-| `seitenwand_h100_2x.stl` | V3-2 | Original | Seitenwand 120 × 134 × 5 (Höhe 100 mm über der Plattenoberseite), flach, 2× drucken |
+| `seitenwand_h100_2x.stl` | V3-2 | Original | Seitenwand 128 × 134 × 7 (Höhe 100 mm über der Plattenoberseite), flach, 2× drucken |
 | `rastprobe.stl` | V3-2 | Original | Rastprobe: Taschenblock mit Plattenstück und ein kurzes Wandstück, vorab drucken |
 | `korb.3mf` | V3-2 | Original | Korb Version 3 auf 5 Platten: Plattform, 2 Bügel, 2 Seitenwände (4 Wände, 100 %), erzeugt mit `werkzeuge/korb_3mf.py` |
 | `schnitt_wand.png` | V3-2 | Original | Schnitt durch einen Wandsteg: Zapfen in der Tasche, Rastnase unter dem Block |
@@ -69,7 +70,7 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 |---|---|---|---|
 | `plattform` | 1 | 210 × 166 × 44 | Massive 4-mm-Platte mit 9 Langlöchern, 4 runde Füße (40 mm Bodenabstand), 4 abgeflachte Scharnierstifte (Bügel) und 4 Taschen für die Seitenwände |
 | `langseite` | 2 | 249,75 × 134 | Bügel mit zwei Haken und Griffschlaufe |
-| `seitenwand` | 2 | 120 × 134 × 5 | Seitenwand (∩): zwei Stege 20 × 4 mm, Quersteg, Steckzapfen mit Rastzunge; Höhe `wand_h` |
+| `seitenwand` | 2 | 128 × 134 × 7 | Seitenwand (∩): zwei Stege 20 × 4 mm, Quersteg, Steckzapfen mit Rastzunge; Höhe `wand_h` |
 | `rastprobe` | 1 + 1 | 38 × 62 × 14 | Taschenblock mit Plattenstück und kurzes Wandstück zum Probieren von Spiel und Rastkraft |
 | `schmalseite` | 2 | 249,75 × 124 | Band mit einem Haken und Griffschlaufe, nur bei `schmalseite_typ = "band"` (Version 2) |
 | `trichter` | 2 | 140,25 × 207,5 × 59 | Trichterhälfte, Keilwand, Laschen mit M3-Löchern an der Fuge (mit `mittelteil = 5`: 137,75) |
@@ -171,7 +172,7 @@ Die Griffbänder der Schmalseiten sind durch zwei steife, abnehmbare **∩-förm
 
 - **Form:** zwei Seitenstege 20 × 4 mm, die direkt nach den Eckschrägen der Plattform beginnen (y = ±47 … ±67), und ein Quersteg 20 mm hoch. Alle Kanten gerundet, Innenecken gefast.
 - **Steifigkeit:** 4 mm dick, 100 % Füllung, flach gedruckt (Biegelast entlang der Schichten). Rechnerisch gibt die Oberkante bei 5 N etwa 3,7 mm nach (ein Griffband wäre rund 30-mal weicher), plus höchstens 2,9 mm Spiel im Zapfen. Für höhere Wände `wand_t` erhöhen (bis 6 mm; die Konsole meldet Durchbiegung und Abstand zur Öffnung).
-- **Clip:** Jeder Steg endet in einem 14 mm breiten, 20 mm langen Zapfen. Er wird von oben in eine unten offene Tasche der Plattform gesteckt (14 mm Führung, Spiel 0,2 mm je Seite). Die Stegkanten neben dem Zapfen bilden die Schulter auf der Plattenoberseite. In der Mitte des Zapfens liegt eine federnde Rastzunge (8 mm breit, 17 mm lang) mit 1 mm hoher Nase, die unter dem Taschenblock einschnappt (Haltefläche 0,8 mm, Dehnung beim Einrasten ca. 2,5 %). Hinter der Zunge hat die Tasche ein Relief, in das die Zunge einfedert.
+- **Clip:** Jeder Steg endet in einem 14 mm breiten, 28 mm langen Zapfen. Er wird von oben in eine unten offene Tasche der Plattform gesteckt (14 mm Führung, Spiel 0,2 mm je Seite). Die Stegkanten neben dem Zapfen bilden die Schulter auf der Plattenoberseite. In der Mitte des Zapfens liegt eine federnde Rastzunge (8 mm breit, 17 mm lang) mit 1 mm hoher Nase, die unter dem Taschenblock einschnappt (Haltefläche 0,8 mm, Dehnung beim Einrasten ca. 2,5 %). Hinter der Zunge hat die Tasche ein Relief, in das die Zunge einfedert.
 - **Taschenblöcke:** Sie sitzen als Ohr an der Plattenkante und reichen bis x = ±106,7, also 1,8 mm vor die feste Trichteröffnung (±108,5). Die Wand selbst liegt bei x = ±100,5 … ±104,5, 0,5 mm vom Sack und 4 mm von der Öffnung.
 - **Plattform:** wächst im Wandmodus auf 210 mm (`platte_l_wand`); die Eckfüße rücken auf x = ±78,6, damit sie die Taschenblöcke nicht berühren.
 - **Trichteröffnung:** fest 217 × 172 mm, unabhängig von Plattform und Mittelteil. Mit `mittelteil = 5` sind Trichterhälfte, Mittelteil und Bügel geometrisch unverändert gegenüber Stand 9 (Eckpunktabweichung 0,0000 mm); Standard ist seit V3-3 `mittelteil = 0` (Hälften 140,25 mm).
@@ -181,10 +182,10 @@ Die Griffbänder der Schmalseiten sind durch zwei steife, abnehmbare **∩-förm
 
 Plan, Entscheidungen und Abweichungen vom Plan: [`v3_plan.md`](v3_plan.md).
 
-> **Hinweis (V3, Stand 4): Rastnase noch nicht am Druck geprüft.**
-> Die erste Fassung (`rast_nase = 1,0`) rastete nicht spürbar ein, die Wand glitt ohne Widerstand wieder heraus. Seit Stand 4 gilt `rast_nase = 1,5`, `tasche_relief = 1,5`, `rast_wurzel = 1` (Zunge 19 mm, Dehnung ca. 2,8 %, Haltefläche nominal 1,3 mm). Das ist nur gerechnet. **Vor dem Druck der ganzen Teile zuerst `rastprobe.stl` drucken** und prüfen, ob die Wand hörbar einrastet und nicht zurückgleitet.
-> Reicht es nicht: `rast_nase` bis 1,8 mm erhöhen (dann `rast_wurzel` 0,5 oder `zapfen_l` größer wählen, die Konsole warnt ab 3 % Dehnung) oder die Rastkante leicht hinterschneiden. Das hält besser, macht aber das Lösen mit dem Daumen schwerer.
-> Die Plattform ist wegen der geänderten Tasche neu zu drucken. Bügel und Trichter bleiben unverändert.
+> **Hinweis (V3, Stand 7): Rastnase noch nicht am Druck geprüft.**
+> Die erste Fassung (`rast_nase = 1,0`) rastete nicht spürbar ein, die Wand glitt ohne Widerstand wieder heraus. Stand 4 brachte 1,5 mm, seit Stand 7 gilt `rast_nase = 3,0` mit `tasche_relief = 3`, `rast_rampe = 5`, `rast_wurzel = 1` und `zapfen_l = 28` (Zunge 27 mm, Dehnung ca. 2,6 %, Haltefläche nominal 2,8 mm). Das ist nur gerechnet. **Vor dem Druck der ganzen Teile zuerst `rastprobe.stl` drucken** und prüfen, ob die Wand hörbar einrastet, nicht zurückgleitet und sich noch von Hand lösen lässt.
+> Rastet sie zu fest: `rast_nase` verkleinern (2,0 bis 2,5). Rastet sie zu schwach: Rastkante leicht hinterschneiden (hält besser, löst sich schwerer). Die Konsole warnt ab 3 % Dehnung der Zunge; längere Zunge (`zapfen_l`) erlaubt höhere Nasen.
+> Die Plattform ist wegen der geänderten Tasche neu zu drucken, ebenso die Seitenwände. Bügel und Trichter bleiben unverändert.
 
 ## Stand
 

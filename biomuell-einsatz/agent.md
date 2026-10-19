@@ -9,7 +9,11 @@ Arbeitsanweisung und Projektstand für KI-Agenten. Sprache mit der Nutzerin: **D
 - Commit-Messages auf Deutsch, sprechend: Betreffzeile im Imperativ (≤ 72 Zeichen), darunter kurz *was* und *warum*.
 - Vor dem Push `git pull --rebase origin main` (die Nutzerin committet auch selbst).
 - STL-Dateien werden eingecheckt. Die SCAD-Datei ist die Quelle.
-- Jeder neue Konstruktionsstand ist ein eigener Commit mit allen erzeugten Dateien im Projektordner. Der Verlauf steht in der Git-Historie.
+- **Versionierung nur über Git** (Festlegung der Nutzerin, 19.10.2026): Jeder neue Konstruktionsstand ist ein eigener Commit. Ein neuer Stand **überschreibt die gleichnamige Datei** des Vorstands; es werden keine neuen Dateien pro Version oder Stand angelegt.
+  - Dateinamen ohne Versions- oder Standkennung (also `trichter_haelfte_2x.stl`, `korb.3mf`, nicht `…_v2…`, `…_v3…`, `…_neu…`, `…_stand5…`). Der Verlauf steht in der Git-Historie, Versionen werden mit Tags markiert (`biomuell-v2`, `biomuell-v3`, …).
+  - Eigene Dateinamen nur für Teile, die es **gleichzeitig** gibt und die tatsächlich verschieden sind (z. B. Variante mit Mittelteil, Seitenwand anderer Höhe `seitenwand_h<Höhe>_2x.stl`), nicht für ältere Stände desselben Teils.
+  - Ein älterer Stand wird bei Bedarf aus der Historie geholt (`git show <commit>:biomuell-einsatz/<datei>`), nicht als Kopie im Ordner gehalten. Der Ordner `archiv/` bleibt unverändert, bekommt aber nichts Neues.
+  - Bestehende Dateien mit Versionsnamen (`trichter_v2*`, `korb_v2.3mf`, `korb_v3.3mf`, `mittelteil_v1*`) sind Altlast aus der Zeit vor dieser Regel; Umbenennen nur nach Rücksprache mit der Nutzerin.
 - Bilder nach Geometrieänderungen neu erzeugen: `werkzeuge/bilder.sh` (siehe unten) und mitcommitten.
 - README und dieses Dokument aktuell halten, wenn sich Parameter, Teile oder Entscheidungen ändern.
 

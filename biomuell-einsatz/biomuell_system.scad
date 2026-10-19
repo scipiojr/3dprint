@@ -215,6 +215,23 @@ rast_rampe = 5;
 rast_flach = 1.2;
 // senkrechtes Spiel zwischen Nase und Blockunterseite
 rast_spiel_z = 0.3;
+// Rastzunge auf der Rückseite (Bettseite) ausdünnen: OpenSCAD berechnet die Stegdicke aus der Zielkraft und der Dehnungsgrenze.
+// Stegdicke fest vorgeben (mm), 0 = automatisch
+rast_steg_manuell = 0;
+// Zielkraft zum Einfedern der Nase beim Einstecken (N, Kragarm-Rechnung, E = 2100 MPa)
+rast_steck_kraft = 10;
+// größte zulässige Dehnung der Rastzunge beim Einrasten
+rast_dehn_max = 0.03;
+// dünnste erlaubte Stegdicke (mm)
+rast_steg_min = 1.6;
+// Stützen im Hohlraum unter der ausgedünnten Zunge mitdrucken (abbrechbar)
+rast_stuetze = true;
+// Luft zwischen Stütze und Zunge (mm)
+stuetz_spalt = 0.2;
+// Wandstärke der Stützrippen (mm)
+stuetz_wand = 0.8;
+// Abstand der Stützrippen (mm)
+stuetz_abstand = 2.5;
 // Kantenrundung der Wand (Oberseite) und Fase (Bettseite)
 wand_r = 1.2;
 wand_c = 0.5;
@@ -745,6 +762,24 @@ module band_stueck(k, Lb, legs, side_w) {
 WL = zapfen_l + wand_h;                              // Gesamtlänge Zapfenspitze bis Oberkante
 // Nase: Auflaufschräge unten, ebene Rastfläche, Rastkante bei X_RAST (oben)
 X_RAST = zapfen_l - tasche_tiefe - rast_spiel_z;
+// Rastzunge: Dicke des federnden Stegs. Aus Einfederkraft F = E*b*t^3*d / (4*L^3) und Dehnung 1,5*t*d / L^2 berechnet,
+// nie dicker als die Wand und nie dünner als rast_steg_min. Die Rückseite (Bettseite) wird entsprechend ausgespart.
+RAST_L = zapfen_l - rast_wurzel;
+RAST_DELTA = rast_nase + zapfen_spiel;                                   // nötiger Federweg
+T_KRAFT = pow(4 * rast_steck_kraft * pow(RAST_L, 3) / (2100 * rast_zunge_b * RAST_DELTA), 1 / 3);
+T_DEHN = rast_dehn_max * RAST_L * RAST_L / (1.5 * RAST_DELTA);
+RAST_T = rast_steg_manuell > 0 ? min(rast_steg_manuell, wand_t)
+       : max(rast_steg_min, floor(10 * min(wand_t, T_KRAFT, T_DEHN)) / 10);
+RAST_D = wand_t - RAST_T;                                                // Tiefe der Aussparung auf der Rückseite
+RAST_KRAFT = 2100 * rast_zunge_b * pow(RAST_T, 3) * RAST_DELTA / (4 * pow(RAST_L, 3));
+// Aussparung unter der Zunge: von der Spitze bis zur Wurzel, dort 45°-Auslauf (ohne Stützen druckbar)
+module rast_aussparung(yc) if (RAST_D > 0.01)
+    translate([0, yc, 0]) rotate([90, 0, 0]) linear_extrude(rast_zunge_b, center = true)
+        polygon([[-1, -1], [RAST_L, -1], [RAST_L, 0], [RAST_L - RAST_D, RAST_D], [-1, RAST_D]]);
+// abbrechbare Stützrippen quer zur Zunge im Hohlraum (nur im Druckteil, nicht in der Montage)
+module rast_stuetzen(yc) if (rast_stuetze && RAST_D > stuetz_spalt + 0.3)
+    for (x = [1 : stuetz_abstand : RAST_L - RAST_D - 1])
+        translate([x, yc - (rast_zunge_b - 0.4) / 2, 0]) cube([stuetz_wand, rast_zunge_b - 0.4, RAST_D - stuetz_spalt]);
 module wand_bein(yc, h) {
     difference() {
         union() {
@@ -757,6 +792,8 @@ module wand_bein(yc, h) {
                 polygon([[X_RAST, wand_t - 0.3], [X_RAST, wand_t + rast_nase], [X_RAST - rast_flach, wand_t + rast_nase],
                          [X_RAST - rast_flach - rast_rampe, wand_t - 0.3]]);
         }
+        // Rückseite der Rastzunge ausdünnen
+        rast_aussparung(yc);
         // Schlitze neben der Zunge (Ende gerundet)
         for (sg = [-1, 1]) {
             y0 = yc + sg * (rast_zunge_b / 2 + rast_schlitz / 2) - rast_schlitz / 2;
@@ -782,7 +819,10 @@ module wand_roh(h = wand_h, beine = [-YC, YC], quer = true) {
     }
 }
 // druckfertig: flach, Mitte der Länge im Ursprung
-module seitenwand_stueck() translate([-WL / 2, 0, 0]) wand_roh();
+module seitenwand_stueck() translate([-WL / 2, 0, 0]) {
+    wand_roh();
+    for (yc = [-YC, YC]) rast_stuetzen(yc);
+}
 
 // Wand im Eimer (am +x- bzw. -x-Rand)
 module wand_am_rand(e) {
@@ -801,7 +841,10 @@ module tasche_probe() rotate([180, 0, 0]) difference() {
     }
     tasche_schnitt();
 }
-module wand_probe() translate([-(zapfen_l + PROBE_H) / 2, 0, 0]) wand_roh(h = PROBE_H, beine = [0], quer = false);
+module wand_probe() translate([-(zapfen_l + PROBE_H) / 2, 0, 0]) {
+    wand_roh(h = PROBE_H, beine = [0], quer = false);
+    rast_stuetzen(0);
+}
 
 // Lage eines Bandes im Eimer (am Scharnier der Kante e)
 module band_am_rand(e, pos) rotate([0, 0, e_ang(e)])
@@ -994,6 +1037,10 @@ if (WAND) {
              "), Oberkante ", PLATTE_OBEN_Z + wand_h, " mm über Boden, 2x drucken -> seitenwand_h", wand_h, "_2x.stl"));
     echo(str("Wand: innen x = ", WX_I, ", außen x = ", WX_O, " (Sack ", sack_b / 2, ", Öffnung ", OEFF[0], "); Stege y = ±",
              YE - wand_steg_b, " … ±", YE, "; Taschenblock bis x = ", L2 + TL_O, ", Rest zur Öffnung ", OEFF[0] - (L2 + TL_O), " mm"));
+    echo(str("Rastzunge: Steg ", RAST_T, " mm dick (Wand ", wand_t, " mm, Rückseite ", RAST_D, " mm ausgespart", rast_stuetze && RAST_D > 0.5 ? ", mit Stützrippen" : "",
+             "), Einsteckkraft ca. ", round(10 * RAST_KRAFT) / 10, " N (Ziel ", rast_steck_kraft, " N), Grenzdicken: Kraft ", round(100 * T_KRAFT) / 100, " mm, Dehnung ", round(100 * T_DEHN) / 100, " mm"));
+    if (RAST_T <= rast_steg_min + 0.001 && RAST_KRAFT > 1.3 * rast_steck_kraft)
+        echo("WARNUNG: Rastzunge an der Mindestdicke, Einsteckkraft trotzdem über dem Ziel – rast_nase verkleinern oder zapfen_l vergrößern.");
     echo(str("Rastzunge: Länge ", zapfen_l - rast_wurzel, " mm, Einfederung ", rast_nase + zapfen_spiel, " mm, Dehnung ca. ",
              round(1000 * RAST_DEHNUNG) / 10, " %, Haltefläche ", rast_nase - zapfen_spiel, " mm; Durchbiegung der Wand oben bei 5 N ca. ",
              round(10 * WAND_DURCH) / 10, " mm (Biegung der Stege), mit Spiel im Zapfen höchstens ", round(10 * WAND_SPIEL_OBEN) / 10, " mm"));
@@ -1064,7 +1111,7 @@ if ((scharniere_lang > 0 && laenge_lang > UX) || (schmalseite_typ == "band" && s
 
 // ---- Seitenwand und Öffnung (Version 3 und feste Trichteröffnung)
 // größte Dehnung der Rastzunge beim Einrasten (Kragarm, Dicke wand_t, Länge zapfen_l - rast_wurzel)
-RAST_DEHNUNG = 1.5 * wand_t * (rast_nase + zapfen_spiel) / pow(zapfen_l - rast_wurzel, 2);
+RAST_DEHNUNG = 1.5 * RAST_T * RAST_DELTA / pow(RAST_L, 2);
 // Durchbiegung der Wandoberkante bei 5 N (zwei Stege 20 x 4, E = 2100 MPa), und Zusatz durch das Spiel im Zapfen
 WAND_DURCH = 5 * pow(wand_h, 3) / (3 * 2100 * 2 * (wand_steg_b * pow(wand_t, 3) / 12));
 WAND_SPIEL_OBEN = WAND_DURCH + 2 * zapfen_spiel / tasche_tiefe * wand_h;

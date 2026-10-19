@@ -80,6 +80,7 @@ Pinbelegung am XIAO (für eigene Aufbauten): D0/A0 Akkumessung, D1 Sensor A, D2 
 1. Magnete in die Taschen der Griffunterseite kleben (entgegengesetzte Pole nach unten).
 2. Sensorplatine mit den Bauteilen nach vorne in die Bogentasche der Platte legen, Kabel durch das Loch nach hinten, mit einem Tropfen Kleber sichern.
 3. Trägerplatine mit dem XIAO von hinten in das Fach setzen, Bauteile nach vorne, USB-C zur Öffnung unten.
+   Die USB-Öffnung ist nur 9,8 × 4,1 mm: Die Buchse sitzt ca. 0,7 mm hinter der Außenfläche, die Stecker-Ummantelung liegt außen an (`usb_oeff`, `usb_vers`). Vorher `fach_test_*.stl` drucken und mit dem Kabel prüfen; nach dem Nachmessen von `usb_ueber` wird die Lage automatisch angepasst.
 4. Akku mit Schaumstoffstreifen darauf legen; er drückt die Platine gegen die Auflagen.
 5. Weiter wie in der README (Schaft, Platte anschrauben, Griff, Querschraube).
 

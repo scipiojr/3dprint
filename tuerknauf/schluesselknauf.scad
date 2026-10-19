@@ -97,7 +97,7 @@ xiao_d = 1.0;                  // Platinendicke (Super Mini nachmessen, bis 1,2 
 usb_ueber = sm ? 2.0 : 1.0;    // Überstand USB-C-Buchse über die Platinenkante (nachmessen! Super Mini: aus dem Foto)
 xiao_bt   = 3.6;               // Bauteilhöhe auf der Oberseite (USB-C-Buchse 3,2)
 wand_u    = 1.5;     // Wand unten
-usb_oeff  = [13.0, 7.2];   // Öffnung für den USB-C-Stecker (Breite, Höhe) – passt für übliche Kabel
+usb_oeff  = [9.8, 4.1];   // Öffnung = Buchse (8,94 x 3,26) + Spiel; Stecker-Ummantelung liegt außen an
 halter_sep = false;  // gestapelt: false = XIAO-Tasche direkt in der Platte (braucht Stützen im Fach),
                      //            true  = separater XIAO-Halter (alles ohne Stützen druckbar)
 halter_sp = 0.2;     // Spiel XIAO-Halter im Fach (je Seite)
@@ -106,11 +106,12 @@ halter_sp = 0.2;     // Spiel XIAO-Halter im Fach (je Seite)
 // des XIAO (-10,5) bis 28,5 mm darüber. Bauteile zeigen nach vorne, eingesetzt wird von hinten.
 // Super Mini: Platine 24 x 38,75 mm, beginnt an der USB-Kante (-12,75); unter dem Modul ein Fenster (USB-Laschen, Akku-Pads).
 tr_b = sm ? 24.0 : 22.0; tr_unten = sm ? -xiao_l/2 : -10.5; tr_oben = sm ? 26.0 : 28.5;
+usb_vers = (gestapelt && !halter_sep) ? min(wand_u - 0.7, usb_ueber) : 0;   // Buchse sitzt fast bündig in der Bodenwand
 tr_d = frei ? 0 : 0.8;
 tr_luft = frei ? 1.4 : 0.6;   // Luft hinter Trägerplatine bzw. Modul (Lötstellen, Drähte an B+/B−)
 tr_bt   = 1.9;       // Bauteilraum vor der Platine (Taster 1,5 mm, Lötstellen der Kabel)
 tr_sp   = 0.2;       // Spiel je Seite
-bat_l = frei ? max(46, usb_ueber + xiao_l + ant_abst + ada[1] + 2*tr_sp + 1) : 46;   // Akkufach-Länge (frei: Modul + Breakout)
+bat_l = frei ? max(46, usb_ueber - usb_vers + xiao_l + ant_abst + ada[1] + 2*tr_sp + 1) : 46;   // Akkufach-Länge (frei: Modul + Breakout)
 // XIAO: RGB-LED und Reset-Taster sitzen auf der Trägerplatine.
 // Super Mini: WS2812 (GPIO8) und RST-Taster sitzen auf dem Modul (Lage aus dem Produktfoto, nachmessen).
 tr_led  = sm ? [ 5.70,  2.19] : [-6.8, 17.2];   // RGB-LED
@@ -135,7 +136,7 @@ zg1  = ztop + 0.6 + dach;    // Griff oben
 zpin = c + pin_z;
 y_in_unten = gestapelt ? fach_oben - bat_l                                  // Innenseite Bodenwand
                        : fach_oben - bat_l - 1.5 - (usb_ueber + xiao_l + 0.3);
-y_x0      = (gestapelt && halter_sep) ? y_in_unten + halter_sp : y_in_unten;   // Vorderkante USB-Buchse
+y_x0      = (gestapelt && halter_sep) ? y_in_unten + halter_sp : y_in_unten - usb_vers;   // Vorderkante USB-Buchse
 halter_l  = usb_ueber + xiao_l + 0.3 + 2.0;                    // Länge XIAO-Halter (2 mm Endwand)
 y_x_oben  = y_x0 + usb_ueber + xiao_l + 0.3;                   // Oberkante XIAO-Tasche
 tr_y0     = y_x0 + usb_ueber - tr_unten;                       // Plattenkoordinate der XIAO-Mitte
@@ -200,13 +201,14 @@ module traeger_tasche() {
 module xiao_tasche(y0, z_unten) {
   bx = xiao_b + 0.3;
   translate([-bx/2, y0 + usb_ueber, z_unten]) cube([bx, xiao_l + 0.3, z_pf - z_unten]);               // Platine + Raum dahinter
-  translate([-bx/2 + 1, y0, z_pf - 0.01]) cube([bx - 2, xiao_l + 0.3 + usb_ueber, xiao_bt + 1]);       // Bauteilraum
+  yb = max(y0, y_in_unten);
+  translate([-bx/2 + 1, yb, z_pf - 0.01]) cube([bx - 2, y0 + xiao_l + 0.3 + usb_ueber - yb, xiao_bt + 1]);       // Bauteilraum
   hull() {                                                                                             // 1 mm Auflage, 45°
     translate([-bx/2,     y0 + usb_ueber, z_pf - 0.01]) cube([bx,     xiao_l + 0.3, 0.01]);
     translate([-bx/2 + 1, y0 + usb_ueber, z_pf + 0.99]) cube([bx - 2, xiao_l + 0.3, 0.01]);
   }
   translate([-bx/2, y0 + usb_ueber, z_pf - 0.01]) cube([bx, 5, xiao_bt + 1]);                           // USB-Ende volle Breite (Taster)
-  translate([-4.7, y0 - 0.5, z_unten]) cube([9.4, usb_ueber + 0.51, z_pf + xiao_bt + 1 - z_unten]);     // Durchgang USB-Buchse
+  translate([-4.7, y0 - 0.1, z_unten]) cube([9.4, usb_ueber + 0.11, z_pf + xiao_bt + 1 - z_unten]);     // Durchgang USB-Buchse
 }
 
 module elektronikfach() {
@@ -216,20 +218,20 @@ module elektronikfach() {
     // Raum für den XIAO-Halter über dem unteren Teil des Akkus
     translate([-bat_b/2, y_in_unten - 0.01, bat_h - 0.01]) cube([bat_b, halter_l + 2*halter_sp + 0.01, z_pf + xiao_bt - bat_h + 0.01]);
   } else if (frei) {
-    xiao_tasche(y_in_unten, bat_h - 0.01);      // Modul direkt über dem Akku, Drähte dahinter
+    xiao_tasche(y_x0, bat_h - 0.01);      // Modul direkt über dem Akku, Drähte dahinter
     translate([-ada[0]/2 - tr_sp, ada_y0, bat_h - 0.01]) cube([ada[0] + 2*tr_sp, ada[1] + 2*tr_sp, tr_luft + ada_h + 0.01]);  // Breakout
     led_fenster();
     taster_loecher();
   } else if (gestapelt) {
     traeger_tasche();                           // Trägerplatine über dem Akku
-    xiao_tasche(y_in_unten, z_tr - 0.01);       // XIAO darauf (Bauteile, USB-Durchgang)
+    xiao_tasche(y_x0, z_tr - 0.01);       // XIAO darauf (Bauteile, USB-Durchgang)
     // Durchgang für den Überstand der USB-Buchse beim Einsetzen von hinten (unter der Buchse bis zur Akkufach-Decke)
-    translate([-4.7, y_in_unten - 0.5, bat_h - 0.01]) cube([9.4, usb_ueber + tr_sp + 0.51, z_tr - bat_h + 0.02]);
+    translate([-4.7, y_x0 - 0.1, bat_h - 0.01]) cube([9.4, usb_ueber + tr_sp + 0.11, z_tr - bat_h + 0.02]);
     led_fenster();                              // Lichtfenster (separat als transparenter Körper)
     taster_loecher();                           // Reset mit der Büroklammer
   } else {
     translate([-8, y_x_oben - 0.1, -1]) cube([16, 1.7, 1 + 2.4]);   // Kabeldurchgang im Trennsteg
-    xiao_tasche(y_in_unten, -1);
+    xiao_tasche(y_x0, -1);
   }
   // Öffnung in der Bodenwand: so groß wie die Steckerummantelung, damit der Stecker immer ganz einrastet
   hull() for (sx = [-1, 1], sz = [-1, 1]) translate([sx*(usb_oeff[0]/2 - 1.5), y_in_unten + 0.01, z_usb + sz*(usb_oeff[1]/2 - 1.5)]) rotate([90,0,0]) cylinder(r = 1.5, h = wand_u + 1, $fn = 32);

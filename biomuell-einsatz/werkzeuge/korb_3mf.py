@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Baut korb_v3.3mf (Bambu-Studio-/OrcaSlicer-Projekt) aus den druckfertigen STL-Dateien.
+"""Baut korb.3mf (Bambu-Studio-/OrcaSlicer-Projekt) aus den druckfertigen STL-Dateien.
 
 Aufruf: korb_3mf.py <plattform.stl> <buegel.stl> <seitenwand.stl> <aus.3mf> [titel]
 
-Fünf Platten wie in korb_v2.3mf: Plattform, Bügel Langseite A/B, Seitenwand A/B.
+Fünf Platten wie im früheren Korb Version 2 (Git-Historie): Plattform, Bügel Langseite A/B, Seitenwand A/B.
 Einstellungen je Objekt: Plattform 4 Wände / 25 % Gyroid / Brim 5 mm,
 Bügel 3 Wände / 100 %, Seitenwand 4 Wände / 100 % (steif!), oben/unten 5 Lagen, keine Stützen.
 Die STL-Dateien sind schon druckfertig orientiert (aus der SCAD-Datei exportiert).

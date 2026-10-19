@@ -3,9 +3,9 @@
 und behält alle Druckeinstellungen, Platten und Positionen der Vorlage.
 
   trichter_3mf.py einfach    <vorlage.3mf> <hälfte_A.stl> <hälfte_B.stl> <aus.3mf>
-        für trichter_v2.3mf (zwei Objekte in 3D/3dmodel.model, PrusaSlicer- und Bambu-Einstellungen)
+        für trichter.3mf (zwei Objekte in 3D/3dmodel.model, PrusaSlicer- und Bambu-Einstellungen)
   trichter_3mf.py druckhilfe <vorlage.3mf> <hälfte_A.stl> <steg_A.stl> <hälfte_B.stl> <steg_B.stl> <aus.3mf>
-        für trichter_v2_druckhilfe.3mf (je Platte Hälfte + abtrennbarer Steg als zwei Teile)
+        für trichter_druckhilfe.3mf (je Platte Hälfte + abtrennbarer Steg als zwei Teile)
 
 Die Netze werden auf die Mitte ihrer Bounding-Box (bei Hälfte + Steg: gemeinsam) gelegt, wie in den Vorlagen.
 Die STL-Dateien sind druckfertig orientiert (aus der SCAD-Datei exportiert, Kragenoberseite auf dem Bett).

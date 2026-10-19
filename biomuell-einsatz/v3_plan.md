@@ -17,7 +17,7 @@ Alles Folgende steht in `biomuell_system.scad`; der ursprüngliche Plan darunter
 | Stege bündig nach der Eckschräge | `wand_eck_abstand = 0`, Stege y = ±47 … ±67 | wie geplant; der Block reicht dabei bis y = ±67 (1,8 mm zur Öffnung) |
 | Durchbiegung 3–4 mm bei 5 N | 3,7 mm (Stege), mit Spiel im Zapfen bis 6,6 mm | Spiel 0,2 mm je Seite über 14 mm Führung kippt die Wand oben um bis ca. 2,9 mm; die Konsole meldet beides |
 
-Geprüft (Standardwerte): Netze dicht, Wand und Plattform durchdringen sich nicht, waagerechter Abstand zur Öffnung Block 1,8 mm / Wand mit Nase 3,0 mm, Rastzunge Dehnung ca. 2,5 % bei 0,8 mm Haltefläche, `korb_v3.3mf` gültig. **Nicht geprüft:** Einstecken und Rasten am Probedruck, Passung im Eimer, Slicer-Import.
+Geprüft (Standardwerte): Netze dicht, Wand und Plattform durchdringen sich nicht, waagerechter Abstand zur Öffnung Block 1,8 mm / Wand mit Nase 3,0 mm, Rastzunge Dehnung ca. 2,5 % bei 0,8 mm Haltefläche, `korb.3mf` gültig. **Nicht geprüft:** Einstecken und Rasten am Probedruck, Passung im Eimer, Slicer-Import.
 
 Neu gerendert wurden Plattform, Seitenwand und Rastprobe; Trichter, Mittelteil und Bügel sind unverändert.
 

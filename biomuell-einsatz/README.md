@@ -41,14 +41,15 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 | V3-3 | 19:54 | Mittelteil optional: `mittelteil = 0` als Standard. Trichter wie gemessen 280,5 mm lang aus zwei Hälften à 140,25 mm (je 2,5 mm länger als mit Mittelteil), Öffnung unverändert 217 × 172 (feste Parameter), Schrauben M3 × 16. Neu: `trichter_v2_haelfte_2x.stl`, `lehre_haelfte_2x.stl`, `trichter_v2.3mf`, `trichter_v2_druckhilfe.3mf`, `druckhilfe_steg.stl`; die bisherige Passlehre heißt jetzt `lehre_haelfte_mittelteilversion_2x.stl`. |
 | V3-4 | 14:10 | Rastnase vergrößert: `rast_nase` 1,0 → 1,5 mm, `tasche_relief` 1,2 → 1,5, `rast_wurzel` 3 → 1 (Zunge 19 mm, Dehnung ca. 2,8 %, Haltefläche nominal 1,3 mm). Grund: Die Seitenwände rasteten nicht spürbar ein. Plattform, Seitenwand, Rastprobe und `korb.3mf` neu. |
 | V3-5 | 15:04 | Scharnier: Haken lässt sich nur noch bei 180° nach unten gedrehtem Bügel (±7°) einhängen und abnehmen (Abflachungen des Stifts jetzt oben/unten statt seitlich). Die Plattform tritt am Scharnier um 2 mm zurück (`schlitz_zugabe = 2`), damit die Hakenrundung nicht schabt. Bügel und Bänder bleiben unverändert, Plattform und `korb.3mf` neu. |
+| V3-6 | 15:49 | Plattform niedriger: Beine 10 mm kürzer (`bodenabstand` 50 → 40), Platte 2 mm dünner (`platte_t` 6 → 4). Plattenoberseite jetzt 44 statt 56 mm über dem Boden. Die Bügel werden dadurch 10 mm länger (249,75 statt 239,75 mm), damit die Griffe oben bleiben; `griff_ueber_absatz` 5 → 3, damit der Bügel unter 250 mm bleibt und ungeteilt druckbar ist. Plattform, Bügel, Band (V2) und `korb.3mf` neu. |
 | `vergleich_v1_v2.png` | 1 | Original | Vergleich Version 1 (rot) und Version 2 (grün), Schnitte durch die Trichterschräge |
 | `trichter_haelfte_2x.stl` | V3-3 | Original | Trichterhälfte (Standard, ohne Mittelteil), Eimer 283 mm, Öffnung 217 × 172: 140,25 × 207,5 × 59, 2× drucken |
 | `trichter.3mf` | V3-3 | Original | Trichter ohne Druckhilfe, ohne Mittelteil (je Platte eine Hälfte), Einstellungen wie zuvor; mit `werkzeuge/trichter_3mf.py` neu erzeugt |
 | `druckhilfe_steg.stl` | V3-3 | Original | Druckhilfe-Steg für Eimer 283 mm (Hälfte 140,25 mm) |
 | `trichter_druckhilfe.3mf` | V3-3 | Original | wie zuvor mit abtrennbarer Druckhilfe, ohne Mittelteil |
-| `plattform.stl` | V3-2 | Original | Plattform **210** × 166 × 56 (213,4 mit den Ohren der Taschenblöcke) mit abgeflachten Scharnierstiften an den Langseiten und vier Taschen für die Seitenwände, Eckfüße bei x = ±78,6, 1× drucken. Die Plattform der Version 2 (206 mm, mit Scharnier an den Schmalseiten) steht in der Git-Historie; sie passt zu `band_schmalseite_2x.stl`. |
-| `buegel_langseite_2x.stl` | 5 | Original | Bügel Langseite mit 2 Haken (Kanal), 239,75 × 134, 2× drucken |
-| `band_schmalseite_2x.stl` | 5 | Original | Band Schmalseite mit 1 Haken (Kanal), 239,75 × 124, 2× drucken. Nur für die Plattform der Version 2 (`schmalseite_typ = "band"`). |
+| `plattform.stl` | V3-2 | Original | Plattform **210** × 166 × 44 (213,4 mit den Ohren der Taschenblöcke) mit abgeflachten Scharnierstiften an den Langseiten und vier Taschen für die Seitenwände, Eckfüße bei x = ±78,6, 1× drucken. Die Plattform der Version 2 (206 mm, mit Scharnier an den Schmalseiten) steht in der Git-Historie; sie passt zu `band_schmalseite_2x.stl`. |
+| `buegel_langseite_2x.stl` | 5 | Original | Bügel Langseite mit 2 Haken (Kanal), 249,75 × 134, 2× drucken |
+| `band_schmalseite_2x.stl` | 5 | Original | Band Schmalseite mit 1 Haken (Kanal), 249,75 × 124, 2× drucken. Nur für die Plattform der Version 2 (`schmalseite_typ = "band"`). |
 | `scharnier_flachlage.png` | V3-5 | Original | Scharnier in vier Stellungen (aufrecht, waagerecht, 150°: gehalten; 180° nach unten: löst), 2D-Simulation mit `werkzeuge/scharnier_pruefung.py` |
 | `seitenwand_h100_2x.stl` | V3-2 | Original | Seitenwand 120 × 134 × 5 (Höhe 100 mm über der Plattenoberseite), flach, 2× drucken |
 | `rastprobe.stl` | V3-2 | Original | Rastprobe: Taschenblock mit Plattenstück und ein kurzes Wandstück, vorab drucken |
@@ -66,11 +67,11 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 
 | `teil` | Anzahl | Maße (mm) | Beschreibung |
 |---|---|---|---|
-| `plattform` | 1 | 210 × 166 × 56 | Massive 6-mm-Platte mit 9 Langlöchern, 4 runde Füße (50 mm Bodenabstand), 4 abgeflachte Scharnierstifte (Bügel) und 4 Taschen für die Seitenwände |
-| `langseite` | 2 | 239,75 × 134 | Bügel mit zwei Haken und Griffschlaufe |
+| `plattform` | 1 | 210 × 166 × 44 | Massive 4-mm-Platte mit 9 Langlöchern, 4 runde Füße (40 mm Bodenabstand), 4 abgeflachte Scharnierstifte (Bügel) und 4 Taschen für die Seitenwände |
+| `langseite` | 2 | 249,75 × 134 | Bügel mit zwei Haken und Griffschlaufe |
 | `seitenwand` | 2 | 120 × 134 × 5 | Seitenwand (∩): zwei Stege 20 × 4 mm, Quersteg, Steckzapfen mit Rastzunge; Höhe `wand_h` |
 | `rastprobe` | 1 + 1 | 38 × 62 × 14 | Taschenblock mit Plattenstück und kurzes Wandstück zum Probieren von Spiel und Rastkraft |
-| `schmalseite` | 2 | 239,75 × 124 | Band mit einem Haken und Griffschlaufe, nur bei `schmalseite_typ = "band"` (Version 2) |
+| `schmalseite` | 2 | 249,75 × 124 | Band mit einem Haken und Griffschlaufe, nur bei `schmalseite_typ = "band"` (Version 2) |
 | `trichter` | 2 | 140,25 × 207,5 × 59 | Trichterhälfte, Keilwand, Laschen mit M3-Löchern an der Fuge (mit `mittelteil = 5`: 137,75) |
 | `mittelteil` | 2 | 5 × 207,5 × 59 | **Optional** (nur bei `mittelteil > 0`, Standard 0): Zwischenstück je Längsseite zwischen den Trichterhälften, z. B. um schon gedruckte Hälften weiterzuverwenden |
 | `lehre` | 2 | Hälften | Passlehre für den Trichterkragen – zuerst drucken und im Eimer prüfen |

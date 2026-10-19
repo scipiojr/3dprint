@@ -86,11 +86,11 @@ platte_b = 166;
 // Schenkellänge der 45°-Eckschrägen
 platte_fase = 16;
 // Plattenstärke (massiv, oben und unten geschlossen)
-platte_t = 6;
+platte_t = 4;
 // Fase an Plattenrand und Lochkanten
 platte_kante = 1;
 // Bodenabstand: Plattenunterseite bis Eimerboden (= Fußhöhe)
-bodenabstand = 50;
+bodenabstand = 40;
 // Lochform
 loch_form = "oval"; // [oval, rund]
 // Lochlänge (bei "rund" = Durchmesser loch_b)
@@ -146,8 +146,8 @@ wange = 6;
 laenge_lang = 0;
 // Gesamtlänge Bügel/Band Schmalseite, 0 = automatisch
 laenge_kurz = 0;
-// Griff-Oberkante über dem Absatz (muss unter der Eimerkante bleiben)
-griff_ueber_absatz = 5;
+// Griff-Oberkante über dem Absatz (muss unter der Eimerkante bleiben). 3 statt 5: hält den Bügel unter 250 mm (ungeteilt druckbar)
+griff_ueber_absatz = 3;
 band_b = 22;
 band_t = 1.6;
 hals_t = 2.0;

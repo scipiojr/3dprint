@@ -200,7 +200,7 @@ tasche_tiefe = 14;
 // Wandstärke des Taschenblocks nach außen (Rest zur Trichteröffnung beachten!)
 tasche_wand = 2.0;
 // Freiraum hinter der Rastzunge in der Tasche (Zunge federt hierhin ein)
-tasche_relief = 3;
+tasche_relief = 1;
 // Höhe der Rastnase (Überstand nach außen)
 rast_nase = 2;
 // Breite der federnden Rastzunge
@@ -771,6 +771,8 @@ T_DEHN = rast_dehn_max * RAST_L * RAST_L / (1.5 * RAST_DELTA);
 RAST_T = rast_steg_manuell > 0 ? min(rast_steg_manuell, wand_t)
        : max(rast_steg_min, floor(10 * min(wand_t, T_KRAFT, T_DEHN)) / 10);
 RAST_D = wand_t - RAST_T;                                                // Tiefe der Aussparung auf der Rückseite
+// nötiger Freiraum hinter der Zunge: Nase minus Spiel außen/innen minus die eigene Aussparung der Zunge
+RELIEF_MIN = max(0, rast_nase - RAST_D - 2 * zapfen_spiel);
 RAST_KRAFT = 2100 * rast_zunge_b * pow(RAST_T, 3) * RAST_DELTA / (4 * pow(RAST_L, 3));
 // Aussparung unter der Zunge: von der Spitze bis zur Wurzel, dort 45°-Auslauf (ohne Stützen druckbar)
 module rast_aussparung(yc) if (RAST_D > 0.01)
@@ -1039,6 +1041,9 @@ if (WAND) {
              YE - wand_steg_b, " … ±", YE, "; Taschenblock bis x = ", L2 + TL_O, ", Rest zur Öffnung ", OEFF[0] - (L2 + TL_O), " mm"));
     echo(str("Rastzunge: Steg ", RAST_T, " mm dick (Wand ", wand_t, " mm, Rückseite ", RAST_D, " mm ausgespart", rast_stuetze && RAST_D > 0.5 ? ", mit Stützrippen" : "",
              "), Einsteckkraft ca. ", round(10 * RAST_KRAFT) / 10, " N (Ziel ", rast_steck_kraft, " N), Grenzdicken: Kraft ", round(100 * T_KRAFT) / 100, " mm, Dehnung ", round(100 * T_DEHN) / 100, " mm"));
+    echo(str("Freiraum hinter der Zunge: ", tasche_relief, " mm (mindestens ", round(10 * RELIEF_MIN) / 10, " mm nötig: Nase ", rast_nase, " - Aussparung der Zunge ", RAST_D,
+             " - Spiel ", 2 * zapfen_spiel, "). Die ausgedünnte Zunge federt zuerst in ihre eigene Aussparung und liegt dann unter Spannung am Freiraum an."));
+    if (tasche_relief < RELIEF_MIN + 0.2) echo("WARNUNG: tasche_relief zu klein für die Nase – die Zunge kann nicht weit genug einfedern (tasche_relief vergrößern).");
     if (RAST_T <= rast_steg_min + 0.001 && RAST_KRAFT > 1.3 * rast_steck_kraft)
         echo("WARNUNG: Rastzunge an der Mindestdicke, Einsteckkraft trotzdem über dem Ziel – rast_nase verkleinern oder zapfen_l vergrößern.");
     echo(str("Rastzunge: Länge ", zapfen_l - rast_wurzel, " mm, Einfederung ", rast_nase + zapfen_spiel, " mm, Dehnung ca. ",

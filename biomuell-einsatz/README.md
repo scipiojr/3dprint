@@ -180,6 +180,11 @@ Die Griffbänder der Schmalseiten sind durch zwei steife, abnehmbare **∩-förm
 
 Plan, Entscheidungen und Abweichungen vom Plan: [`v3_plan.md`](v3_plan.md).
 
+> **Hinweis (V3, Stand 4): Rastnase noch nicht am Druck geprüft.**
+> Die erste Fassung (`rast_nase = 1,0`) rastete nicht spürbar ein, die Wand glitt ohne Widerstand wieder heraus. Seit Stand 4 gilt `rast_nase = 1,5`, `tasche_relief = 1,5`, `rast_wurzel = 1` (Zunge 19 mm, Dehnung ca. 2,8 %, Haltefläche nominal 1,3 mm). Das ist nur gerechnet. **Vor dem Druck der ganzen Teile zuerst `rastprobe.stl` drucken** und prüfen, ob die Wand hörbar einrastet und nicht zurückgleitet.
+> Reicht es nicht: `rast_nase` bis 1,8 mm erhöhen (dann `rast_wurzel` 0,5 oder `zapfen_l` größer wählen, die Konsole warnt ab 3 % Dehnung) oder die Rastkante leicht hinterschneiden. Das hält besser, macht aber das Lösen mit dem Daumen schwerer.
+> Die Plattform ist wegen der geänderten Tasche neu zu drucken. Bügel und Trichter bleiben unverändert.
+
 ## Stand
 
 Laufender Stand und offene Punkte stehen in [`agent.md`](agent.md).

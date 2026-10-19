@@ -194,15 +194,15 @@ tasche_tiefe = 14;
 // Wandstärke des Taschenblocks nach außen (Rest zur Trichteröffnung beachten!)
 tasche_wand = 2.0;
 // Freiraum hinter der Rastzunge in der Tasche (Zunge federt hierhin ein)
-tasche_relief = 1.2;
+tasche_relief = 1.5;
 // Höhe der Rastnase (Überstand nach außen)
-rast_nase = 1.0;
+rast_nase = 1.5;
 // Breite der federnden Rastzunge
 rast_zunge_b = 8;
 // Breite der beiden Schlitze neben der Zunge
 rast_schlitz = 1.0;
 // Abstand der Schlitz-Enden (Zungenwurzel) von der Schulter
-rast_wurzel = 3;
+rast_wurzel = 1;
 // Länge der Auflaufschräge der Nase
 rast_rampe = 3;
 // Länge der ebenen Rastfläche der Nase

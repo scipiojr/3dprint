@@ -202,7 +202,7 @@ tasche_wand = 2.0;
 // Freiraum hinter der Rastzunge in der Tasche (Zunge federt hierhin ein)
 tasche_relief = 3;
 // Höhe der Rastnase (Überstand nach außen)
-rast_nase = 3;
+rast_nase = 2;
 // Breite der federnden Rastzunge
 rast_zunge_b = 8;
 // Breite der beiden Schlitze neben der Zunge

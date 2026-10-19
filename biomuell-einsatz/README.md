@@ -43,6 +43,7 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 | V3-5 | 15:04 | Scharnier: Haken lässt sich nur noch bei 180° nach unten gedrehtem Bügel (±7°) einhängen und abnehmen (Abflachungen des Stifts jetzt oben/unten statt seitlich). Die Plattform tritt am Scharnier um 2 mm zurück (`schlitz_zugabe = 2`), damit die Hakenrundung nicht schabt. Bügel und Bänder bleiben unverändert, Plattform und `korb.3mf` neu. |
 | V3-6 | 15:49 | Plattform niedriger: Beine 10 mm kürzer (`bodenabstand` 50 → 40), Platte 2 mm dünner (`platte_t` 6 → 4). Plattenoberseite jetzt 44 statt 56 mm über dem Boden. Die Bügel werden dadurch 10 mm länger (249,75 statt 239,75 mm), damit die Griffe oben bleiben; `griff_ueber_absatz` 5 → 3, damit der Bügel unter 250 mm bleibt und ungeteilt druckbar ist. Plattform, Bügel, Band (V2) und `korb.3mf` neu. |
 | V3-7 | 16:01 | Rastnase 1,5 mm weiter heraus: `rast_nase` 1,5 → 3,0 mm. Folgen: Zapfen 20 → 28 mm (`zapfen_l`), damit die Rastzunge 27 mm lang bleibt (Dehnung ca. 2,6 %, Haltefläche nominal 2,8 mm); `tasche_relief` 1,5 → 3,0 (Einfederweg), `rast_rampe` 3 → 5 (flachere Auflaufschräge). Seitenwand jetzt 128 × 134 × 7 mm. Plattform, Seitenwand, Rastprobe und `korb.3mf` neu. |
+| V3-8 | 16:13 | Neue Prüfung der Bügellänge gegen den Druckraum: Die Konsole warnt, wenn der Bügel nicht ungeteilt passt, und bietet an, stattdessen den Trichter tiefer zu ziehen (`bei_zu_langem_buegel = "trichter_tiefer"`, Griffe und Trichterschräge um das Fehlmaß tiefer). Standard bleibt `warnen`; mit den heutigen Werten ist der Bügel 249,75 mm lang und passt bei `bett_x/y = 260`. Maße sonst unverändert. |
 | `vergleich_v1_v2.png` | 1 | Original | Vergleich Version 1 (rot) und Version 2 (grün), Schnitte durch die Trichterschräge |
 | `trichter_haelfte_2x.stl` | V3-3 | Original | Trichterhälfte (Standard, ohne Mittelteil), Eimer 283 mm, Öffnung 217 × 172: 140,25 × 207,5 × 59, 2× drucken |
 | `trichter.3mf` | V3-3 | Original | Trichter ohne Druckhilfe, ohne Mittelteil (je Platte eine Hälfte), Einstellungen wie zuvor; mit `werkzeuge/trichter_3mf.py` neu erzeugt |
@@ -108,6 +109,8 @@ Die Maße stehen im Abschnitt „Eimer – gemessen“:
 | `oeffnung_l`, `oeffnung_b` | 217, 172 | Trichteröffnung, **fest** (nicht mehr von der Plattform abhängig) |
 | `schmalseite_typ` | wand | `wand` = Seitenwand (Version 3), `band` = Band mit Griffschlaufe (Version 2) |
 | `wand_h` | 100 | Wandhöhe ab Plattenoberseite; andere Höhen passen in dieselbe Plattform |
+| `griff_ueber_absatz` | 3 | Griff-Oberkante über dem Absatz; daraus ergibt sich die Bügellänge (aktuell 249,75 mm) |
+| `bei_zu_langem_buegel` | warnen | Passt der Bügel nicht in den Druckraum (länger als `bett` − 2 × `bett_rand`), warnt die Konsole und bietet an, `trichter_tiefer` zu wählen: Griffe und Trichter rücken dann gemeinsam um das Fehlmaß nach unten, der Bügel bleibt ungeteilt. Bei `warnen` wird der Bügel geteilt und geklebt |
 | `wand_t` | 4 | Wanddicke (Steifigkeit ~ Dicke³) |
 
 Bügellänge und Griffhöhe werden aus `absatz_z` berechnet (`laenge_lang/kurz = 0`). Die Trichteröffnung ist fest (`oeffnung_l/b`); Plattform, Wand und Taschenblöcke müssen hineinpassen, die Konsole warnt bei weniger als 1,5 mm Abstand.

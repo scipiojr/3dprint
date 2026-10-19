@@ -148,6 +148,10 @@ laenge_lang = 0;
 laenge_kurz = 0;
 // Griff-Oberkante über dem Absatz (muss unter der Eimerkante bleiben). 3 statt 5: hält den Bügel unter 250 mm (ungeteilt druckbar)
 griff_ueber_absatz = 3;
+// Was tun, wenn die automatische Bügellänge nicht in den Druckraum passt (länger als bett - 2 * bett_rand)?
+// "warnen": Bügel wird geteilt und geklebt, die Konsole nennt Vorschläge.
+// "trichter_tiefer": Griff-Oberkante und Trichter rücken gemeinsam nach unten (Bügel kürzer, Trichter um das Fehlmaß tiefer).
+bei_zu_langem_buegel = "warnen"; // [warnen, trichter_tiefer]
 band_b = 22;
 band_t = 1.6;
 hals_t = 2.0;
@@ -333,6 +337,12 @@ W2 = platte_b / 2;
 ZB = -platte_t;
 ZF = ZB - bodenabstand;
 PLATTE_OBEN_Z = bodenabstand + platte_t;
+// Automatische Bügel-/Bandlänge (Griff-Oberkante auf absatz_z + griff_ueber_absatz) gegen den Druckraum
+LEN_AUTO = absatz_z + griff_ueber_absatz - (PLATTE_OBEN_Z + stift_z - R_OUT);
+LEN_AUTO_GENUTZT = (scharniere_lang > 0 && laenge_lang == 0) || ((schmalseite_typ == "band") && scharniere_kurz > 0 && laenge_kurz == 0);
+FEHLMASS = LEN_AUTO_GENUTZT ? max(0, ceil((LEN_AUTO - UX + 0.05) * 10) / 10) : 0;   // Meter, um die der Bügel zu lang ist
+TIEFER = bei_zu_langem_buegel == "trichter_tiefer" ? FEHLMASS : 0;     // so viel rückt Griff und Trichter nach unten
+TT = trichter_tiefe + TIEFER;                                       // wirksame Trichtertiefe
 PLATTE_OKT = [L2, W2, platte_fase, platte_fase];
 
 function seite(e, n, a) = n == 2 ? [[e, -a / 2], [e, a / 2]] : n == 1 ? [[e, 0]] : [];
@@ -373,13 +383,13 @@ OEFF = [oeffnung_l / 2, oeffnung_b / 2, oeffnung_fase, oeffnung_fase * RATIO];
 // Abstand eines Punktes (x, y) von der Öffnungskante (positiv = innerhalb)
 function oeff_abstand(x, y) = let(s = sqrt(OEFF[2] * OEFF[2] + OEFF[3] * OEFF[3]))
     min(OEFF[0] - abs(x), OEFF[1] - abs(y), okt_k(OEFF) - (OEFF[3] * abs(x) + OEFF[2] * abs(y)) / s);
-ALPHA_X = atan(trichter_tiefe / (T_TOP[0] - LIP[0]));
-ALPHA_Y = atan(trichter_tiefe / (T_TOP[1] - LIP[1]));
-ALPHA_C = atan(trichter_tiefe / (okt_k(T_TOP) - okt_k(LIP)));
+ALPHA_X = atan(TT / (T_TOP[0] - LIP[0]));
+ALPHA_Y = atan(TT / (T_TOP[1] - LIP[1]));
+ALPHA_C = atan(TT / (okt_k(T_TOP) - okt_k(LIP)));
 ALPHA_MIN = min(ALPHA_X, ALPHA_Y, ALPHA_C);
 DELTA = wand / sin(ALPHA_MIN);                      // waagerechte Wandstärke
 T_BOT = okt_off(LIP, -DELTA);                       // Trichter außen, Unterkante
-function o_at(z) = T_TOP + (T_TOP - T_BOT) * (z / trichter_tiefe);   // Außenfläche
+function o_at(z) = T_TOP + (T_TOP - T_BOT) * (z / TT);   // Außenfläche
 function fin(z) = okt_off(o_at(z), DELTA);                           // Innenfläche (Version 1)
 // Achteck mit Halbmaßen hx/hy, Eckschräge parallel zu ref, Abstand k der Schräge von der Mitte
 function okt_mk(hx, hy, ref, k) = let(s = sqrt(ref[2] * ref[2] + ref[3] * ref[3]),
@@ -387,8 +397,8 @@ function okt_mk(hx, hy, ref, k) = let(s = sqrt(ref[2] * ref[2] + ref[3] * ref[3]
 // Keilwand: Innenkante oben (Kragen-Oberseite) -> geradlinig bis zur Öffnung LIP
 TOP_IN = okt_mk(RIM[0] - flansch_spiel - ring_x, RIM[1] - flansch_spiel - ring_y, RIM,
                 okt_k(RIM) - flansch_spiel - (ring_x + ring_y) / 2);
-function fin_k(z) = LIP + (TOP_IN - LIP) * ((z + trichter_tiefe) / (kragen_t + trichter_tiefe));
-IN_H = kragen_t + trichter_tiefe;
+function fin_k(z) = LIP + (TOP_IN - LIP) * ((z + TT) / (kragen_t + TT));
+IN_H = kragen_t + TT;
 BETA_X = atan(IN_H / (TOP_IN[0] - LIP[0]));
 BETA_Y = atan(IN_H / (TOP_IN[1] - LIP[1]));
 BETA_C = atan(IN_H / (okt_k(TOP_IN) - okt_k(LIP)));
@@ -405,7 +415,7 @@ T_CY = teilung(T_NY, T_B);
 
 // Bänder: automatische Länge -> Griff-Oberkante auf absatz_z + griff_ueber_absatz
 HAKEN_UNTEN_Z = PLATTE_OBEN_Z + stift_z - R_OUT;
-GRIFF_Z = absatz_z + griff_ueber_absatz;
+GRIFF_Z = absatz_z + griff_ueber_absatz - TIEFER;
 LEN_KURZ = laenge_kurz > 0 ? laenge_kurz : GRIFF_Z - HAKEN_UNTEN_Z;
 LEN_LANG = laenge_lang > 0 ? laenge_lang : GRIFF_Z - HAKEN_UNTEN_Z;
 LOOP_H = rahmen_b + fenster_h + griff_h;
@@ -845,21 +855,21 @@ module laschen_loecher(cx, cy, a, za, b, zb) {
 module trichter_roh() {
     difference() {
         union() {
-            hull() { okt_scheibe(T_TOP, -EPS); okt_scheibe(T_BOT, -trichter_tiefe); }
+            hull() { okt_scheibe(T_TOP, -EPS); okt_scheibe(T_BOT, -TT); }
             linear_extrude(kragen_t) okt_poly(okt_off(RIM, flansch_spiel));
-            laschen(T_CX, T_CY, T_TOP, 0, T_BOT, -trichter_tiefe, T_TOP);
+            laschen(T_CX, T_CY, T_TOP, 0, T_BOT, -TT, T_TOP);
             // senkrechter Haltekragen an der Öffnung
-            okt_prisma(okt_off(LIP, -wand), -trichter_tiefe - kragen_unten_h, -trichter_tiefe + EPS);
+            okt_prisma(okt_off(LIP, -wand), -TT - kragen_unten_h, -TT + EPS);
         }
-        okt_prisma(LIP, -trichter_tiefe - kragen_unten_h - 1, -trichter_tiefe + 1);
+        okt_prisma(LIP, -TT - kragen_unten_h - 1, -TT + 1);
         // Innenraum
         if (innenform == "keil")
-            hull() { okt_scheibe(fin_k(kragen_t + 1), kragen_t + 1); okt_scheibe(fin_k(-trichter_tiefe - 1), -trichter_tiefe - 1); }
+            hull() { okt_scheibe(fin_k(kragen_t + 1), kragen_t + 1); okt_scheibe(fin_k(-TT - 1), -TT - 1); }
         else intersection() {
-            hull() { okt_scheibe(fin(kragen_t + 1), kragen_t + 1); okt_scheibe(fin(-trichter_tiefe - 1), -trichter_tiefe - 1); }
-            okt_prisma(okt_off(RIM, flansch_spiel + 1.5), -trichter_tiefe - 2, kragen_t + 3);
+            hull() { okt_scheibe(fin(kragen_t + 1), kragen_t + 1); okt_scheibe(fin(-TT - 1), -TT - 1); }
+            okt_prisma(okt_off(RIM, flansch_spiel + 1.5), -TT - 2, kragen_t + 3);
         }
-        laschen_loecher(T_CX, T_CY, T_TOP, 0, T_BOT, -trichter_tiefe);
+        laschen_loecher(T_CX, T_CY, T_TOP, 0, T_BOT, -TT);
     }
 }
 T_N = T_NX * T_NY;
@@ -992,17 +1002,17 @@ if (scharniere_lang > 0)
     echo(str("Langseite: ", scharniere_lang == 2 ? "Bügel" : "Band", ", Länge ", LEN_LANG, " mm, Griff-Oberkante ",
              HAKEN_UNTEN_Z + LEN_LANG, " mm über Boden -> ", band_n(LEN_LANG), " Stück(e), 2x drucken"));
 if (mit_trichter) {
-    echo(str("Trichter ", T_L + (T_NX == 2 ? MT : 0), " x ", T_B, " x ", kragen_t + trichter_tiefe + kragen_unten_h, " mm -> ", T_N,
+    echo(str("Trichter ", T_L + (T_NX == 2 ? MT : 0), " x ", T_B, " x ", kragen_t + TT + kragen_unten_h, " mm -> ", T_N,
              " Stücke", MT > 0 && T_NX == 2 ? str(" (Hälften je ", T_L / 2 - MT / 2, " mm + 2 Mittelteile ", MT, " mm)") : T_NX == 2 ? str(" (Hälften je ", T_L / 2, " mm, ohne Mittelteil)") : "", ", Öffnung ", 2 * LIP[0] + (T_NX == 2 ? MT : 0), " x ", 2 * LIP[1], " mm, Schräge ", round(ALPHA_X), "°/", round(ALPHA_Y), "°, Ecken ", round(ALPHA_C), "°"));
     echo(str("Sack ", sack_b, " x ", sack_t, " in Öffnung: Abstand je Seite ", OEFF[0] - sack_b / 2, " / ", OEFF[1] - sack_t / 2,
-             " mm", WAND ? "" : str(" (davon Band ", kante_versatz + hals_t, " mm)"), ", Öffnungs-Unterkante ", absatz_z - trichter_tiefe - kragen_unten_h, " mm über Boden"));
-    if (T_N > 1) echo(str("Trichter-Verbindung: je Fuge ", 2 * len(lasche_zs(len(T_CX) > 0 ? T_TOP[1] - T_BOT[1] : T_TOP[0] - T_BOT[0], 0, -trichter_tiefe)),
+             " mm", WAND ? "" : str(" (davon Band ", kante_versatz + hals_t, " mm)"), ", Öffnungs-Unterkante ", absatz_z - TT - kragen_unten_h, " mm über Boden"));
+    if (T_N > 1) echo(str("Trichter-Verbindung: je Fuge ", 2 * len(lasche_zs(len(T_CX) > 0 ? T_TOP[1] - T_BOT[1] : T_TOP[0] - T_BOT[0], 0, -TT)),
                           " Schrauben M3 x ", SCHRAUBE_L, " (Edelstahl) + Muttern, optional 2K-Epoxid"));
     if (innenform == "keil") {
         echo(str("Keilwand: Innenschräge ", round(BETA_X), "°/", round(BETA_Y), "°, Ecken ", round(BETA_C),
                  "° (Überhang beim Druck ", round(90 - BETA_X), "°/", round(90 - BETA_Y), "°/", round(90 - BETA_C),
                  "° aus der Senkrechten), Kragen-Oberseite ", RING_X_EFF, " / ", RING_Y_EFF, " mm breit"));
-        if (okt_ins(fin(0), fin_k(0)) < -0.01 || okt_ins(fin(-trichter_tiefe / 2), fin_k(-trichter_tiefe / 2)) < -0.01)
+        if (okt_ins(fin(0), fin_k(0)) < -0.01 || okt_ins(fin(-TT / 2), fin_k(-TT / 2)) < -0.01)
             echo("WARNUNG: Keilwand stellenweise dünner als 'wand' – ring_x/ring_y vergrößern.");
         if (TOP_IN[2] <= 0 || TOP_IN[3] <= 0) echo("WARNUNG: ring_x/ring_y passen nicht zur Eckschräge.");
     }
@@ -1036,7 +1046,21 @@ for (b = concat(SCH_KURZ > 0 ? [[LEN_KURZ, LEGS_KURZ, SW_KURZ]] : [], [[LEN_LANG
     if (max([for (i = [0:len(st) - 2]) st[i + 1] - st[i]]) > UX)
         echo(str("WARNUNG: Band ", b[0], " mm lässt sich nicht passend teilen – Schlaufe/Griff verkleinern."));
 }
-if (PLATTE_OBEN_Z > bett_z || kragen_t + trichter_tiefe + kragen_unten_h > bett_z) echo("WARNUNG: Teil höher als der Druckraum.");
+if (PLATTE_OBEN_Z > bett_z || kragen_t + TT + kragen_unten_h > bett_z) echo("WARNUNG: Teil höher als der Druckraum.");
+
+// ---- Bügel/Band länger als der Druckraum?
+if (LEN_AUTO_GENUTZT && FEHLMASS > 0) {
+    if (TIEFER > 0)
+        echo(str("HINWEIS: Bügel wäre ", LEN_AUTO, " mm lang (nutzbarer Druckraum ", UX, " mm). Darum Trichter um ", TIEFER, " mm tiefer (trichter_tiefe ",
+                 trichter_tiefe, " -> ", TT, " mm) und Griff-Oberkante um ", TIEFER, " mm tiefer (", GRIFF_Z, " mm über Boden); Bügel jetzt ", LEN_AUTO - TIEFER, " mm, ungeteilt."));
+    else
+        echo(str("WARNUNG: Bügel/Band ", LEN_AUTO, " mm lang, nutzbarer Druckraum nur ", UX, " mm -> wird in ", ceil(LEN_AUTO / UX), " Teile geteilt und geklebt. ",
+                 "ANGEBOT: bei_zu_langem_buegel = \"trichter_tiefer\" setzen: Griffe rücken um ", FEHLMASS, " mm nach unten, der Trichter wird um ", FEHLMASS,
+                 " mm tiefer (trichter_tiefe ", trichter_tiefe, " -> ", trichter_tiefe + FEHLMASS, " mm), der Bügel bleibt ungeteilt. ",
+                 "Alternativen: griff_ueber_absatz auf ", griff_ueber_absatz - FEHLMASS, " senken, bodenabstand bzw. platte_t verkleinern oder bett_rand verkleinern."));
+}
+if ((scharniere_lang > 0 && laenge_lang > UX) || (schmalseite_typ == "band" && scharniere_kurz > 0 && laenge_kurz > UX))
+    echo(str("WARNUNG: Fest eingestellte Länge (laenge_lang/laenge_kurz) größer als der nutzbare Druckraum (", UX, " mm) -> Bügel wird geteilt und geklebt."));
 
 // ---- Seitenwand und Öffnung (Version 3 und feste Trichteröffnung)
 // größte Dehnung der Rastzunge beim Einrasten (Kragarm, Dicke wand_t, Länge zapfen_l - rast_wurzel)
@@ -1061,7 +1085,7 @@ if (WAND) {
     if (X_RAST - rast_flach - rast_rampe < 0.2) echo("WARNUNG: Zapfen zu kurz für die Rastnase (zapfen_l vergrößern oder tasche_tiefe verkleinern).");
     if (zapfen_l - rast_wurzel < tasche_tiefe - rast_wurzel) echo("WARNUNG: Zapfen kürzer als die Tasche.");
     if (PLATTE_OBEN_Z + wand_h > absatz_z + absatz_bis_rand - 3) echo("WARNUNG: Wand reicht bis an/über die Eimerkante (Ablage!) – wand_h verkleinern.");
-    if (PLATTE_OBEN_Z + wand_h > absatz_z - trichter_tiefe - kragen_unten_h) echo("HINWEIS: Wand ragt in die Trichteröffnung hinein (Höhe über der Öffnungs-Unterkante); der Korb geht trotzdem durch, weil die Wand innerhalb des Öffnungsumrisses liegt.");
+    if (PLATTE_OBEN_Z + wand_h > absatz_z - TT - kragen_unten_h) echo("HINWEIS: Wand ragt in die Trichteröffnung hinein (Höhe über der Öffnungs-Unterkante); der Korb geht trotzdem durch, weil die Wand innerhalb des Öffnungsumrisses liegt.");
     if (WAND_SPIEL_OBEN > 8) echo("HINWEIS: Wand gibt oben bei 5 N mehr als 8 mm nach – wand_t erhöhen (bis 6) oder wand_h verkleinern.");
     if (WL > UX || 2 * YE > UY) echo("WARNUNG: Wand größer als der Druckraum.");
     if (platte_l_wand / 2 > OEFF[0] - 1.5) echo("WARNUNG: Plattform fast so lang wie die Trichteröffnung.");

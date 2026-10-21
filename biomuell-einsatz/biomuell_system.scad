@@ -37,6 +37,14 @@
 //  unverändert, innen steilere Schräge und breitere Bettauflage; dazu eine
 //  abbrechbare Druckhilfe, die jede Hälfte beim Druck zum Ring schließt.
 //
+//  Magnete / Eisenscheiben (optional, 22.10.2026): "griff_einsatz" und
+//  "trichter_einsatz" (aus / magnet / eisen) legen versenkte Taschen (Ø15 x 3)
+//  in den Griffsteg der Langseiten-Bügel (Außenseite, 2 je Bügel) und in die
+//  Trichterschräge (2 je Langseite, auf kegeliger Aufdickung). Sie halten die
+//  Griffe am Trichter. Standard: aus (alle Teile unverändert). Mit
+//  "einsatz_haut" > 0 sitzt der Einsatz unter einer Haut eingeschlossen
+//  (Druckpause, Höhen in der Konsole), mit 0 ist die Tasche offen (kleben).
+//
 //  Koordinaten (Übersicht): X = Eimer-Längsachse, Y = Querachse,
 //  Z = 0 auf dem Innenboden (Standfläche der Füße).
 // =====================================================================
@@ -298,6 +306,33 @@ fuge_spiel = 0.15;
 stoss_l = 30;
 stoss_t = 4;
 
+/* [Magnete / Eisenscheiben (optional)] */
+// Haltet die Griffe der Langseiten am Trichter (kippen nicht weg): versenkte Taschen für Magnete oder Eisenscheiben.
+// Griff: Außenseite der Bügel (zeigt zum Trichter), je Bügel zwei Taschen. aus = keine Tasche
+griff_einsatz = "aus"; // [aus:ohne, magnet:Magnet, eisen:Eisenscheibe]
+// Trichter: Innenseite der Schräge an den Langseiten (gegenüber den Griffen), je Seite zwei Taschen. aus = keine Tasche
+trichter_einsatz = "aus"; // [aus:ohne, magnet:Magnet, eisen:Eisenscheibe]
+// Magnet: Durchmesser und Dicke
+magnet_d = 15;
+magnet_h = 3;
+// Eisenscheibe: Durchmesser und Dicke (Maße angenommen, bitte an die gekauften Scheiben anpassen)
+eisen_d = 15;
+eisen_h = 1;
+// Spiel der Tasche zum Einsatz: Durchmesser (je Seite) und Tiefe
+einsatz_spiel_d = 0.15;
+einsatz_spiel_h = 0.2;
+// Haut vor dem Einsatz (mm). > 0: Einsatz ist vollständig in PETG eingeschlossen (spülmaschinenfest, keine Fuge), muss bei einer
+// Druckpause eingelegt werden (Höhe meldet die Konsole). 0: offene Tasche, Einsatz von außen einkleben (2K-Epoxid)
+einsatz_haut = 0.6;
+// Abstand der beiden Taschen von der Mitte (Griff und Trichter; die Trichterfuge liegt in der Mitte)
+einsatz_x = 50;
+// Trichter: Rand der Aufdickung um die Tasche (mm)
+einsatz_rand = 2;
+// Trichter: Höhe der Aufdickung (kegelig, 45°) über der Schräge. -1 = automatisch (nur so hoch wie nötig), 0 = keine
+einsatz_pad_h = -1;
+// Trichter: Mindest-Restwand hinter der Tasche (mm)
+einsatz_rest = 1.2;
+
 /* [Hidden] */
 $fn = 48;
 EPS = 0.01;
@@ -441,6 +476,33 @@ LEGS_KURZ = legs(SCH_KURZ, scharnier_abstand_kurz);
 LEGS_LANG = legs(scharniere_lang, scharnier_abstand_lang);
 SW_KURZ = SCH_KURZ == 2 ? seitensteg_buegel : seitensteg_band;
 SW_LANG = scharniere_lang == 2 ? seitensteg_buegel : seitensteg_band;
+
+// Magnete / Eisenscheiben (optional): Taschen im Griffsteg (Langseite) und in der Trichterschräge
+function ein_aktiv(t) = t == "magnet" || t == "eisen";
+function ein_d(t) = t == "eisen" ? eisen_d : magnet_d;
+function ein_h(t) = t == "eisen" ? eisen_h : magnet_h;
+EIN_G = ein_aktiv(griff_einsatz) && scharniere_lang > 0;
+EIN_T = ein_aktiv(trichter_einsatz);
+EG_D = ein_d(griff_einsatz) + 2 * einsatz_spiel_d;       // Taschendurchmesser Griff
+EG_H = ein_h(griff_einsatz) + einsatz_spiel_h;           // Taschentiefe Griff
+ET_D = ein_d(trichter_einsatz) + 2 * einsatz_spiel_d;    // Taschendurchmesser Trichter
+ET_H = ein_h(trichter_einsatz) + einsatz_spiel_h;        // Taschentiefe Trichter
+// Innenfläche der Trichterschräge an der Langseite (y) in der Höhe z (Absatz = 0)
+function y_in(z) = innenform == "keil" ? fin_k(z)[1] : fin(z)[1];
+// Außenfläche der Trichterwand an der Langseite (y); über dem Absatz der Kragen
+function y_aussen(z) = z >= 0 ? RIM[1] - flansch_spiel : o_at(z)[1];
+EIN_BETA = atan2(TT - 1, y_in(-1) - y_in(-TT));          // Neigung der Innenfläche gegen die Waagerechte
+EIN_ZC = GRIFF_Z - griff_h / 2 - absatz_z;               // Mitte des Griffstegs in Trichterkoordinaten (Taschenmitte im Trichter)
+function wand_n(z) = (y_aussen(z) - y_in(z)) * sin(EIN_BETA);   // Wanddicke senkrecht zur Schräge
+ET_DICKE = wand_n(EIN_ZC - (ET_D / 2) * sin(EIN_BETA));  // dünnste Stelle der Wand am unteren Taschenrand
+ET_BEDARF = einsatz_haut + ET_H + einsatz_rest - ET_DICKE;   // > 0: Aufdickung nötig
+PAD_H = einsatz_pad_h >= 0 ? einsatz_pad_h : max(0, ceil(2 * ET_BEDARF) / 2);
+ET_REST = ET_DICKE - (einsatz_haut + ET_H - PAD_H);      // Restwand hinter der Tasche
+// Druckpause Trichter (Kragen-Oberseite auf dem Bett): Höhe der obersten Taschenkante im Druck
+ET_PAUSE = kragen_t - (EIN_ZC - cos(EIN_BETA) * (einsatz_haut - PAD_H + ET_H) - (ET_D / 2) * sin(EIN_BETA));
+// Griff: Dicke des Griffstegs im Abstand u von seiner Mitte (Rahmenplatte + Wölbung) und Restwand hinter der Tasche
+function griff_dicke(u) = abs(u) >= griff_h / 2 ? rahmen_t : max(rahmen_t, 3 + (griff_t - 3) * sqrt(1 - pow(u / (griff_h / 2), 2)));
+EG_REST = min([for (a = [0:15:345]) griff_dicke(EG_D / 2 * cos(a)) - (einsatz_haut + EG_H)]);
 
 // =====================================================================
 //  Allgemein: Teilung mit Schwalbenschwanz
@@ -667,7 +729,15 @@ module haken2d() difference() {
 function band_info(Lb, legs, side_w) = let(lx0 = Lb - LOOP_H)
     [lx0, lx0 - zwickel_l, lx0 - 15, R_OUT + hals_l, fenster_b / 2 + side_w];
 
-module band_roh(Lb, legs, side_w, stoesse = []) {
+// Tasche für Magnet bzw. Eisenscheibe. Lokal: Ursprung auf der Kontaktfläche, +Z zeigt ins Bauteil.
+// haut > 0: geschlossene Tasche hinter einer Haut (Einsatz bei Druckpause einlegen), haut = 0: offen zur Kontaktfläche
+module einsatz_hohlraum(D, H, haut) {
+    if (haut > 0) translate([0, 0, haut]) cylinder(d = D, h = H, $fn = 64);
+    else translate([0, 0, -1]) cylinder(d = D, h = H + 1, $fn = 64);
+}
+
+// einsatz = true: zwei Taschen (Magnet/Eisenscheibe) in der Außenseite des Griffstegs (nur Bügel der Langseite)
+module band_roh(Lb, legs, side_w, stoesse = [], einsatz = false) {
     I = band_info(Lb, legs, side_w);
     lx0 = I[0]; gx0 = I[1]; ramp0 = I[2]; neck_end = I[3]; lw2 = I[4];
     Xc = R_OUT;
@@ -681,6 +751,7 @@ module band_roh(Lb, legs, side_w, stoesse = []) {
     leg_end = single ? gx0 + 1 : lx0 + 1;
     // Bandansatz am Haken: bei Kanal-Haken erst hinter dem Kanal, damit der Kanal frei bleibt
     xn = FLACH ? Xc + KANAL_B / 2 + kanal_fase : Xc - 2;
+    difference() {
     union() {
         for (L = legs) {
             translate([0, L, 0]) rotate([90, 0, 0]) linear_extrude(haken_b, center = true) translate([Xc, Xc]) haken2d();
@@ -733,6 +804,9 @@ module band_roh(Lb, legs, side_w, stoesse = []) {
             rund_platte(griff_t, 3, rahmen_c) rrect(lx0, Lb, -lw2, lw2, 12);
         }
     }
+    // Taschen für Magnete / Eisenscheiben in der Außenseite (Z = 0) des Griffstegs
+    if (einsatz && EIN_G) for (s = [-1, 1]) translate([xg, s * einsatz_x, 0]) einsatz_hohlraum(EG_D, EG_H, einsatz_haut);
+    }
 }
 
 // Teilung eines Bandes
@@ -743,13 +817,13 @@ function band_cuts(Lb, legs, side_w) = let(
     hi = (len(legs) == 1 ? I[1] : I[2]) - stoss_l / 2 - 2)
     [for (i = [1:1:n - 1]) min(hi, max(lo, i * Lb / n))];
 
-module band_stueck(k, Lb, legs, side_w) {
+module band_stueck(k, Lb, legs, side_w, einsatz = false) {
     cuts = band_cuts(Lb, legs, side_w);
     n = len(cuts) + 1;
     xl = k == 0 ? 0 : cuts[k - 1];
     xh = k == n - 1 ? Lb : cuts[k];
     translate([-(xl + xh) / 2, 0, 0]) intersection() {
-        band_roh(Lb, legs, side_w, cuts);
+        band_roh(Lb, legs, side_w, cuts, einsatz);
         if (n > 1) linear_extrude(100, center = true) bereich_x(k, cuts, legs);
     }
 }
@@ -895,7 +969,18 @@ module laschen_loecher(cx, cy, a, za, b, zb) {
 // =====================================================================
 //  TRICHTER  (Absatzebene z = 0)
 // =====================================================================
-module trichter_roh() {
+// Lokales System auf der Innenfläche der Schräge (Langseiten, je zwei Stellen bei x = ±einsatz_x):
+// Ursprung auf der Innenfläche in Höhe EIN_ZC, XY = Tangentialebene, +Z zeigt in die Wand (nach außen/unten).
+module einsatz_trichter_system() for (sy = [1, -1], sx = [-1, 1])
+    mirror([0, sy < 0 ? 1 : 0, 0]) translate([sx * einsatz_x, y_in(EIN_ZC), EIN_ZC]) rotate([EIN_BETA - 180, 0, 0]) children();
+// Kegelige Aufdickung (45°) um die Tasche; Kontaktfläche liegt PAD_H über der Schräge
+module einsatz_pad() if (PAD_H > 0) hull() {
+    translate([0, 0, -PAD_H]) cylinder(d = ET_D + 2 * einsatz_rand, h = EPS, $fn = 64);
+    cylinder(d = ET_D + 2 * einsatz_rand + 2 * PAD_H, h = 1.5, $fn = 64);
+}
+
+// Trichter-Grundkörper (ohne Magnet-/Eisenscheibentaschen)
+module trichter_grund() {
     difference() {
         union() {
             hull() { okt_scheibe(T_TOP, -EPS); okt_scheibe(T_BOT, -TT); }
@@ -913,6 +998,23 @@ module trichter_roh() {
             okt_prisma(okt_off(RIM, flansch_spiel + 1.5), -TT - 2, kragen_t + 3);
         }
         laschen_loecher(T_CX, T_CY, T_TOP, 0, T_BOT, -TT);
+    }
+}
+// Trichter. Mit Magnet-/Eisenscheibentaschen: Aufdickung (liegt im Innenraum, darum erst nach dem Grundkörper angefügt)
+// und Taschen, die in der Aufdickung bzw. Wand sitzen.
+module trichter_roh() {
+    if (!EIN_T) trichter_grund();
+    else difference() {
+        union() {
+            trichter_grund();
+            // Aufdickung (nicht über die Kragen-Oberseite hinaus)
+            intersection() {
+                einsatz_trichter_system() einsatz_pad();
+                translate([-500, -500, -500]) cube([1000, 1000, 500 + kragen_t]);
+            }
+        }
+        // Taschen ab der Kontaktfläche der Aufdickung
+        einsatz_trichter_system() translate([0, 0, -PAD_H]) einsatz_hohlraum(ET_D, ET_H, einsatz_haut);
     }
 }
 T_N = T_NX * T_NY;
@@ -1009,7 +1111,7 @@ module eimer_geist() {
 }
 module baender_alle() {
     if (SCH_KURZ > 0) for (e = ["+x", "-x"]) band_am_rand(e, 0) band_roh(LEN_KURZ, LEGS_KURZ, SW_KURZ);
-    if (scharniere_lang > 0) for (e = ["+y", "-y"]) band_am_rand(e, 0) band_roh(LEN_LANG, LEGS_LANG, SW_LANG);
+    if (scharniere_lang > 0) for (e = ["+y", "-y"]) band_am_rand(e, 0) band_roh(LEN_LANG, LEGS_LANG, SW_LANG, [], true);
 }
 module uebersicht() {
     eimer_geist();
@@ -1142,6 +1244,51 @@ if (W2 > OEFF[1] - 1.5) echo("WARNUNG: Plattform fast so breit wie die Trichter�
 if (oeff_abstand(L2, W2 - platte_fase) < 1.5 || oeff_abstand(L2 - platte_fase, W2) < 1.5)
     echo("WARNUNG: Plattform kommt im Eckbereich zu nah an die Trichteröffnung (< 1,5 mm).");
 
+// ---- Magnete / Eisenscheiben (optional)
+function ein_name(t) = t == "eisen" ? "Eisenscheibe" : "Magnet";
+if (ein_aktiv(griff_einsatz) && scharniere_lang == 0) echo("WARNUNG: griff_einsatz gesetzt, aber scharniere_lang = 0 – keine Bügel an den Langseiten.");
+if (EIN_G) {
+    echo(str("Griff: ", ein_name(griff_einsatz), " Ø", ein_d(griff_einsatz), " x ", ein_h(griff_einsatz), " mm, 2 je Bügel bei y = ±", einsatz_x,
+             " in der Außenseite des Griffstegs; Tasche Ø", EG_D, " x ", EG_H, " mm, Restwand hinter der Tasche mindestens ", round(10 * EG_REST) / 10, " mm"));
+    if (einsatz_haut > 0)
+        echo(str("Griff: ", einsatz_haut, " mm Haut vor dem Einsatz -> DRUCKPAUSE bei Z = ", einsatz_haut + EG_H,
+                 " mm (Bügel liegt mit der Außenseite auf dem Bett): Einsätze einlegen, dann weiterdrucken. Offen statt Haut: einsatz_haut = 0 (einkleben)"));
+    else echo("Griff: Tasche offen zur Außenseite -> Einsätze einkleben (2K-Epoxid, Fuge dicht verschließen)");
+    if (EG_REST < 1) echo("WARNUNG: Griff: weniger als 1 mm Material hinter der Tasche – einsatz_haut oder Einsatzdicke verkleinern.");
+    if (griff_h / 2 - EG_D / 2 < 1.5) echo("WARNUNG: Griff: Tasche reicht fast an die Öffnung der Griffschlaufe (griff_h gegen Taschendurchmesser).");
+    if (einsatz_x - EG_D / 2 < 2) echo("WARNUNG: Die zwei Taschen im Griff liegen zu nah beieinander – einsatz_x vergrößern.");
+    if (einsatz_x + EG_D / 2 + 4 > band_info(LEN_LANG, LEGS_LANG, SW_LANG)[4])
+        echo("WARNUNG: Tasche liegt zu nah am Rand des Griffstegs – einsatz_x verkleinern.");
+}
+if (EIN_T) {
+    echo(str("Trichter: ", ein_name(trichter_einsatz), " Ø", ein_d(trichter_einsatz), " x ", ein_h(trichter_einsatz), " mm, je Langseite zwei bei x = ±", einsatz_x,
+             " (4 gesamt, je Hälfte 2); Tasche Ø", ET_D, " x ", ET_H, " mm senkrecht zur Schräge (", round(EIN_BETA), "°), Mitte ", -EIN_ZC,
+             " mm unter dem Absatz (Höhe der Griffstegmitte), Aufdickung ", PAD_H, " mm, Restwand hinter der Tasche ", round(10 * ET_REST) / 10, " mm"));
+    if (einsatz_haut > 0)
+        echo(str("Trichter: ", einsatz_haut, " mm Haut vor dem Einsatz -> DRUCKPAUSE bei Z = ", round(10 * ET_PAUSE) / 10,
+                 " mm (Hälfte liegt mit der Kragen-Oberseite auf dem Bett): Einsätze hochkant in die Taschen stecken, dann weiterdrucken. Offen statt Haut: einsatz_haut = 0 (einkleben)"));
+    else echo("Trichter: Tasche offen zur Innenseite -> Einsätze einkleben (2K-Epoxid, Fuge dicht verschließen)");
+    if (ET_REST < einsatz_rest - 0.01) echo("WARNUNG: Trichter: Restwand hinter der Tasche zu dünn – einsatz_pad_h = -1 (automatisch) oder größer wählen.");
+    if (PAD_H > 0 && kragen_t + 0 < EIN_ZC + (ET_D / 2 + einsatz_rand) * sin(EIN_BETA))
+        echo("HINWEIS: Aufdickung reicht bis zur Kragen-Oberseite und wird dort bündig abgeschnitten.");
+    if (einsatz_x - (ET_D / 2 + einsatz_rand + PAD_H) < 3) echo("WARNUNG: Trichter: Aufdickung kommt zu nah an die Trichterfuge in der Mitte – einsatz_x vergrößern.");
+    if (einsatz_x + ET_D / 2 + einsatz_rand + PAD_H > fin_k(EIN_ZC)[0] - fin_k(EIN_ZC)[2] - 2)
+        echo("WARNUNG: Trichter: Aufdickung reicht in die Eckschräge – einsatz_x verkleinern.");
+    if (EIN_ZC - (ET_D / 2 + einsatz_rand + PAD_H) * sin(EIN_BETA) < -TT)
+        echo("WARNUNG: Trichter: Tasche reicht unter die Trichterschräge – Griffhöhe/Trichtertiefe prüfen.");
+}
+if (EIN_G || EIN_T) {
+    LUFT = y_in(EIN_ZC) - PAD_H * sin(EIN_BETA) - (W2 - kante_versatz);
+    echo(str("Abstand Griff-Außenseite (hängend) zur Kontaktfläche im Trichter: ca. ", round(10 * LUFT) / 10,
+             " mm -> der Bügel muss zum Trichter hin angelehnt werden (Band ist flexibel); die Magnete halten ihn dann dort"));
+    if (griff_einsatz == "eisen" && trichter_einsatz == "eisen") echo("WARNUNG: Eisenscheibe gegen Eisenscheibe – keine Haltekraft. Mindestens eine Seite muss ein Magnet sein.");
+    else if (EIN_G != EIN_T) echo("HINWEIS: Nur eine Seite hat Taschen – die Gegenseite (Griff bzw. Trichter) hat kein Magnet/Eisen und hält nichts.");
+    if (griff_einsatz == "magnet" && trichter_einsatz == "magnet")
+        echo("HINWEIS: Magnet gegen Magnet – die Pole müssen gegensinnig sitzen (anziehend). Zuerst probeweise zusammenhalten und die Außenseiten mit Filzstift markieren.");
+    if (griff_einsatz == "eisen" || trichter_einsatz == "eisen")
+        echo("HINWEIS: Eisenscheibe nur eingeschlossen (Haut > 0) oder dicht eingeklebt verwenden – blankes Eisen rostet in der Spülmaschine (rostfreier Ferrit-Stahl 1.4016 ist magnetisch).");
+}
+
 
 // =====================================================================
 //  AUSGABE
@@ -1168,7 +1315,7 @@ if (teil == "uebersicht") {
 } else if (teil == "langseite" && scharniere_lang > 0) {
     n = band_n(LEN_LANG);
     for (k = (stueck < 0 ? [0:n - 1] : [stueck])) if (k < n)
-        translate([stueck < 0 ? k * (LEN_LANG / n + 40) : 0, 0, 0]) band_stueck(k, LEN_LANG, LEGS_LANG, SW_LANG);
+        translate([stueck < 0 ? k * (LEN_LANG / n + 40) : 0, 0, 0]) band_stueck(k, LEN_LANG, LEGS_LANG, SW_LANG, true);
 } else if (teil == "trichter") {
     for (k = (stueck < 0 ? [0:T_N - 1] : [stueck])) if (k < T_N)
         translate(stueck < 0 ? [(k % T_NX) * (T_L / T_NX + 40), floor(k / T_NX) * (T_B / T_NY + 40), 0] : [0, 0, 0])

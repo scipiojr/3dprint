@@ -198,3 +198,54 @@ def wandschnitt():
 
 
 wandschnitt()
+
+
+def magnetschnitt():
+    """Schnitt durch die Magnettaschen (x = einsatz_x, Option griff_einsatz/trichter_einsatz = magnet):
+    Griffsteg des Bügels und Trichterschräge mit je einer geschlossenen Tasche hinter 0,6 mm Haut.
+    Die Beschriftungen gelten für die Standardwerte (absatz_z = 275, Magnet 15 x 3)."""
+    fig, ax = plt.subplots(figsize=(11, 6.4), dpi=150)
+    umr = lambda p: np.c_[-p[:, 1], -p[:, 0]]          # SVG (-z, -y) -> (y, z)
+
+    def zeichne(name, farbe, **kw):
+        polys = svg_pfade(name)
+        verts, codes = [], []
+        for p in polys:
+            q = umr(p)
+            verts += list(q) + [q[0]]
+            codes += [MPath.MOVETO] + [MPath.LINETO] * (len(q) - 1) + [MPath.CLOSEPOLY]
+        if verts:
+            ax.add_patch(PathPatch(MPath(np.array(verts), codes), facecolor=farbe, **kw))
+
+    zeichne("sx_sack.svg", FARBE["sack"], alpha=0.45, edgecolor="#a8946c", lw=0.6, ls="--")
+    zeichne("sx_eimer.svg", FARBE["eimer"], edgecolor="#222", lw=0.4)
+    zeichne("sm_plattform.svg", FARBE["plattform"], edgecolor="#222", lw=0.4)
+    zeichne("sm_baender.svg", FARBE["baender"], edgecolor="#222", lw=0.5)
+    zeichne("sm_trichter.svg", FARBE["trichter"], edgecolor="#222", lw=0.5)
+    ax.set_xlim(62, 132)
+    ax.set_ylim(212, 292)
+    ax.set_aspect("equal")
+    ax.grid(alpha=0.25, lw=0.5)
+    ax.set_xlabel("y ab Mitte [mm] (Langseite rechts)")
+    ax.set_ylabel("Höhe über Innenboden [mm]")
+    ax.set_title("Magnettaschen im Schnitt (x = 50): Griffsteg (links) und Trichterschräge (rechts)")
+    pfeil = dict(arrowstyle="-", color="#333", lw=0.8)
+    ax.annotate("Tasche im Griff: Magnet 15 x 3,\n0,6 mm Haut zur Außenseite", xy=(80.5, 270), xytext=(63, 284),
+                fontsize=8, arrowprops=pfeil)
+    ax.annotate("Tasche im Trichter, senkrecht zur Schräge,\nauf kegeliger Aufdickung (hier 1,5 mm),\n0,6 mm Haut zum Griff hin", xy=(96, 270),
+                xytext=(107, 262), fontsize=8, arrowprops=pfeil)
+    # Abstand Griff-Außenseite (hängend) bis Kontaktfläche der Aufdickung (Standardwerte, Neigung 75,05 Grad)
+    z_m = 262
+    y_kontakt = 93.36 + (z_m - 268) * np.tan(np.radians(90 - 75.05))
+    ax.annotate("", xy=(y_kontakt, z_m), xytext=(82.7, z_m), arrowprops=dict(arrowstyle="<->", color="#b00020", lw=1))
+    ax.text((82.7 + y_kontakt) / 2, z_m - 1.5, "ca. 11 mm", color="#b00020", fontsize=8, ha="center", va="top")
+    ax.text(63, 238, "Der Bügel wird zum\nTrichter hin angelehnt\n(Band flexibel); die\nMagnete halten ihn dort.", fontsize=8, color="#b00020")
+    ax.text(80.2, 291, "Sack", ha="right", va="top", color="#a8946c", fontsize=8)
+    fig.tight_layout()
+    fig.savefig(OUT / "schnitt_magnet.png", facecolor="white")
+    plt.close(fig)
+    print("Bild schnitt_magnet.png")
+
+
+if (W / "sm_trichter.svg").exists():
+    magnetschnitt()

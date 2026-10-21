@@ -72,5 +72,16 @@ for k in plattform waende; do
 done
 wait
 
+# Schnitt durch die Magnet-/Eisenscheibentaschen (x = einsatz_x): Bügel und Trichter mit Magneten (Option ist im Standard aus)
+EINSATZ_X=$(grep -oP '^einsatz_x = \K[0-9.]+' "$SCAD" || echo 50)
+baugruppe_m() {  # name  openscad-ausdruck
+    { cat "$SCAD"; echo "$2"; } > "$TMP/_$1.scad"
+    oscad "$TMP/_$1.scad" -o "$TMP/$1" -D 'teil="keins"' -D 'griff_einsatz="magnet"' -D 'trichter_einsatz="magnet"' > "$TMP/$1.log" 2>&1
+}
+for k in plattform baender trichter; do
+    baugruppe_m "sm_$k.svg" "projection(cut=true) rotate([0,-90,0]) translate([-$EINSATZ_X,0,0]) { ${TEIL[$k]} }" &
+done
+wait
+
 grep -h "ECHO" "$TMP/plattform.log" || true
 python3 "$HIER/bilder.py" "$TMP" "$PROJ/bilder"

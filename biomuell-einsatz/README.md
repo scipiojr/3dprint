@@ -48,6 +48,12 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 | V3-10 | 16:27 | `seitenwand_h100_2x.stl` und `korb.3mf` ohne eingebaute Stützrippen neu erzeugt (Wunsch der Nutzerin). Der Standard `rast_stuetze = true` und die Rastprobe bleiben unverändert (mit Rippen). |
 | V3-11 | 17:37 | Rastnase dünner: `rast_nase` 3,0 → 2,0 mm (Wunsch der Nutzerin, Maß gewählt, nicht vorgegeben). Berechnet: Rastzunge-Steg 2,7 mm (Rückseite 1,3 mm ausgespart), Einsteckkraft ca. 9 N, Dehnung ca. 1,2 %, Haltefläche nominal 1,8 mm. `tasche_relief` bleibt 3, damit die Plattform unverändert bleibt. Seitenwand (ohne Rippen) 128 × 134 × 6, Rastprobe und `korb.3mf` neu. |
 | V3-14 | 21:58 | Zurück auf den Stand von V3-11 (Commit `b717507`): V3-12 (`tasche_relief` 1) und V3-13 (Rechteckkanal, Träger 2,3 mm) zurückgenommen. Grund: Die Nutzerin hatte die Seitenwände verkehrt herum eingesteckt, der Stand V3-11 funktioniert („sehr gut“). Die Änderungen stehen in der Git-Historie (`576b5d0`, `632f9b2`). |
+| V3-15 | 22.10., 00:29 | Optional: versenkte Taschen für Magnete 15 × 3 oder Eisenscheiben in den Griffen der Langseiten-Bügel und im Trichter (Parameter `griff_einsatz`, `trichter_einsatz`, Standard `aus`, siehe [Abschnitt unten](#optional-magnete-oder-eisenscheiben-an-den-griffen)). Standardteile bleiben unverändert (Eckpunktabweichung 0,0000 mm). Neu: die vier Varianten-STLs unten, `bilder/schnitt_magnet.png`. |
+| `buegel_langseite_magnet_2x.stl` | V3-15 | Original | Optional: Bügel Langseite mit zwei Magnettaschen (Ø15,3 × 3,2) im Griffsteg, Außenseite mit 0,6 mm Haut. **Druckpause bei Z = 3,8 mm** (Magnete einlegen), 249,75 × 134 × 11,5, 2× drucken |
+| `buegel_langseite_eisen_2x.stl` | V3-15 | Original | Optional: wie oben für Eisenscheiben Ø15 × 1 (Maß angenommen): Taschen 15,3 × 1,2, **Druckpause bei Z = 1,8 mm** |
+| `trichter_haelfte_magnet_2x.stl` | V3-15 | Original | Optional: Trichterhälfte mit je zwei Magnettaschen (Ø15,3 × 3,2) auf kegeliger Aufdickung (1,5 mm) in der Schräge der Langseiten, 140,25 × 207,5 × 59, 2× drucken. **Druckpause bei Z = 19 mm** (Hälfte liegt mit der Kragen-Oberseite auf dem Bett) |
+| `trichter_haelfte_eisen_2x.stl` | V3-15 | Original | Optional: wie oben für Eisenscheiben Ø15 × 1: Taschen 15,3 × 1,2 ohne Aufdickung, **Druckpause bei Z = 18,9 mm** |
+| `schnitt_magnet.png` | V3-15 | Original | Schnitt durch Griffsteg und Trichterschräge mit den beiden Magnettaschen (x = 50), erzeugt mit `werkzeuge/bilder.sh` |
 | `vergleich_v1_v2.png` | 1 | Original | Vergleich Version 1 (rot) und Version 2 (grün), Schnitte durch die Trichterschräge |
 | `trichter_haelfte_2x.stl` | V3-3 | Original | Trichterhälfte (Standard, ohne Mittelteil), Eimer 283 mm, Öffnung 217 × 172: 140,25 × 207,5 × 59, 2× drucken |
 | `trichter.3mf` | V3-3 | Original | Trichter ohne Druckhilfe, ohne Mittelteil (je Platte eine Hälfte), Einstellungen wie zuvor; mit `werkzeuge/trichter_3mf.py` neu erzeugt |
@@ -86,7 +92,7 @@ Alle Konstruktionsstände sind eingecheckt: STL, 3MF, PNG und SCAD stehen direkt
 |---|---|---|---|
 | ![Plattform](bilder/plattform.png) | ![Bügel](bilder/buegel_langseite.png) | ![Band](bilder/band_schmalseite.png) | ![Trichterhälfte](bilder/trichter_haelfte.png) |
 
-**Kaufteile:** 8 Edelstahlschrauben M3 × 16 mit Muttern für die Trichterfugen (mit Mittelteil M3 × 20, siehe Konsolenausgabe). Optional 2K-Epoxid für die Fugen.
+**Kaufteile:** 8 Edelstahlschrauben M3 × 16 mit Muttern für die Trichterfugen (mit Mittelteil M3 × 20, siehe Konsolenausgabe). Optional 2K-Epoxid für die Fugen. Optional für die Griffhalterung (siehe unten): 8 Magnete 15 × 3 mm bzw. Eisenscheiben (je 4 für die Bügel und für den Trichter).
 
 ## Bedienung der SCAD-Datei
 
@@ -116,6 +122,9 @@ Die Maße stehen im Abschnitt „Eimer – gemessen“:
 | `griff_ueber_absatz` | 3 | Griff-Oberkante über dem Absatz; daraus ergibt sich die Bügellänge (aktuell 249,75 mm) |
 | `bei_zu_langem_buegel` | warnen | Passt der Bügel nicht in den Druckraum (länger als `bett` − 2 × `bett_rand`), warnt die Konsole und bietet an, `trichter_tiefer` zu wählen: Griffe und Trichter rücken dann gemeinsam um das Fehlmaß nach unten, der Bügel bleibt ungeteilt. Bei `warnen` wird der Bügel geteilt und geklebt |
 | `wand_t` | 4 | Wanddicke (Steifigkeit ~ Dicke³) |
+| `griff_einsatz`, `trichter_einsatz` | aus | Optional: `magnet` oder `eisen` legt versenkte Taschen im Griffsteg der Bügel bzw. in der Trichterschräge an (siehe [unten](#optional-magnete-oder-eisenscheiben-an-den-griffen)) |
+| `einsatz_haut` | 0,6 | Haut vor dem Einsatz: > 0 schließt ihn ein (Druckpause), 0 = offene Tasche zum Einkleben |
+| `einsatz_x` | 50 | Abstand der zwei Taschen von der Mitte (Griff und Trichter) |
 
 Bügellänge und Griffhöhe werden aus `absatz_z` berechnet (`laenge_lang/kurz = 0`). Die Trichteröffnung ist fest (`oeffnung_l/b`); Plattform, Wand und Taschenblöcke müssen hineinpassen, die Konsole warnt bei weniger als 1,5 mm Abstand.
 
@@ -170,6 +179,7 @@ Jeder Konstruktionsstand ist ein eigener Commit mit allen erzeugten Dateien. Det
 | 9 | 16:19 | Parameter `mittelteil` (5 mm): Hälften wieder 137,75 mm, je Längsseite ein Mittelteil. `mittelteil_v1.scad` für die alten Hälften der Version 1. |
 | V3-1 | 18:30 | Plan für Version 3 eingecheckt ([`v3_plan.md`](v3_plan.md)): abnehmbare ∩-Seitenwände statt Schmalseiten-Bänder. Noch keine Geometrie. |
 | V3-2 | 18:55 | Version 3 umgesetzt: `schmalseite_typ = "wand"`, Seitenwand `wand_h = 100` / `wand_t = 4` mit Steckzapfen und Rastzunge, Taschenblöcke an der Plattform (210 mm), Eckfüße bei x = ±78,6, feste Trichteröffnung 217 × 172 (Trichter, Bügel, Mittelteil geometrisch unverändert), `teil = "seitenwand"` und `"rastprobe"`, STL, `korb_v3.3mf`, Bilder. |
+| V3-15 | 22.10., 00:29 | Optional: Taschen für Magnete 15 × 3 bzw. Eisenscheiben in den Griffen der Langseiten-Bügel (außen) und in der Trichterschräge, damit die Griffe nicht wegkippen. Standard `aus`, vier Varianten-STLs, Schnittbild. |
 
 ## Version 3: abnehmbare Seitenwände an den Schmalseiten
 
@@ -194,6 +204,23 @@ Plan, Entscheidungen und Abweichungen vom Plan: [`v3_plan.md`](v3_plan.md).
 > **Seit Stand 10 liegt `seitenwand_h100_2x.stl` ohne Rippen im Repo** (Slicer-Stützen unter der Zunge nötig); die Rastprobe hat weiterhin Rippen. Die Aussparung unter der Zunge liegt auf dem Druckbett und braucht Stützen: Im Modell stehen dort bei `rast_stuetze = true` abbrechbare Rippen (0,8 mm dick, Abstand 2,5 mm, 0,2 mm Luft zur Zunge). Nach dem Druck mit dem Fingernagel oder einer Zange herausbrechen. Mit `rast_stuetze = false` entfallen sie (dann Stützen im Slicer für diesen Bereich einschalten).
 > **Vor dem Druck der ganzen Teile zuerst `rastprobe.stl` drucken** und prüfen, ob die Wand hörbar einrastet, nicht zurückgleitet und sich noch von Hand lösen lässt. Zu streng: `rast_steck_kraft` verkleinern (dünnerer Steg) oder `rast_nase` verkleinern. Zu schwach: `rast_steck_kraft` erhöhen oder Rastkante leicht hinterschneiden. Die Stegdicke lässt sich mit `rast_steg_manuell` fest vorgeben.
 > Plattform und Bügel bleiben unverändert, die Seitenwände sind neu zu drucken.
+
+## Optional: Magnete oder Eisenscheiben an den Griffen
+
+![Schnitt durch die Magnettaschen](bilder/schnitt_magnet.png)
+
+Damit die Griffe der Langseiten-Bügel nicht wegkippen, kann der Griff am Trichter magnetisch gehalten werden. Dazu legt die SCAD-Datei versenkte Taschen für **Magnete 15 × 3 mm** oder **Eisenscheiben** an. Die Option ist im Standard **aus** (`griff_einsatz = "aus"`, `trichter_einsatz = "aus"`); alle Standardteile bleiben unverändert (geprüft: Eckpunktabweichung 0,0000 mm).
+
+- **Griff:** zwei Taschen in der Außenseite des Griffstegs jedes Bügels (je Bügel zwei, insgesamt 4), bei ±`einsatz_x` = 50 mm von der Griffmitte. Die Tasche liegt senkrecht zur Außenseite, Ø15,3 × 3,2 mm (Spiel 0,15 mm je Seite, 0,2 mm in der Tiefe).
+- **Trichter:** zwei Taschen je Langseite (insgesamt 4, je Hälfte 2) bei x = ±50 mm in der Innenseite der Schräge, **senkrecht zur Schräge** und auf Höhe der Griffstegmitte (7 mm unter dem Absatz). Die Wand ist dort nur ca. 4 mm dick, deshalb sitzt jede Tasche auf einer **kegeligen Aufdickung** (45°, Rand 2 mm). Ihre Höhe berechnet die SCAD aus der Taschentiefe und der Mindest-Restwand `einsatz_rest = 1,2` (mit Magnet 1,5 mm, mit Eisenscheibe 0). Die Aufdickung liegt außerhalb der Trichteröffnung (Öffnung 217 × 172) und behindert das Herausheben des Korbs nicht.
+- **Kombinationen:** Magnet gegen Magnet (Pole gegensinnig einsetzen, vorher probeweise zusammenhalten und mit Filzstift markieren), Magnet gegen Eisenscheibe (Griff oder Trichter, keine Polung nötig) – Eisenscheibe gegen Eisenscheibe hält nichts, die Konsole warnt. Auch nur eine bestückte Seite ist möglich, hält aber nichts (Hinweis in der Konsole).
+- **Eingeschlossen oder offen (`einsatz_haut`):**
+  - `0,6` (Standard): Der Einsatz sitzt in einer geschlossenen Tasche hinter einer 0,6 mm dünnen Haut, ohne Fuge und ohne Kleber (spülmaschinenfest, Eisen rostet nicht). Er wird bei einer **Druckpause** eingelegt (Pause nach der genannten Höhe, Einsatz einlegen, fortsetzen): Bügel mit der Außenseite auf dem Bett bei **Z = 3,8 mm** (Eisenscheibe 1,8 mm); Trichterhälfte mit der Kragen-Oberseite auf dem Bett bei **Z = 19 mm** (Eisenscheibe 18,9 mm). Im Trichter steht die Tasche fast senkrecht, der Einsatz wird hochkant von oben eingesteckt. Die Höhen stehen in der Konsole; im Slicer die Pausenschicht prüfen.
+  - `0`: Die Tasche ist zur Kontaktfläche offen. Einsatz mit 2K-Epoxid einkleben und die Fuge dicht verschließen (neue STL erzeugen).
+- **Abstand und Haltekraft:** Hängt der Bügel senkrecht, liegt seine Außenseite ca. 10,7 mm (Magnet, mit Aufdickung) bzw. 12,1 mm (Eisenscheibe, ohne) von der Kontaktfläche im Trichter entfernt. Die Magnete halten also nur, wenn der Bügel zum Trichter hin angelehnt wird (das Band ist flexibel); dort halten sie ihn. Haut 0,6 mm auf beiden Seiten schwächt die Kraft gegenüber dem direkten Kontakt etwas.
+- **Eisenscheibe:** Ø15 × 1 mm ist angenommen (`eisen_d`, `eisen_h`), bitte an die gekaufte Scheibe anpassen. Blankes Eisen rostet in der Spülmaschine, deshalb nur eingeschlossen oder dicht eingeklebt verwenden (rostfreier Ferrit-Stahl 1.4016 ist magnetisch).
+- **Dateien:** `buegel_langseite_magnet_2x.stl`, `buegel_langseite_eisen_2x.stl`, `trichter_haelfte_magnet_2x.stl`, `trichter_haelfte_eisen_2x.stl` (Standardparameter, je 2× drucken). Andere Kombinationen, Abstände oder Maße: Parameter in der Gruppe „Magnete / Eisenscheiben (optional)“ setzen und `teil = "langseite"` bzw. `"trichter"` neu exportieren.
+- **Nicht am Druck geprüft.** Geprüft sind: Netze dicht, Wand/Haut/Restwand entlang der Taschenachse (Strahltest), Standardgeometrie unverändert. Offen: Überhang der unteren Aufdickungsflanke beim Trichterdruck (ca. 60°, nur 1,5 mm hoch, sollte ohne Stütze gehen), ob die Haltekraft durch die Hautstärke und den Restabstand reicht, Lage der Pausenschicht im Slicer.
 
 ## Stand
 

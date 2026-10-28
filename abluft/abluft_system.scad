@@ -101,13 +101,13 @@ pipe_chamfer = 1.0;     // Einfuehrfase am Rohrende (aussen)
 dh           = (110 - hose_nom) / 2;   // Verkleinerung des 110er-Referenzmusters (radial) fuer kleinere Schlauchgroesse
 // Muster des Schlauch-Magnetflanschs: hose_nom 110 und 100 sind an den Referenz-Anschluessen vermessen,
 // andere Groessen werden naeherungsweise verschoben.
-R110         = hose_nom == 100 ? 61.0 : 70.9 - dh;    // Teilkreisradius der Magnete (Referenz: 110 -> 70.9, 100 -> 61.0)
+R110         = hose_nom == 100 ? 66.0 : 70.9 - dh;    // Teilkreisradius der Magnete (Referenz: 110 -> 70.9, 100 -> 66.0)
 gr110        = hose_nom == 100 ? 50.5 : 55.5 - dh;    // Nut-Mittenradius (Referenz: 110 -> 55.5, 100 -> 50.5)
 flange110_t  = 8;
-body110_r    = hose_nom == 100 ? 55.9 : 63.5 - dh;   // Koerperradius zwischen den Lappen (Referenz: 110 -> 63.4, 100 -> 55.9)
-hose_mag_d   = mag_d;      // Magnetdurchmesser der Schlauch-Magnetflaechen (Standard 15; der vermessene 100er-Anschluss hat Taschen fuer 10 mm)
-hose_mag_clear = mag_clear;
-lobe110      = (hose_mag_d + hose_mag_clear) / 2 + 2.75;   // Lappenradius um die Magnete (Referenz 110: 10.4; Anschluss 100 mit 10-mm-Taschen: 8.0)
+body110_r    = hose_nom == 100 ? 58.4 : 63.5 - dh;   // Koerperradius zwischen den Lappen (Referenz: 110 -> 63.4, 100 -> 58.4)
+hose_mag_d   = mag_d;      // Magnetdurchmesser der Schlauch-Magnetflaechen (15; der alte 100er-Anschluss hatte Taschen fuer 10 mm)
+hose_mag_clear = hose_nom == 100 ? 0.2 : mag_clear;   // Referenz 100: Taschen ø15,2
+lobe110      = (hose_mag_d + hose_mag_clear) / 2 + (hose_nom == 100 ? 2.9 : 2.75);   // Lappenradius um die Magnete (Referenz 110: 10.4, 100: 10.5)
 
 /* [Ventilator-Adapter 140 -> 110 (part = "adapter140")] */
 fan_socket_d   = 146.4; // Innendurchmesser der Muffe (schiebt sich ueber den Ventilatoranschluss)

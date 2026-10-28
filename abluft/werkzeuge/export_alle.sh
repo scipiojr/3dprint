@@ -15,15 +15,15 @@ trap 'rm -rf "$TMP"' EXIT
 TEILE=(
   "durchfuehrung_innen.stl|inner|"
   "durchfuehrung_aussen.stl|nut|"
-  "verjuengung_150_110_magnet.stl|funnel|end110=\"magnet\""
-  "verjuengung_150_110_stutzen.stl|funnel|end110=\"stub\""
+  "verjuengung_150_100_magnet.stl|funnel|end110=\"magnet\""
+  "verjuengung_150_100_stutzen.stl|funnel|end110=\"stub\""
   "verjuengung_150_110_rohr.stl|funnel|end110=\"pipe\""
   "verjuengung_150_110_rohr_45grad.stl|funnel|end110=\"pipe\" pipe_angle=45"
-  "adapter_ventilator_140_110.stl|adapter140|"
+  "adapter_ventilator_140_100.stl|adapter140|"
   "dichtung_ventilator_muffe_tpu.stl|oring_fan|"
   "dichtung_150_plexiglas_tpu.stl|oring150_plexi|"
   "dichtung_150_anschluss_tpu.stl|oring150_face|"
-  "dichtung_110_anschluss_tpu.stl|oring110|"
+  "dichtung_100_anschluss_tpu.stl|oring110|"
 )
 
 export_eins() {

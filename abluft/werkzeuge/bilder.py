@@ -18,9 +18,9 @@ wert = lambda n: float(re.search(rf"^{n}\s*=\s*([-0-9.]+)\s*;", text, re.M).grou
 disc_t, nut_t, plate_t, hole_r = wert("disc_t"), wert("nut_t"), wert("plate_t"), wert("hole_d") / 2
 lade = lambda n: trimesh.load(O / n)
 innen, aussen = lade("durchfuehrung_innen.stl"), lade("durchfuehrung_aussen.stl")
-magnet, stutzen = lade("verjuengung_150_110_magnet.stl"), lade("verjuengung_150_110_stutzen.stl")
+magnet, stutzen = lade("verjuengung_150_100_magnet.stl"), lade("verjuengung_150_100_stutzen.stl")
 o150p, o150a = lade("dichtung_150_plexiglas_tpu.stl"), lade("dichtung_150_anschluss_tpu.stl")
-ventilator = lade("adapter_ventilator_140_110.stl")
+ventilator = lade("adapter_ventilator_140_100.stl")
 
 def kontur(ax, m, farbe, lw=0.7, y=0.0):
     s = m.section(plane_origin=[0, y, 0], plane_normal=[0, 1, 0])

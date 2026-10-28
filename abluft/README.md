@@ -24,14 +24,14 @@ Abluft-Anschluss für einen Laser-Cutter: Eine 5 mm dicke Plexiglasscheibe häng
 | `abluft_system.scad` | Quelle, alles parametrisch, Customizer auf Deutsch (OpenSCAD 2021.01 oder neuer). `part` wählt das Teil. |
 | `durchfuehrung_innen.stl` | Innenscheibe mit Zentrierbund und Gewinderohr (Raumseite) |
 | `durchfuehrung_aussen.stl` | Halteplatte mit Innengewinde (Dachseite), mit Bohrungen für zwei M4-Sicherungsschrauben |
-| `verjuengung_150_110_magnet.stl` | Verjüngung mit 110er-Magnetflansch (Standard) |
-| `verjuengung_150_110_stutzen.stl` | Variante: fester Schlauchstutzen mit 5 Wulsten statt 110er-Flansch |
+| `verjuengung_150_100_magnet.stl` | Verjüngung 150 → 100 mit Schlauch-Magnetflansch, 100er Schlauchmuster (Standard) |
+| `verjuengung_150_100_stutzen.stl` | Variante: fester Schlauchstutzen mit 5 Wulsten statt Schlauchflansch |
 | `verjuengung_150_110_rohr.stl` | Variante: glatter Rohrstumpf ø109 (innen ø100), 36 mm lang, gerade; 150er-Seite mit Magneten wie gehabt |
 | `verjuengung_150_110_rohr_45grad.stl` | wie oben, Stumpf um 45° gewinkelt (Biegeradius 80 mm); Stützen nötig, bei Winkeln über ca. 45° besonders |
-| `adapter_ventilator_140_110.stl` | Ventilator-Adapter: Muffe für den 140-mm-Ventilatoranschluss → Trichter → 110er-Magnetflansch, mit 4 Schraublöchern |
+| `adapter_ventilator_140_100.stl` | Ventilator-Adapter: Muffe für den 140-mm-Ventilatoranschluss → Trichter → 100er-Magnetflansch, mit 4 Schraublöchern |
 | `dichtung_150_plexiglas_tpu.stl` | TPU-Ring zwischen Scheibe und Plexiglas (ID 156,4 / AD 164,4 mm) – 2 Stück |
 | `dichtung_150_anschluss_tpu.stl` | TPU-Ring für 150er-Anschlussflächen (ID 147 / AD 155 mm) |
-| `dichtung_110_anschluss_tpu.stl` | TPU-Ring für alle Schlauch-Magnetflächen (bei `hose_nom=100`: ID 97 / AD 105 mm, Schnur 4 mm, Nut r 48,4–52,6 mm): Flansch der Verjüngung, Ventilator-Adapter und 100er-Schlauchanschluss haben dieselbe Nut. Bei `hose_nom=110`: ID 107 / AD 115 |
+| `dichtung_100_anschluss_tpu.stl` | TPU-Ring für alle Schlauch-Magnetflächen (bei `hose_nom=100`: ID 97 / AD 105 mm, Schnur 4 mm, Nut r 48,4–52,6 mm): Flansch der Verjüngung, Ventilator-Adapter und 100er-Schlauchanschluss haben dieselbe Nut. Bei `hose_nom=110`: ID 107 / AD 115 |
 | `schraubkappe_110_auf_100.stl` | Reduzierer: wird auf den Stutzen des vorhandenen **110er**-Schlauchanschlusses geschraubt und endet in einem 100er-Schlauchstutzen mit Wulsten (siehe Schraubkappe) |
 | `dichtung_stutzenende_tpu.stl` | TPU-O-Ring (Schnur 2,5 mm, ID 101 / AD 106) für die Dichtfläche zwischen Stutzenende des 110er-Anschlusses und Schraubkappe |
 | `dichtung_ventilator_muffe_tpu.stl` | TPU-O-Ring für die Nut in der Muffenwand des Ventilator-Adapters (Schnur 3 mm, ID 143,6 / AD 149,6 mm) |
@@ -71,17 +71,19 @@ Ein durchgehender Luftkanal für eine flache Fensterdurchführung: 150er-Magnetf
 
 Dünne Platte (Magnetdicke + 1,2 mm), die mit eingeklebten Magneten auf eine Kupplungsstelle gelegt wird und in der Mitte einen senkrechten Stift trägt (Standard ø5 mm, Länge `pin_len` 150 mm). Zum Anpeilen der Kupplungsmitte, z. B. gegen einen Fensterausschnitt oder ein Rohr.
 
-- Voreinstellungen `preset="150"` (8 Magnete, Teilkreisradius 91) und `"110"` (6 Magnete, Radius 70,9), außerdem `"frei"` mit `n_mag` und `R_mag`. Magnet rund oder Quader (`mag_shape`), Durchmesser/Länge, Breite, Höhe, Spiel und Quetschrippen frei wählbar.
+- Voreinstellungen `preset="150"` (8 Magnete, Teilkreisradius 91), `"100"` (6 Magnete, Radius 66,0) und `"110"` (Radius 70,9), außerdem `"frei"` mit `n_mag` und `R_mag`. Magnet rund oder Quader (`mag_shape`), Durchmesser/Länge, Breite, Höhe, Spiel und Quetschrippen frei wählbar.
 - Öffnungen zwischen den Speichen (`openings`, `spoke_w`), Nabe `hub_r`, optional fester Plattendurchmesser `plate_d`. Kerbe an jedem zweiten Magneten markiert die abwechselnde Polung.
 - Stift: `pin_mode="gedruckt"` (Kegelfuß, PETG; bei Länge über 12 × Durchmesser empfindlich) oder `"loch"` (Bohrung ø5,2 mm mit Führungsnabe für einen Metallstift).
-- `werkzeuge/export_ausmesshilfe.sh [ordner] [-D ...]` erzeugt `ausmesshilfe_150.stl` und `ausmesshilfe_110.stl`. Nicht gedruckt getestet; die Winkellage der Magnete der Referenzteile (`mag_angle0`) ist nicht verifiziert.
+- `werkzeuge/export_ausmesshilfe.sh [ordner] [-D ...]` erzeugt `ausmesshilfe_150.stl` und `ausmesshilfe_100.stl`. Nicht gedruckt getestet; die Winkellage der Magnete der Referenzteile (`mag_angle0`) ist nicht verifiziert.
 
 ## Schlauchgröße (`hose_nom`, Standard 100 mm)
 
-Der Schlauch hat nominal **100 mm**. Alle Schlauchseiten (Verjüngung, Ventilator-Adapter) folgen dem `hose_nom` in `abluft_system.scad` und sind auf deinen vermessenen **100er-Schlauchanschluss** (`Anschluss_100mm_Schlauch.stl`) abgestimmt: 6 Magnete auf Teilkreisradius 61,0 mm, Dichtungsnut Mitte r 50,5 mm (4,2 breit), Bohrung ø90, Körperradius 55,9 mm. Stutzen-Außen ø100 (Gewindegrund deines Anschlusses), innen ø90. Mit `hose_nom=110` entsteht das ursprüngliche 110er-Muster.
+Dateinamen: `…_100_…` = Schlauchseite für 100-mm-Schlauch; `verjuengung_150_110_rohr*.stl` behalten die 110, weil dort das 110er-KG-Rohr (Muffe über ø109) gemeint ist.
 
-- **Magnete:** Standard sind 15 × 3 mm auch an den Schlauchflächen (`hose_mag_d`); dein vermessener Anschluss hat noch Taschen ø10,2 und wird bei dir noch angepasst. Mit 15-mm-Magneten bleiben nur ca. 0,75 mm Wand zwischen Tasche und Dichtungsnut. Mit `-D hose_mag_d=10` passt die Magnetfläche zum aktuellen Anschluss (Lappenradius folgt automatisch).
-- **Dichtung:** Dieselbe Nut an allen 100er-Flächen, ein Ring `dichtung_110_anschluss_tpu.stl` (ID 97 / AD 105) passt überall.
+Der Schlauch hat nominal **100 mm**. Alle Schlauchseiten (Verjüngung, Ventilator-Adapter) folgen dem `hose_nom` in `abluft_system.scad` und sind auf deinen vermessenen **100er-Schlauchanschluss** (`Anschluss_100mm_Schlauch.stl`) abgestimmt: 6 Magnete (Taschen ø15,2) auf Teilkreisradius 66,0 mm, Dichtungsnut Mitte r 50,5 mm (4,2 breit), Bohrung ø90, Körperradius 58,4 mm, Lappen bis r 76,5 mm. Stutzen-Außen ø100 (Gewindegrund deines Anschlusses), innen ø90. Mit `hose_nom=110` entsteht das ursprüngliche 110er-Muster.
+
+- **Magnete:** 15 × 3 mm auch an den Schlauchflächen (`hose_mag_d`). Der erste vermessene 100er-Anschluss hatte noch Taschen ø10,2 auf R 61,0; der aktuelle (15-mm-Magnete, R 66,0) ist die Referenz.
+- **Dichtung:** Dieselbe Nut an allen 100er-Flächen, ein Ring `dichtung_100_anschluss_tpu.stl` (ID 97 / AD 105) passt überall.
 - **Prüfung:** Verjüngung (Magnetflansch) und Ventilator-Adapter überlappen sich nicht mit deinem 100er-Anschluss (`werkzeuge/pruefung.py --ref110`).
 
 ## Schraubkappe 110 → 100 (`abluft_schraubkappe.scad`)
@@ -97,7 +99,7 @@ Damit der vorhandene 110er-Schlauchanschluss weiter nutzbar ist: Die Kappe wird 
 | Gewinde | ø151 mm außen, Steigung 4 mm, Tiefe 1,5 mm, Wand am Gewindegrund 4 mm; Gewindelänge = Dicke Halteplatte − 3,5 mm Steg (Standard 8,5 mm = 2,1 Gänge) |
 | Plattendicken | Innenscheibe 12 mm, Halteplatte 12 mm, Flansch der Verjüngung 10 mm (alle einstellbar: `disc_t`, `nut_t`, `adapter_t`) |
 | Zentrierbund | ø153,4 mm (0,8 mm Spiel zum Ausschnitt), liegt im Bereich der Plexiglasdicke |
-| Magnete | 15 × 3 mm, 8 je 150er-Fläche (Teilkreisradius 91,0 mm), 6 je Schlauchfläche (Teilkreisradius 61,0 mm bei `hose_nom` 100, 70,9 mm bei 110) |
+| Magnete | 15 × 3 mm, 8 je 150er-Fläche (Teilkreisradius 91,0 mm), 6 je Schlauchfläche (Teilkreisradius 66,0 mm bei `hose_nom` 100, 70,9 mm bei 110) |
 | Magnettasche | ø15,3 × 3,2 mm mit 3 feinen Klemmnasen, Magnet plan eingelassen, mit Sekundenkleber |
 | Dichtungsnut | 4,2 mm breit; Anschlussflächen 150: Radius 75,5 mm, 1,9 mm tief; Schlauchfläche: Radius 50,5 mm (100) bzw. 55,5 mm (110), 1,3 mm tief; Plexiglasseite: Radius 80,2 mm, 2,8 mm tief |
 | Trichter | 35 mm lang, innen ø140 → ø100, Wand ≥ 5 mm |

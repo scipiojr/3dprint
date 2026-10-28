@@ -7,12 +7,12 @@
 //  Rohr auszurichten oder Abstaende zu messen.
 //
 //  Magnetart, Anzahl, Durchmesser, Teilkreis und Stiftlaenge sind frei waehlbar.
-//  Voreinstellungen: preset = "150" (8 Magnete, Teilkreisradius 91) oder "110" (6 Magnete, Radius 70,9),
+//  Voreinstellungen: preset = "150" (8 Magnete, Teilkreisradius 91), "100" (6 Magnete, Radius 66,0) oder "110" (Radius 70,9),
 //  jeweils wie die Magnetflansche des Abluft-Systems; "frei" nimmt n_mag und R_mag.
 //  Die Platte liegt mit den Magneten unten auf z=0, der Stift zeigt nach oben (Druckrichtung).
 // =====================================================================
 
-preset = "150";         // "150" | "110" | "frei"
+preset = "150";         // "150" | "100" | "110" | "frei"
 
 /* [Magnete] */
 mag_shape = "rund";     // "rund" (Scheibe, mag_d) | "quader" (mag_d lang x mag_w breit, Laenge tangential)
@@ -42,8 +42,8 @@ pin_hole_d = 5.2;       // Bohrung fuer einen Metallstift (nur "loch")
 pin_base_d = 12;        // Fuss (Kegel) des gedruckten Stifts
 pin_base_h = 4;
 
-n  = preset == "150" ? 8 : preset == "110" ? 6 : n_mag;
-R  = preset == "150" ? 91 : preset == "110" ? 70.9 : R_mag;
+n  = preset == "150" ? 8 : (preset == "100" || preset == "110") ? 6 : n_mag;
+R  = preset == "150" ? 91 : preset == "100" ? 66.0 : preset == "110" ? 70.9 : R_mag;
 mext = mag_shape == "rund" ? mag_d / 2 : mag_w / 2;   // radiale Ausdehnung der Tasche (Quader: Laenge tangential)
 plate_t = mag_h + floor_t;
 ro = plate_d > 0 ? plate_d / 2 : R + mext + mag_clear / 2 + wall;

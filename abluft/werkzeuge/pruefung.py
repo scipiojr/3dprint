@@ -25,15 +25,15 @@ ORDNER = Path(__file__).resolve().parent.parent
 DATEIEN = {
     "innen": "durchfuehrung_innen.stl",
     "aussen": "durchfuehrung_aussen.stl",
-    "magnet": "verjuengung_150_110_magnet.stl",
-    "stutzen": "verjuengung_150_110_stutzen.stl",
+    "magnet": "verjuengung_150_100_magnet.stl",
+    "stutzen": "verjuengung_150_100_stutzen.stl",
     "rohr": "verjuengung_150_110_rohr.stl",
     "rohr45": "verjuengung_150_110_rohr_45grad.stl",
-    "ventilator": "adapter_ventilator_140_110.stl",
+    "ventilator": "adapter_ventilator_140_100.stl",
     "ofan": "dichtung_ventilator_muffe_tpu.stl",
     "o150p": "dichtung_150_plexiglas_tpu.stl",
     "o150a": "dichtung_150_anschluss_tpu.stl",
-    "o110": "dichtung_110_anschluss_tpu.stl",
+    "o110": "dichtung_100_anschluss_tpu.stl",
 }
 
 

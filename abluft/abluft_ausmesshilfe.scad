@@ -37,7 +37,7 @@ plate_d  = 0;           // 0 = automatisch (Teilkreis + Magnet + Rand), sonst Au
 /* [Stift] */
 pin_mode = "gedruckt";  // "gedruckt" = Stift aus PETG | "loch" = Bohrung fuer Nadel/Draht aus Metall
 pin_d    = 5;           // Durchmesser des Stifts (5 mm = 0,5 cm)
-pin_len  = 30;          // Laenge ueber der Platte
+pin_len  = 150;         // Laenge ueber der Platte
 pin_hole_d = 5.2;       // Bohrung fuer einen Metallstift (nur "loch")
 pin_base_d = 12;        // Fuss (Kegel) des gedruckten Stifts
 pin_base_h = 4;

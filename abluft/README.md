@@ -33,7 +33,7 @@ Abluft-Anschluss für einen Laser-Cutter: Eine 5 mm dicke Plexiglasscheibe häng
 | `dichtung_150_anschluss_tpu.stl` | TPU-Ring für 150er-Anschlussflächen (ID 147 / AD 155 mm) |
 | `dichtung_100_anschluss_tpu.stl` | TPU-Ring für alle Schlauch-Magnetflächen (bei `hose_nom=100`: ID 97 / AD 105 mm, Schnur 4 mm, Nut r 48,4–52,6 mm): Flansch der Verjüngung, Ventilator-Adapter und 100er-Schlauchanschluss haben dieselbe Nut. Bei `hose_nom=110`: ID 107 / AD 115 |
 | `schraubkappe_110_auf_100.stl` | Reduzierer: wird auf den Stutzen des vorhandenen **110er**-Schlauchanschlusses geschraubt und endet in einem 100er-Schlauchstutzen mit Wulsten (siehe Schraubkappe) |
-| `dichtung_stutzenende_tpu.stl` | TPU-O-Ring (Schnur 2,5 mm, ID 101 / AD 106) für die Dichtfläche zwischen Stutzenende des 110er-Anschlusses und Schraubkappe |
+| `dichtung_stutzenende_tpu.stl` | TPU-O-Ring (Schnur 2,5 mm, ID 101,5 / AD 106,5) für die Dichtfläche zwischen Stutzenende des 110er-Anschlusses und Schraubkappe |
 | `dichtung_ventilator_muffe_tpu.stl` | TPU-O-Ring für die Nut in der Muffenwand des Ventilator-Adapters (Schnur 3 mm, ID 143,6 / AD 149,6 mm) |
 | `bilder/` | Vorschaubilder, erzeugt mit `werkzeuge/bilder.py` |
 | `werkzeuge/` | `export_alle.sh` (alle STL aus der SCAD erzeugen), `pruefung.py` (Passungs- und Gewindeprüfung), `bilder.py` |

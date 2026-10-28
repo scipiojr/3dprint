@@ -53,6 +53,18 @@ Alle Dateien sind eingecheckt. Der Stand steht in der Git-Historie. Neu erzeugen
 - Magnetbedarf: 6 (zusammen mit dem restlichen System 36 von 40).
 - Parameter der Dichtung: `fan_groove`, `fan_oring_d`, `fan_groove_depth`, `fan_groove_from_mouth`, `fan_flange_groove`. Den passenden Ring erzeugt `part = "oring_fan"`.
 
+## Fensterkanal (`abluft_fensterkanal.scad`)
+
+Ein durchgehender Luftkanal für eine flache Fensterdurchführung: 150er-Magnetflansch (wie bei Verjüngung und Adapter) → Rundrohr `fk_L1` → Bogen `fk_angle` (Radius `fk_bend_r`) → Rundrohr → Übergang rund → flach (`fk_trans`) → Flachkanal (`fk_flat_len`, Höhe `fk_H`, links `fk_WL` und rechts `fk_WR` der Rohrachse, abgerundete Ecken, Stützstege). `fk_after_total` ist die Gesamtstrecke vom Bogenende bis zum Ende des Auslasses. Das Rundrohr hat den Innendurchmesser `bore_d` (140) aus der Hauptdatei, die Wand `fk_wall` (2,8 mm).
+
+- **Warnung:** Ist der Querschnitt des Flachkanals (innen, ohne Stege) kleiner als der des Rundkanals, gibt OpenSCAD in der Konsole `WARNUNG` aus. Ebenso bei zu steilem Übergang, zu kleinem Biegeradius oder negativem Rohrstück.
+- **Teilung nur wenn nötig:** Der Druckraum `fk_bed` (Standard 260×260×260) wird gegen die Maße geprüft. Passt alles hinein, entstehen so wenige Teile wie möglich (Standard: 2 Teile, ohne Seitenteile). Sonst teilt das Programm automatisch: längs mit Steckverbindung (Spigot/Muffe, `fk_joint_len`, Klebespalt `fk_joint_gap`), und ist der Flachkanal breiter als der Druckraum, zusätzlich in Spalten mit Falz (Halbwand-Überlappung) in der Teilungsebene. Stege werden an den Falzen ausgespart.
+- **Druckrichtung:** Teile stehen auf der Stoßfläche. Nur Flachkanal-Teile, die so nicht passen oder in Spalten geteilt sind, liegen flach; die Stege stützen dann die Decke.
+- **Ausgabe:** `ausgabe="info"` listet Querschnitt, Warnungen und die Teile; `"teil"` mit `teil_nr` ist ein Druckteil; `"gesamt"` und `"montage"` sind Vorschauen; `"montiert"` ein Teil in Einbaulage.
+- **Werkzeuge:** `werkzeuge/export_fensterkanal.sh [ordner] [-D name=wert ...]` exportiert alle Teile (Dateien `fensterkanal/fensterkanal_teil_N.stl`, Reihenfolge vom 150er-Flansch zum Auslass), `werkzeuge/pruefung_fensterkanal.py [-D ...]` prüft wasserdicht, Druckraum und Überlappung in Einbaulage.
+- Beispiele: `-D fk_angle=45`, `-D fk_flat_in_plane=true` (Breite in der Bogenebene), `-D 'fk_bed=[220,220,250]'`, `-D fk_WL=177 -D fk_WR=163 -D fk_H=60` (breiter Kanal, 6 Teile).
+- Nicht gedruckt getestet: Passung der Steckverbindungen (Spiel 0,25 mm), Dichtheit der Klebestellen, Steifigkeit der 2,8-mm-Wand im breiten Flachkanal.
+
 ## Maße
 
 | | |

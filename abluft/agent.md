@@ -62,6 +62,12 @@ Ein 110-mm-Abluftschlauch (Laser-Cutter, heiße Rauchluft) soll über magnetisch
 
 7. **28.10.2026:** Ventilator-Adapter mit **O-Ring-Nut in der Muffenwand** (3-mm-TPU-Schnur, 1,6 mm tief, 24 mm vom Rand, `part = "oring_fan"` liefert den Ring) und **optionaler Dichtungsnut** auf dem 110er-Magnetflansch (`fan_flange_groove`, Standard an). Die 110er-Nut ist an Verjüngung und Adapter identisch (r 53,4–57,6), ein Ring `dichtung_110_anschluss_tpu.stl` passt überall. Die Nutzerin wollte zunächst nur wissen, ob beidseitig gedichtet ist; Entscheidung: Nut in der Muffenwand (nicht Flachdichtung auf der Schulter).
 
+### Fensterkanal (`abluft_fensterkanal.scad`, eigene Datei, bindet `abluft_system.scad` per `include` ein und setzt danach `part="keiner"`)
+- Ein Ring-Sweep entlang der Mittellinie (Parameter s) erzeugt alle Rundteile, den Loft (Radialabbildung Kreis → abgerundetes Rechteck, Glättung smoothstep) und den Flachkanal als Polyeder ohne Boolesche Operationen. Teile sind Abschnitte [s0, s1] desselben Sweeps; Steckverbindungen entstehen durch zusätzliche Ringe mit anderem Wandversatz (Spigot außen halbe Wand, Muffe innen halbe Wand plus Spiel).
+- Teileplan (`plan`, `fits`): nur so viele Teile wie nötig, Greedy in 5-mm-Schritten; Zwangsschnitte (Loftanfang, Flachkanalanfang) und Spalten nur wenn `ncol > 1` (Breite > Druckraum − Steckverbindung). Stege liegen im lokalen Rahmen (Ebenen exakt koplanar zu den Endringen); bei geraden Teilen werden lokale Koordinaten exakt statt per Matrix berechnet (sonst fast-koplanare Flächen).
+- Nutzerwunsch: nur teilen, wenn nötig; Standard ohne Seitenteile; auf einfaches Drucken optimiert (stehend, wenige Teile). Beispiel der Nutzerin (Datei Window_Duct): Rundrohr 101,6 → Flachkanal 340 × 60, asymmetrisch (177/163), Stützblöcke.
+- Offen: nicht gedruckt, Passung der Steckverbindungen und Falze ungeprüft; Spaltenteilung wurde nur geometrisch geprüft (`werkzeuge/pruefung_fensterkanal.py`).
+
 ### Geprüft (Rechenmodell, `werkzeuge/pruefung.py`)
 
 Alle STL wasserdicht; keine Überlappung Innenscheibe/Plexiglas/Halteplatte; Gewinde frei bei ca. 50° Drehspiel (0,56 mm axial); Verjüngung und Referenzadapter (150 auf Halteplatte und unter Innenscheibe, 110 auf Flansch) ohne Überlappung; Ring- und Taschenradien stimmen mit der Referenz überein. Mit abweichenden Dicken (`disc_t = 15`, `nut_t = 18`) wurden nur die Kontrollausgaben (3,6 Gänge) geprüft, nicht der volle Export.

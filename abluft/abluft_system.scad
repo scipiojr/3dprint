@@ -6,7 +6,8 @@
 //    "inner"           Durchfuehrung, Innenseite: Scheibe + Zentrierbund + Gewinderohr (= Luftkanal), Magnete zum Schlauch
 //    "nut"             Durchfuehrung, Aussenseite: Halteplatte mit Innengewinde und Steg, Magnete z. B. fuer Umlenker
 //    "funnel"          Verjuengung 150 -> 110: Magnetflansch 150, Trichter, am 110er-Ende Magnetflansch
-//                      (end110="magnet", Standard) oder fester Schlauchstutzen mit Wulsten (end110="stub")
+//                      (end110="magnet", Standard), Schlauchstutzen mit Wulsten (end110="stub") oder glatter
+//                      Rohrstumpf ø109 x 36 mm, optional gewinkelt (end110="pipe", pipe_*-Parameter)
 //    "adapter140"      Ventilator-Adapter: Muffe fuer 140-mm-Ventilatoranschluss (Innendurchmesser 146,4 mm) ->
 //                      Trichter -> 110er-Magnetflansch (Anschluss fuer 110-mm-Schlauch), Schraubloecher in der Muffe
 //    "oring_fan"       TPU-O-Ring fuer die Nut in der Muffenwand des Ventilator-Adapters (3 mm Schnur)
@@ -23,7 +24,7 @@
 // =====================================================================
 
 part = "assembly";      // inner | nut | funnel | adapter140 | oring_fan | oring150_plexi | oring150_face | oring110 | assembly
-end110 = "magnet";      // funnel: "magnet" = Magnetflansch (Referenz-Muster, passt auf Anschluss_110mm_Schlauch) | "stub" = fester Schlauchstutzen am 110er-Ende
+end110 = "magnet";      // funnel, 110er-Ende: "magnet" = Magnetflansch (Referenz-Muster, passt auf Anschluss_110mm_Schlauch) | "stub" = Schlauchstutzen mit Wulsten | "pipe" = glatter Rohrstumpf (gerade oder gewinkelt) zum Ueberstuelpen der Muffe eines 110er-Rohrs
 
 /* [Magnete] */
 mag_d        = 15;      // Magnet-Durchmesser
@@ -84,6 +85,15 @@ bead_n       = 5;       // Anzahl Wulste
 bead_pitch   = 6;
 bead_r       = 2.0;
 bead_first   = 10;      // erster Wulst ab Stutzenanfang
+
+/* [Rohrstumpf am 110er-Ende (nur end110="pipe")] */
+pipe_od      = 109;     // Aussendurchmesser des Stumpfs (Muffe des 110er-Rohrs wird darueber geschoben)
+pipe_bore_d  = 100;     // Innendurchmesser (lichte Weite)
+pipe_len     = 36;      // Laenge des geraden Stumpfs (bei Winkel: gemessen ab Ende des Bogens)
+pipe_angle   = 0;       // 0 = gerade, sonst Winkel des Bogens in Grad (z. B. 45 oder 90)
+pipe_bend_r  = 80;      // Biegeradius der Mittellinie (muss groesser als pipe_od/2 sein)
+pipe_dir     = 0;       // Richtung des Bogens um die Achse in Grad (0 = zur +X-Seite)
+pipe_chamfer = 1.0;     // Einfuehrfase am Rohrende (aussen)
 
 /* [110er Magnetflansch (Referenz-Muster, nur end110="magnet")] */
 R110         = 70.9;    // Teilkreisradius der Magnete (Referenz)
@@ -255,6 +265,39 @@ module part_nut() {
 // Aussenprofil des Stutzens inkl. Wulste (r,z)
 function stub_r(z) = stub_r0 - stub_taper * z / stub_len;     // z ab Stutzenanfang
 function arc_pts(zc, rc, br) = [for (a = [-80 : 20 : 80]) [rc + br * cos(a), zc + br * sin(a)]];
+// ---- Rohrstumpf (gerade oder gewinkelt) als ein Polyeder ohne Boolesche Operationen ----
+// Ringe senkrecht zum Pfad: [Mittelpunkt, Richtung e1 in der Biegeebene, Aussenradius]; Start bei z=0 in +Z-Richtung
+NP = 240;
+function pipe_path() =
+    let(a = pipe_angle, Rb = pipe_bend_r,
+        nb = a > 0 ? max(2, ceil(a / 5)) : 0,
+        E  = [Rb * (1 - cos(a)), 0, Rb * sin(a)],
+        t  = [sin(a), 0, cos(a)],
+        e1 = [cos(a), 0, -sin(a)],
+        ro = pipe_od / 2)
+    concat([[[0, 0, 0], [1, 0, 0], ro]],
+           nb > 0 ? [for (k = [1 : nb]) let(f = a * k / nb) [[Rb * (1 - cos(f)), 0, Rb * sin(f)], [cos(f), 0, -sin(f)], ro]] : [],
+           [[E + t * (pipe_len - pipe_chamfer), e1, ro]],
+           [[E + t * pipe_len, e1, ro - pipe_chamfer]]);
+module pipe_stub() {
+    assert(pipe_angle == 0 || pipe_bend_r > pipe_od / 2 + 5, "pipe_bend_r muss deutlich groesser als pipe_od/2 sein");
+    path = pipe_path();
+    K = len(path);
+    ri = pipe_bore_d / 2;
+    // Punkte: erst alle Aussenringe, dann alle Innenringe (gleiche Winkelphase wie rotate_extrude)
+    pts = concat(
+        [for (k = [0 : K - 1]) for (i = [0 : NP - 1])
+            path[k][0] + path[k][2] * (cos(360 * i / NP) * path[k][1] + sin(360 * i / NP) * [0, 1, 0])],
+        [for (k = [0 : K - 1]) for (i = [0 : NP - 1])
+            path[k][0] + ri * (cos(360 * i / NP) * path[k][1] + sin(360 * i / NP) * [0, 1, 0])]);
+    faces = concat(
+        [for (k = [0 : K - 2], i = [0 : NP - 1]) each let(j = (i + 1) % NP, a = k * NP + i, b = k * NP + j, c = (k + 1) * NP + j, d = (k + 1) * NP + i) [[a, d, c], [a, c, b]]],
+        [for (k = [0 : K - 2], i = [0 : NP - 1]) each let(j = (i + 1) % NP, a = K * NP + k * NP + i, b = K * NP + k * NP + j, c = K * NP + (k + 1) * NP + j, d = K * NP + (k + 1) * NP + i) [[a, b, c], [a, c, d]]],
+        [for (i = [0 : NP - 1]) each let(j = (i + 1) % NP) [[i, j, K * NP + j], [i, K * NP + j, K * NP + i]]],
+        [for (i = [0 : NP - 1]) each let(j = (i + 1) % NP, o = (K - 1) * NP) [[o + i, K * NP + o + j, o + j], [o + i, K * NP + o + i, K * NP + o + j]]]);
+    polyhedron(points = pts, faces = faces, convexity = 10);
+}
+
 module funnel_body() {
     T = adapter_t;
     zc = T + cone_len;
@@ -272,6 +315,10 @@ module funnel_body() {
                 outer_stub,
                 [[stub_r(stub_len), ztop - 1.5], [stub_r(stub_len) - 1.2, ztop],
                  [stub_bore_r + 1.0, ztop], [stub_bore_r, ztop - 1.0], [stub_bore_r, zc], [bore_r, T]]));
+    } else if (end110 == "pipe") {
+        rotate_extrude($fn = 240)
+            polygon([[bore_r, T - 1], [rc0, T - 1], [rc0, T], [pipe_od / 2, zc], [pipe_bore_d / 2, zc], [bore_r, T]]);
+        translate([0, 0, zc]) rotate(pipe_dir) pipe_stub();
     } else {
         rotate_extrude($fn = 240)
             polygon([[bore_r, T - 1], [rc0, T - 1], [rc0, T], [stub_r0, zc + 0.5],

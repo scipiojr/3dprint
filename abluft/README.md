@@ -10,7 +10,7 @@ Abluft-Anschluss für einen Laser-Cutter: Eine 5 mm dicke Plexiglasscheibe häng
   - **Innenscheibe** (Raumseite): flache Scheibe mit Magnetlappen, aus ihr wächst ein **Rohr** (Luftkanal ø140 mm) durch den Ausschnitt. Das Rohr hat einen glatten **Zentrierbund** im Bereich der Plexiglasdicke und darüber ein feines Außengewinde.
   - **Halteplatte** (Dachseite): flache Scheibe mit Magnetlappen und Innengewinde. Sie wird von oben auf das Rohr geschraubt und klemmt das Plexiglas zwischen beiden Scheiben.
   - Auf **beiden Außenflächen** sitzen 8 Magnete (15 × 3 mm) und eine Dichtungsnut, und auf der **Plexiglasseite** jeder Scheibe sitzt eine zweite Nut für eine TPU-Dichtung.
-- **Verjüngung 150 → 110:** Magnetflansch (150) → Trichter (35 mm, ca. 30° Halbwinkel) → am 110er-Ende ein Magnetflansch im Muster der 110er-Referenz. Darauf passt der Schlauchanschluss mit 110-mm-Stutzen. Als Variante gibt es statt des Flanschs einen festen Schlauchstutzen mit Wulsten.
+- **Verjüngung 150 → 110:** Magnetflansch (150) → Trichter (35 mm, ca. 30° Halbwinkel) → am 110er-Ende ein Magnetflansch im Muster der 110er-Referenz. Darauf passt der Schlauchanschluss mit 110-mm-Stutzen. Als Varianten gibt es statt des Flanschs einen festen Schlauchstutzen mit Wulsten oder einen glatten Rohrstumpf (ø109 × 36 mm, zum Überstülpen der Muffe eines 110er-KG-Rohrs), wahlweise gerade oder gewinkelt.
 - **Lastpfad (Dachfenster, Schlauch hängt innen):** Schlauch und Kupplung hängen über die **Magnete** an der Innenscheibe. Die Innenscheibe hängt über das **Gewinde** an der Halteplatte. Die Halteplatte liegt auf dem Plexiglas. Das Gewinde steht also dauerhaft unter Zug; Seitenkräfte gehen über den Zentrierbund ins Plexiglas.
 - **Abdichtung:** TPU-Rundschnüre (Ø 4 mm) in Nuten. Auf den Magnetflächen liegt jeweils **ein** Ring in den beiden gegenüberliegenden Nuten. Die Plexiglas-Ringe dichten Scheibe gegen Plexiglas. Gewinde und Zwischenräume liegen im abgeschlossenen Totraum innerhalb der Plexiglas-Ringe, die Dichtung hängt nicht am Gewinde.
 - **Magnetlappen sind um 22,5° gedreht** (`lobe_offset150`): Das Plexiglas hat in der Ecke nur etwa 20 mm Rand ab der Ausschnittkante. Die Scheiben reichen nur 95,7 mm vom Mittelpunkt (frei sind 97,5 mm). Anschlussteile mit 8 Magneten werden deshalb **um 22,5° gedreht** aufgesetzt, damit die Magnete übereinanderliegen.
@@ -26,6 +26,8 @@ Abluft-Anschluss für einen Laser-Cutter: Eine 5 mm dicke Plexiglasscheibe häng
 | `durchfuehrung_aussen.stl` | Halteplatte mit Innengewinde (Dachseite), mit Bohrungen für zwei M4-Sicherungsschrauben |
 | `verjuengung_150_110_magnet.stl` | Verjüngung mit 110er-Magnetflansch (Standard) |
 | `verjuengung_150_110_stutzen.stl` | Variante: fester Schlauchstutzen mit 5 Wulsten statt 110er-Flansch |
+| `verjuengung_150_110_rohr.stl` | Variante: glatter Rohrstumpf ø109 (innen ø100), 36 mm lang, gerade; 150er-Seite mit Magneten wie gehabt |
+| `verjuengung_150_110_rohr_45grad.stl` | wie oben, Stumpf um 45° gewinkelt (Biegeradius 80 mm); Stützen nötig, bei Winkeln über ca. 45° besonders |
 | `adapter_ventilator_140_110.stl` | Ventilator-Adapter: Muffe für den 140-mm-Ventilatoranschluss → Trichter → 110er-Magnetflansch, mit 4 Schraublöchern |
 | `dichtung_150_plexiglas_tpu.stl` | TPU-Ring zwischen Scheibe und Plexiglas (ID 156,4 / AD 164,4 mm) – 2 Stück |
 | `dichtung_150_anschluss_tpu.stl` | TPU-Ring für 150er-Anschlussflächen (ID 147 / AD 155 mm) |
@@ -95,7 +97,10 @@ Alle Dateien sind eingecheckt. Der Stand steht in der Git-Historie. Neu erzeugen
 | Parameter | Bedeutung |
 |---|---|
 | `part` | Teil: `inner`, `nut`, `funnel`, `adapter140`, `oring150_plexi`, `oring150_face`, `oring110`, `assembly` |
-| `end110` | `"magnet"` (Standard) oder `"stub"` für das 110er-Ende der Verjüngung |
+| `end110` | `"magnet"` (Standard), `"stub"` (Schlauchstutzen) oder `"pipe"` (Rohrstumpf) für das 110er-Ende der Verjüngung |
+| `pipe_od`, `pipe_bore_d`, `pipe_len` | Rohrstumpf: Außen-ø (109), Innen-ø (100), Länge (36 mm) |
+| `pipe_angle`, `pipe_bend_r`, `pipe_dir` | Rohrstumpf gewinkelt: Winkel in Grad (0 = gerade), Biegeradius der Mittellinie (80), Richtung um die Achse (0 = +X) |
+| `pipe_chamfer` | Einführfase außen am Rohrende (1 mm) |
 | `mag_d`, `mag_h`, `mag_clear`, `crush_ribs` | Magnetmaße, Spiel, Klemmnasen |
 | `n_mag_150`, `n_mag_110` | Magnetzahl je Fläche (die Referenzumrisse gelten nur für 8 bzw. 6; sonst runder Fallback-Umriss) |
 | `hole_d`, `plate_t` | Ausschnitt und Plattendicke |

@@ -27,6 +27,8 @@ DATEIEN = {
     "aussen": "durchfuehrung_aussen.stl",
     "magnet": "verjuengung_150_110_magnet.stl",
     "stutzen": "verjuengung_150_110_stutzen.stl",
+    "rohr": "verjuengung_150_110_rohr.stl",
+    "rohr45": "verjuengung_150_110_rohr_45grad.stl",
     "ventilator": "adapter_ventilator_140_110.stl",
     "ofan": "dichtung_ventilator_muffe_tpu.stl",
     "o150p": "dichtung_150_plexiglas_tpu.stl",
@@ -115,7 +117,7 @@ def main():
 
     print("== Anschluesse auf der Halteplatte (Magnetflaeche oben, Drehung 0 und 22,5 Grad)")
     for winkel in (0, 22.5):
-        for k in ("magnet", "stutzen"):
+        for k in ("magnet", "stutzen", "rohr", "rohr45"):
             if k in teile:
                 f = bewegt(teile[k], tf.translation_matrix([0, 0, z_oben]), tf.rotation_matrix(np.radians(winkel), [0, 0, 1]))
                 v = ueberlappung(aussen_m, zu_manifold(f))

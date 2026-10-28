@@ -11,12 +11,14 @@ SCAD=abluft_system.scad
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
-# Datei | part | zusaetzliche -D Argumente
+# Datei | part | zusaetzliche -D Argumente (durch Leerzeichen getrennt, keine Leerzeichen in den Werten)
 TEILE=(
   "durchfuehrung_innen.stl|inner|"
   "durchfuehrung_aussen.stl|nut|"
   "verjuengung_150_110_magnet.stl|funnel|end110=\"magnet\""
   "verjuengung_150_110_stutzen.stl|funnel|end110=\"stub\""
+  "verjuengung_150_110_rohr.stl|funnel|end110=\"pipe\""
+  "verjuengung_150_110_rohr_45grad.stl|funnel|end110=\"pipe\" pipe_angle=45"
   "adapter_ventilator_140_110.stl|adapter140|"
   "dichtung_ventilator_muffe_tpu.stl|oring_fan|"
   "dichtung_150_plexiglas_tpu.stl|oring150_plexi|"
@@ -27,7 +29,7 @@ TEILE=(
 export_eins() {
   local datei="$1" teil="$2" extra="$3"
   local args=(-D "part=\"$teil\"")
-  [[ -n "$extra" ]] && args+=(-D "$extra")
+  for e in $extra; do args+=(-D "$e"); done
   openscad -o "$TMP/$datei" "${args[@]}" "$SCAD" >"$TMP/$datei.log" 2>&1 || { cat "$TMP/$datei.log"; exit 1; }
   grep -q "Simple:        yes" "$TMP/$datei.log" || { echo "WARNUNG: $datei nicht 'Simple' (siehe Log)"; cat "$TMP/$datei.log"; }
   python3 - "$TMP/$datei" "$ZIEL/$datei" <<'PY' || cp "$TMP/$datei" "$ZIEL/$datei"

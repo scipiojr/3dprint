@@ -99,6 +99,7 @@ Alle Dateien sind eingecheckt. Der Stand steht in der Git-Historie. Neu erzeugen
 | `part` | Teil: `inner`, `nut`, `funnel`, `adapter140`, `oring150_plexi`, `oring150_face`, `oring110`, `assembly` |
 | `end110` | `"magnet"` (Standard), `"stub"` (Schlauchstutzen) oder `"pipe"` (Rohrstumpf) für das 110er-Ende der Verjüngung |
 | `pipe_od`, `pipe_bore_d`, `pipe_len` | Rohrstumpf: Außen-ø (109), Innen-ø (100), Länge (36 mm) |
+| `pipe_straight` | „Bend distance“: ungebogene Strecke zwischen Trichter und Beginn des Bogens (Standard 0, nur bei `pipe_angle` > 0) |
 | `pipe_angle`, `pipe_bend_r`, `pipe_dir` | Rohrstumpf gewinkelt: Winkel in Grad (0 = gerade), Biegeradius der Mittellinie (80), Richtung um die Achse (0 = +X) |
 | `pipe_chamfer` | Einführfase außen am Rohrende (1 mm) |
 | `mag_d`, `mag_h`, `mag_clear`, `crush_ribs` | Magnetmaße, Spiel, Klemmnasen |

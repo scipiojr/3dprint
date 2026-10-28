@@ -91,6 +91,7 @@ pipe_od      = 109;     // Aussendurchmesser des Stumpfs (Muffe des 110er-Rohrs 
 pipe_bore_d  = 100;     // Innendurchmesser (lichte Weite)
 pipe_len     = 36;      // Laenge des geraden Stumpfs (bei Winkel: gemessen ab Ende des Bogens)
 pipe_angle   = 0;       // 0 = gerade, sonst Winkel des Bogens in Grad (z. B. 45 oder 90)
+pipe_straight = 0;      // "bend distance": ungebogene Strecke zwischen Trichter und Beginn des Bogens (nur bei pipe_angle > 0)
 pipe_bend_r  = 80;      // Biegeradius der Mittellinie (muss groesser als pipe_od/2 sein)
 pipe_dir     = 0;       // Richtung des Bogens um die Achse in Grad (0 = zur +X-Seite)
 pipe_chamfer = 1.0;     // Einfuehrfase am Rohrende (aussen)
@@ -271,12 +272,14 @@ NP = 240;
 function pipe_path() =
     let(a = pipe_angle, Rb = pipe_bend_r,
         nb = a > 0 ? max(2, ceil(a / 5)) : 0,
-        E  = [Rb * (1 - cos(a)), 0, Rb * sin(a)],
+        s  = a > 0 ? pipe_straight : 0,
+        E  = [Rb * (1 - cos(a)), 0, s + Rb * sin(a)],
         t  = [sin(a), 0, cos(a)],
         e1 = [cos(a), 0, -sin(a)],
         ro = pipe_od / 2)
     concat([[[0, 0, 0], [1, 0, 0], ro]],
-           nb > 0 ? [for (k = [1 : nb]) let(f = a * k / nb) [[Rb * (1 - cos(f)), 0, Rb * sin(f)], [cos(f), 0, -sin(f)], ro]] : [],
+           s > 0 ? [[[0, 0, s], [1, 0, 0], ro]] : [],
+           nb > 0 ? [for (k = [1 : nb]) let(f = a * k / nb) [[Rb * (1 - cos(f)), 0, s + Rb * sin(f)], [cos(f), 0, -sin(f)], ro]] : [],
            [[E + t * (pipe_len - pipe_chamfer), e1, ro]],
            [[E + t * pipe_len, e1, ro - pipe_chamfer]]);
 module pipe_stub() {

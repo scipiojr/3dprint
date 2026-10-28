@@ -59,6 +59,8 @@ Ein 110-mm-Abluftschlauch (Laser-Cutter, heiße Rauchluft) soll über magnetisch
 
 6. **28.10.2026:** `part = "adapter140"`: Ventilator-Adapter (Muffe ø146,4 × 36 mm, Schulter auf ø140, 35-mm-Trichter, 110er-Magnetflansch nach Referenz, `fan_screw_*` für radiale Schraublöcher). Vorlage war `4inchto6inchDuct_v5.stl` (Muffe 35 mm tief, ID 149,2, Trichter ca. 38 mm, Stutzen); die Maße der Nutzerin weichen ab, die Form ist ähnlich.
 
+7. **28.10.2026:** Ventilator-Adapter mit **O-Ring-Nut in der Muffenwand** (3-mm-TPU-Schnur, 1,6 mm tief, 24 mm vom Rand, `part = "oring_fan"` liefert den Ring) und **optionaler Dichtungsnut** auf dem 110er-Magnetflansch (`fan_flange_groove`, Standard an). Die 110er-Nut ist an Verjüngung und Adapter identisch (r 53,4–57,6), ein Ring `dichtung_110_anschluss_tpu.stl` passt überall. Die Nutzerin wollte zunächst nur wissen, ob beidseitig gedichtet ist; Entscheidung: Nut in der Muffenwand (nicht Flachdichtung auf der Schulter).
+
 ### Geprüft (Rechenmodell, `werkzeuge/pruefung.py`)
 
 Alle STL wasserdicht; keine Überlappung Innenscheibe/Plexiglas/Halteplatte; Gewinde frei bei ca. 50° Drehspiel (0,56 mm axial); Verjüngung und Referenzadapter (150 auf Halteplatte und unter Innenscheibe, 110 auf Flansch) ohne Überlappung; Ring- und Taschenradien stimmen mit der Referenz überein. Mit abweichenden Dicken (`disc_t = 15`, `nut_t = 18`) wurden nur die Kontrollausgaben (3,6 Gänge) geprüft, nicht der volle Export.
@@ -69,7 +71,7 @@ Alle STL wasserdicht; keine Überlappung Innenscheibe/Plexiglas/Halteplatte; Gew
 - **Polungsregel der Referenzteile** unbekannt (Kerbenmarkierung im Modell ist eine eigene Konvention).
 - O-Ring-Pressung auf den Anschlussflächen: zwei Nuten à 1,9 mm gegen 4 mm Schnur ergeben nur ca. 0,2 mm Vorspannung, sobald die Flächen anliegen (110er-Flächen: 2 × 1,3 mm, also ca. 1,4 mm bzw. 35 % Pressung); bei undichtem Ring tiefere Nuten oder weichere/dickere Ringe prüfen (Referenzmaß bleibt maßgeblich).
 - Ausreichende Wand an der Plexiglasnut in der Taille (ca. 1,1 mm): am Probedruck beobachten.
-- **Ventilator-Adapter:** lichte Weite des Ventilatoranschlusses (`fan_bore_d = 140`) und sein Außendurchmesser sind Annahmen (die Muffe ist 146,4 mm, die Nutzerin hat nur diesen Wert genannt). Schrauben- oder Klebefixierung ungeklärt; Wandstärke 4 mm und Lochlage (12 mm vom Rand) nicht am Teil erprobt.
+- **Ventilator-Adapter:** Der Muffen-O-Ring dichtet nur, wenn der Außendurchmesser des Ventilatoranschlusses zu 146,4 − 2 × 1,4 + Spiel passt (Pressung ca. 1,2 mm bei AD 146,0). Außendurchmesser des Ventilatoranschlusses messen und `fan_groove_depth`/`fan_oring_d` anpassen. Lichte Weite des Ventilatoranschlusses (`fan_bore_d = 140`) und sein Außendurchmesser sind Annahmen (die Muffe ist 146,4 mm, die Nutzerin hat nur diesen Wert genannt). Schrauben- oder Klebefixierung ungeklärt; Wandstärke 4 mm und Lochlage (12 mm vom Rand) nicht am Teil erprobt.
 - Möglicher Schritt: 3MF mit Druckeinstellungen (PETG: 100 % Füllung/≥ 5 Wände für Rohrteile; TPU für Dichtungen), Gewindeprobe als kleines Probestück, Bajonettvariante als Option (`fastening`), Parametertest für abweichende Magnetzahl (nur 8/6 haben Referenzumriss).
 
 ## Hinweise zur Geometrie (für Änderungen)

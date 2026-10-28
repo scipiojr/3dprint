@@ -28,6 +28,7 @@ DATEIEN = {
     "magnet": "verjuengung_150_110_magnet.stl",
     "stutzen": "verjuengung_150_110_stutzen.stl",
     "ventilator": "adapter_ventilator_140_110.stl",
+    "ofan": "dichtung_ventilator_muffe_tpu.stl",
     "o150p": "dichtung_150_plexiglas_tpu.stl",
     "o150a": "dichtung_150_anschluss_tpu.stl",
     "o110": "dichtung_110_anschluss_tpu.stl",

@@ -29,7 +29,8 @@ Abluft-Anschluss für einen Laser-Cutter: Eine 5 mm dicke Plexiglasscheibe häng
 | `adapter_ventilator_140_110.stl` | Ventilator-Adapter: Muffe für den 140-mm-Ventilatoranschluss → Trichter → 110er-Magnetflansch, mit 4 Schraublöchern |
 | `dichtung_150_plexiglas_tpu.stl` | TPU-Ring zwischen Scheibe und Plexiglas (ID 156,4 / AD 164,4 mm) – 2 Stück |
 | `dichtung_150_anschluss_tpu.stl` | TPU-Ring für 150er-Anschlussflächen (ID 147 / AD 155 mm) |
-| `dichtung_110_anschluss_tpu.stl` | TPU-Ring für 110er-Anschlussflächen (ID 107 / AD 115 mm) |
+| `dichtung_110_anschluss_tpu.stl` | TPU-Ring für alle 110er-Magnetflächen (ID 107 / AD 115 mm, Schnur 4 mm): Flansch der Verjüngung, Ventilator-Adapter und der 110er-Schlauchanschluss, alle haben dieselbe Nut (r 53,4–57,6 mm) |
+| `dichtung_ventilator_muffe_tpu.stl` | TPU-O-Ring für die Nut in der Muffenwand des Ventilator-Adapters (Schnur 3 mm, ID 143,6 / AD 149,6 mm) |
 | `bilder/` | Vorschaubilder, erzeugt mit `werkzeuge/bilder.py` |
 | `werkzeuge/` | `export_alle.sh` (alle STL aus der SCAD erzeugen), `pruefung.py` (Passungs- und Gewindeprüfung), `bilder.py` |
 | `agent.md` | Arbeitsstand, Entscheidungen und Arbeitsweise für KI-Agenten |
@@ -44,9 +45,11 @@ Alle Dateien sind eingecheckt. Der Stand steht in der Git-Historie. Neu erzeugen
 
 - **Muffe:** Innendurchmesser **146,4 mm**, **36 mm tief** (`socket_depth`), Wand 4 mm. Sie wird über den Ventilatoranschluss geschoben und liegt auf einer 3,2 mm breiten **Schulter** an; dahinter bleibt eine lichte Weite von **140 mm** (`fan_bore_d`, Annahme für den Innendurchmesser des Ventilatoranschlusses). Am Rand ist innen eine 1,5-mm-Einführfase.
 - **Trichter:** 35 mm lang (`ad_cone_len`, ca. 30° Halbwinkel) von ø140 auf ø100, am 110er-Ende Magnetflansch (6 Magnete, Nut r 55,5 mm).
+- **Dichtung:** Zwei Stellen. (1) **Muffe:** O-Ring-Nut in der Muffenwand (`fan_groove`, 3-mm-TPU-Schnur, Nuttiefe 1,6 mm, Mitte 24 mm vom Rand, Dach unter 45° ohne Stützen); der Ring dichtet radial gegen den Außendurchmesser des Ventilatoranschlusses und ragt 1,4 mm nach innen (Restwand 2,4 mm). (2) **110er-Magnetflansch:** Dichtungsnut wie die Referenz, optional (`fan_flange_groove`, Standard an).
 - **Fixierung (offen):** Standardmäßig **4 radiale Schraublöcher** ø4,5 mm im Abstand von 12 mm vom Muffenrand (`fan_screw_n`, `fan_screw_d`, `fan_screw_from_mouth`, `fan_screw_angle0`; `fan_screw_n = 0` entfernt sie). Gedacht für Blechschrauben 4,2 mm mit Unterlegscheibe in den Ventilatoranschluss, alternativ Muffe mit Duct Tape abkleben. Die Fixierung ist noch nicht erprobt.
 - Gedruckt wird mit dem Magnetflansch auf dem Bett, ohne Stützen (Trichter ca. 30° Überhang).
 - Magnetbedarf: 6 (zusammen mit dem restlichen System 36 von 40).
+- Parameter der Dichtung: `fan_groove`, `fan_oring_d`, `fan_groove_depth`, `fan_groove_from_mouth`, `fan_flange_groove`. Den passenden Ring erzeugt `part = "oring_fan"`.
 
 ## Maße
 

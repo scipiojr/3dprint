@@ -9,6 +9,7 @@
 //                      (end110="magnet", Standard) oder fester Schlauchstutzen mit Wulsten (end110="stub")
 //    "adapter140"      Ventilator-Adapter: Muffe fuer 140-mm-Ventilatoranschluss (Innendurchmesser 146,4 mm) ->
 //                      Trichter -> 110er-Magnetflansch (Anschluss fuer 110-mm-Schlauch), Schraubloecher in der Muffe
+//    "oring_fan"       TPU-O-Ring fuer die Nut in der Muffenwand des Ventilator-Adapters (3 mm Schnur)
 //    "oring150_plexi"  TPU-Dichtung zwischen Scheibe und Plexiglas
 //    "oring150_face"   TPU-Dichtung fuer 150er-Anschlussflaechen (Verjuengung/Adapter auf Scheibe)
 //    "oring110"        TPU-Dichtung fuer 110er-Anschlussflaechen
@@ -21,7 +22,7 @@
 //  "Magnetic_Hose_Adapter_150" uebernommen, damit Teile nahtlos aufeinander passen.
 // =====================================================================
 
-part = "assembly";      // inner | nut | funnel | adapter140 | oring150_plexi | oring150_face | oring110 | assembly
+part = "assembly";      // inner | nut | funnel | adapter140 | oring_fan | oring150_plexi | oring150_face | oring110 | assembly
 end110 = "magnet";      // funnel: "magnet" = Magnetflansch (Referenz-Muster, passt auf Anschluss_110mm_Schlauch) | "stub" = fester Schlauchstutzen am 110er-Ende
 
 /* [Magnete] */
@@ -103,6 +104,11 @@ fan_screw_n    = 4;     // Anzahl radialer Schraubloecher in der Muffe (0 = kein
 fan_screw_d    = 4.5;   // Lochdurchmesser (Durchgangsloch fuer M4 / Blechschraube 4,2 mit Unterlegscheibe)
 fan_screw_from_mouth = 12;  // Abstand der Loecher vom Muffenrand
 fan_screw_angle0 = 45;  // Drehlage des ersten Lochs
+fan_groove     = true;  // O-Ring-Nut in der Muffenwand (dichtet radial gegen den Ventilatoranschluss)
+fan_oring_d    = 3.0;   // Schnurdurchmesser des Muffen-O-Rings (TPU)
+fan_groove_depth = 1.6; // Nuttiefe in der Wand (Restwand = socket_wall - Tiefe)
+fan_groove_from_mouth = 24; // Lage der Nutmitte ab Muffenrand (zwischen Schraublochkreis und Schulter)
+fan_flange_groove = true;   // Dichtungsnut auf dem 110er-Magnetflansch des Adapters (optional, wie Referenz)
 
 $fn = 96;
 eps = 0.01;
@@ -139,6 +145,7 @@ echo(str("Gewinde: major=", thread_major, " minor=", 2*r_minor, "  Wand am Gewin
          "  Rohrlaenge=", tube_len, "  Gewindelaenge in Mutter=", nut_t - nut_lip, " (", (nut_t - nut_lip)/thread_pitch, " Gaenge)"));
 echo(str("O-Ring 150 Plexi: ID=", 2*(gr150-oring_d/2), " AD=", 2*(gr150+oring_d/2), "   O-Ring 150 Anschluss: ID=", 2*(gr150_face-oring_d/2), " AD=", 2*(gr150_face+oring_d/2)));
 echo(str("Ventilator-Adapter: Muffe ID=", fan_socket_d, " Tiefe=", socket_depth, " Wand=", socket_wall, "  Schulter=", (fan_socket_d - fan_bore_d)/2, "  Hoehe gesamt=", flange110_t + ad_cone_len + socket_depth));
+echo(str("O-Ring Muffe: Schnur ", fan_oring_d, "  Mittenradius=", fan_socket_d / 2 + fan_groove_depth - fan_oring_d / 2, " -> ID=", fan_socket_d + 2 * fan_groove_depth - 2 * fan_oring_d, " AD=", fan_socket_d + 2 * fan_groove_depth, "  Nut: Restwand=", socket_wall - fan_groove_depth));
 echo(str("Magnete gesamt: inner=", n_mag_150, " nut=", n_mag_150, " funnel=", n_mag_150 + (end110=="magnet" ? n_mag_110 : 0)));
 
 // ---------------- Hilfsfunktionen ----------------
@@ -293,10 +300,18 @@ module part_adapter140() {
     rb   = fan_bore_d / 2;
     difference() {
         union() {
-            mag_flange(T, n_mag_110, R110, lobe110, body110_r, 0, gr110, groove_depth_mag, stub_bore_r, 0, 0, false);
+            mag_flange(T, n_mag_110, R110, lobe110, body110_r, 0, gr110, fan_flange_groove ? groove_depth_mag : 0, stub_bore_r, 0, 0, false);
             rotate_extrude($fn = 240)
                 polygon([[stub_bore_r, T], [stub_bore_r + ad_cone_wall0, T], [rs_o, zc], [rs_o, zt],
                          [rs_i + socket_chamfer, zt], [rs_i, zt - socket_chamfer], [rs_i, zc], [rb, zc]]);
+        }
+        // O-Ring-Nut in der Muffenwand, Dach unter 45 Grad (ohne Stuetzen druckbar)
+        if (fan_groove) {
+            fw = fan_oring_d + 0.2;
+            zg = zt - fan_groove_from_mouth;
+            rotate_extrude($fn = 240)
+                polygon([[rs_i - 0.2, zg - fw/2], [rs_i + fan_groove_depth, zg - fw/2],
+                         [rs_i + fan_groove_depth, zg + fw/2 - fan_groove_depth], [rs_i - 0.2, zg + fw/2 + 0.2]]);
         }
         if (fan_screw_n > 0)
             for (j = [0 : fan_screw_n - 1])
@@ -307,10 +322,11 @@ module part_adapter140() {
 }
 
 // TPU-O-Ring: liegend druckbar (kleine Abflachung oben/unten wie in deinen Vorlagen)
-module oring(rc) {
+module oring(rc, d = oring_d) {
+    h = d / 2 - 0.025;      // Abflachung oben/unten (Druckauflage)
     intersection() {
-        rotate_extrude($fn = 240) translate([rc, 0]) circle(d = oring_d, $fn = 48);
-        translate([-rc - oring_d, -rc - oring_d, -1.975]) cube([2 * (rc + oring_d), 2 * (rc + oring_d), 3.95]);
+        rotate_extrude($fn = 240) translate([rc, 0]) circle(d = d, $fn = 48);
+        translate([-rc - d, -rc - d, -h]) cube([2 * (rc + d), 2 * (rc + d), 2 * h]);
     }
 }
 
@@ -322,6 +338,7 @@ else if (part == "adapter140") part_adapter140();
 else if (part == "oring150_plexi") translate([0, 0, 1.975]) oring(gr150);
 else if (part == "oring150_face") translate([0, 0, 1.975]) oring(gr150_face);
 else if (part == "oring110") translate([0, 0, 1.975]) oring(gr110);
+else if (part == "oring_fan") translate([0, 0, fan_oring_d / 2 - 0.025]) oring(fan_socket_d / 2 + fan_groove_depth - fan_oring_d / 2, fan_oring_d);
 else if (part == "assembly") {
     color("steelblue") part_inner();
     color("lightblue", 0.35) translate([-200, -200, disc_t]) difference() {

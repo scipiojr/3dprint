@@ -20,6 +20,7 @@ lade = lambda n: trimesh.load(O / n)
 innen, aussen = lade("durchfuehrung_innen.stl"), lade("durchfuehrung_aussen.stl")
 magnet, stutzen = lade("verjuengung_150_110_magnet.stl"), lade("verjuengung_150_110_stutzen.stl")
 o150p, o150a = lade("dichtung_150_plexiglas_tpu.stl"), lade("dichtung_150_anschluss_tpu.stl")
+ventilator = lade("adapter_ventilator_140_110.stl")
 
 def kontur(ax, m, farbe, lw=0.7, y=0.0):
     s = m.section(plane_origin=[0, y, 0], plane_normal=[0, 1, 0])
@@ -56,4 +57,9 @@ fig, axs = plt.subplots(1, 2, figsize=(18, 9))
 for ax, (m, t) in zip(axs, [(magnet, "Verjüngung mit 110er-Magnetflansch"), (stutzen, "Variante mit festem Stutzen")]):
     kontur(ax, m, "k", 0.8); ax.set_aspect("equal"); ax.grid(alpha=.3); ax.set_title(t)
 fig.tight_layout(); fig.savefig(O / "bilder" / "verjuengung.png", dpi=55); plt.close(fig)
+# --- Ventilator-Adapter im Schnitt ---
+fig, ax = plt.subplots(figsize=(12, 9))
+kontur(ax, ventilator, "k", 0.8); ax.set_aspect("equal"); ax.grid(alpha=.3)
+ax.set_title("Ventilator-Adapter 140 → 110: Magnetflansch unten, Muffe (ø146,4) oben")
+fig.tight_layout(); fig.savefig(O / "bilder" / "adapter_ventilator.png", dpi=60); plt.close(fig)
 print("Bilder geschrieben")

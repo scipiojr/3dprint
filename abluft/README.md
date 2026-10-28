@@ -26,6 +26,7 @@ Abluft-Anschluss für einen Laser-Cutter: Eine 5 mm dicke Plexiglasscheibe häng
 | `durchfuehrung_aussen.stl` | Halteplatte mit Innengewinde (Dachseite), mit Bohrungen für zwei M4-Sicherungsschrauben |
 | `verjuengung_150_110_magnet.stl` | Verjüngung mit 110er-Magnetflansch (Standard) |
 | `verjuengung_150_110_stutzen.stl` | Variante: fester Schlauchstutzen mit 5 Wulsten statt 110er-Flansch |
+| `adapter_ventilator_140_110.stl` | Ventilator-Adapter: Muffe für den 140-mm-Ventilatoranschluss → Trichter → 110er-Magnetflansch, mit 4 Schraublöchern |
 | `dichtung_150_plexiglas_tpu.stl` | TPU-Ring zwischen Scheibe und Plexiglas (ID 156,4 / AD 164,4 mm) – 2 Stück |
 | `dichtung_150_anschluss_tpu.stl` | TPU-Ring für 150er-Anschlussflächen (ID 147 / AD 155 mm) |
 | `dichtung_110_anschluss_tpu.stl` | TPU-Ring für 110er-Anschlussflächen (ID 107 / AD 115 mm) |
@@ -34,6 +35,18 @@ Abluft-Anschluss für einen Laser-Cutter: Eine 5 mm dicke Plexiglasscheibe häng
 | `agent.md` | Arbeitsstand, Entscheidungen und Arbeitsweise für KI-Agenten |
 
 Alle Dateien sind eingecheckt. Der Stand steht in der Git-Historie. Neu erzeugen: `werkzeuge/export_alle.sh` (ca. 6 Minuten mit OpenSCAD 2021.01) oder in OpenSCAD `part` wählen, F6, STL exportieren.
+
+## Ventilator-Adapter 140 → 110
+
+![Ventilator-Adapter](bilder/adapter_ventilator.png)
+
+Übergang vom Ventilatoranschluss auf den 110er-Magnetanschluss (Magnetflansch im Muster der 110er-Referenz, darauf passt der vorhandene Schlauchanschluss).
+
+- **Muffe:** Innendurchmesser **146,4 mm**, **36 mm tief** (`socket_depth`), Wand 4 mm. Sie wird über den Ventilatoranschluss geschoben und liegt auf einer 3,2 mm breiten **Schulter** an; dahinter bleibt eine lichte Weite von **140 mm** (`fan_bore_d`, Annahme für den Innendurchmesser des Ventilatoranschlusses). Am Rand ist innen eine 1,5-mm-Einführfase.
+- **Trichter:** 35 mm lang (`ad_cone_len`, ca. 30° Halbwinkel) von ø140 auf ø100, am 110er-Ende Magnetflansch (6 Magnete, Nut r 55,5 mm).
+- **Fixierung (offen):** Standardmäßig **4 radiale Schraublöcher** ø4,5 mm im Abstand von 12 mm vom Muffenrand (`fan_screw_n`, `fan_screw_d`, `fan_screw_from_mouth`, `fan_screw_angle0`; `fan_screw_n = 0` entfernt sie). Gedacht für Blechschrauben 4,2 mm mit Unterlegscheibe in den Ventilatoranschluss, alternativ Muffe mit Duct Tape abkleben. Die Fixierung ist noch nicht erprobt.
+- Gedruckt wird mit dem Magnetflansch auf dem Bett, ohne Stützen (Trichter ca. 30° Überhang).
+- Magnetbedarf: 6 (zusammen mit dem restlichen System 36 von 40).
 
 ## Maße
 
@@ -78,7 +91,7 @@ Alle Dateien sind eingecheckt. Der Stand steht in der Git-Historie. Neu erzeugen
 
 | Parameter | Bedeutung |
 |---|---|
-| `part` | Teil: `inner`, `nut`, `funnel`, `oring150_plexi`, `oring150_face`, `oring110`, `assembly` |
+| `part` | Teil: `inner`, `nut`, `funnel`, `adapter140`, `oring150_plexi`, `oring150_face`, `oring110`, `assembly` |
 | `end110` | `"magnet"` (Standard) oder `"stub"` für das 110er-Ende der Verjüngung |
 | `mag_d`, `mag_h`, `mag_clear`, `crush_ribs` | Magnetmaße, Spiel, Klemmnasen |
 | `n_mag_150`, `n_mag_110` | Magnetzahl je Fläche (die Referenzumrisse gelten nur für 8 bzw. 6; sonst runder Fallback-Umriss) |
@@ -88,6 +101,8 @@ Alle Dateien sind eingecheckt. Der Stand steht in der Git-Historie. Neu erzeugen
 | `collar`, `collar_clear` | Zentrierbund |
 | `lock_screw_n`, `lock_screw_d` | Bohrungen für Sicherungsschrauben |
 | `cone_len`, `stub_len`, `bead_n` | Trichterlänge, Stutzenlänge und Wulste |
+| `fan_socket_d`, `fan_bore_d`, `socket_depth`, `socket_wall`, `ad_cone_len` | Ventilator-Adapter: Muffe, lichte Weite, Tiefe, Wand, Trichterlänge |
+| `fan_screw_n`, `fan_screw_d`, `fan_screw_from_mouth` | Schraublöcher in der Muffe |
 | `oring_d`, `groove_depth_*` | Dichtschnurdurchmesser und Nuttiefen |
 
 Beim Rendern gibt die SCAD eine Kontrollausgabe (Konsole): Ausdehnung der Scheiben über der Ausschnittkante, Gewindedaten (Wand, Gänge) und O-Ring-Maße.
@@ -99,6 +114,7 @@ Mit `werkzeuge/pruefung.py` im Rechenmodell geprüft (Boolesche Überlappung mit
 - alle STL wasserdicht,
 - Innenscheibe, Plexiglas (mit Ausschnitt) und Halteplatte überlappen sich nicht, Gewinde passt (Drehspiel ca. 50°),
 - Verjüngung sowie die Referenz-Adapter 150 (Halteplatte und Innenscheibe) und 110 überlappen sich nicht,
+- Ventilator-Adapter: der 110er-Anschluss passt unter den Flansch; ein angenommener Ventilatoranschluss (AD 146,0 / ID 140 mm) sitzt ohne Überlappung in der Muffe,
 - Magnettaschen und Dichtungsnuten liegen deckungsgleich zu den Referenzteilen (Radius der Ringe und Taschen).
 
 **Nicht** am echten Druck geprüft: Gewindesitz, Haltekraft der Magnete (Überschlag: 8 × 15×3 mm ca. 7–10 kg Zug im Stoß), Dichtheit, Verhalten unter Wärme und Dauerlast, Madenschrauben in PETG, Druckbarkeit der Klemmnasen. Auch die Polungsregel der Referenzteile ist offen.
@@ -111,5 +127,5 @@ Die Magnetflächen orientieren sich an diesen MakerWorld-Modellen (nicht im Repo
 - [Dust extraction hose magnetic coupling 100 mm](https://makerworld.com/de/models/252336-dust-extraction-hose-magnetic-coupling-100mm)
 - [Sammlung: compatible dust collection](https://makerworld.com/de/collections/16020952-compatible-dust-collection)
 
-Verwendete Vorlagendateien (liegen bei der Nutzerin): `Magnetic_Hose_Adapter_Parametric.stl` (110er-Adapter), `Magnetic_Hose_Adapter_150.stl` (150er-Adapter), `Anschluss_110mm_Schlauch.stl`, `Enclosure_Port*.step`, `Hose_Adapter_Model.step`, `Attachment_Holder1.step`, zwei O-Ring-STL.
+Verwendete Vorlagendateien (liegen bei der Nutzerin; `4inchto6inchDuct_v5.stl` war Vorbild für den Ventilator-Adapter: Muffe 35 mm tief, Trichter 35 mm, Stutzen): `Magnetic_Hose_Adapter_Parametric.stl` (110er-Adapter), `Magnetic_Hose_Adapter_150.stl` (150er-Adapter), `Anschluss_110mm_Schlauch.stl`, `Enclosure_Port*.step`, `Hose_Adapter_Model.step`, `Attachment_Holder1.step`, zwei O-Ring-STL.
 Der Umriss der 150er-Magnetflansche (`ref150_pts` in der SCAD) wurde aus `Magnetic_Hose_Adapter_150.stl` übernommen. Vor einer Veröffentlichung des Repositorys die Lizenz dieser Vorlage prüfen.

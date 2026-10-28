@@ -27,6 +27,7 @@ DATEIEN = {
     "aussen": "durchfuehrung_aussen.stl",
     "magnet": "verjuengung_150_110_magnet.stl",
     "stutzen": "verjuengung_150_110_stutzen.stl",
+    "ventilator": "adapter_ventilator_140_110.stl",
     "o150p": "dichtung_150_plexiglas_tpu.stl",
     "o150a": "dichtung_150_anschluss_tpu.stl",
     "o110": "dichtung_110_anschluss_tpu.stl",
@@ -137,6 +138,25 @@ def main():
         v = ueberlappung(zu_manifold(teile["magnet"]), zu_manifold(a))
         print(f"== Referenz-Anschluss 110 auf 110er-Flansch der Verjuengung: {v:.4f} mm3 {'ok' if v < 1e-3 else 'FEHLER'}")
         fehler += v >= 1e-3
+
+    if "ventilator" in teile:
+        print("== Ventilator-Adapter 140 -> 110")
+        v = zu_manifold(teile["ventilator"])
+        cone = scad_wert("flange110_t") + scad_wert("ad_cone_len")
+        sock_d, bore_d = scad_wert("fan_socket_d"), scad_wert("fan_bore_d")
+        spigot_od = sock_d - 0.4            # angenommener Aussendurchmesser des Ventilatoranschlusses
+        sp = (mf.Manifold.cylinder(60, spigot_od / 2, spigot_od / 2, 256) - mf.Manifold.cylinder(60, bore_d / 2, bore_d / 2, 256)).translate([0, 0, cone])
+        o = ueberlappung(v, sp)
+        print(f"  Ventilatoranschluss (Annahme AD {spigot_od:.1f} / ID {bore_d:.0f}) in der Muffe bis zur Schulter: {o:.4f} mm3 {'ok' if o < 1e-3 else 'FEHLER'}")
+        fehler += o >= 1e-3
+        ref = args.ref110
+        if ref:
+            r = trimesh.load(ref)
+            for winkel in (0, 30):
+                a = bewegt(r, tf.translation_matrix([0, 0, -15]), umdrehen, tf.rotation_matrix(np.radians(winkel), [0, 0, 1]))
+                o = ueberlappung(v, zu_manifold(a))
+                print(f"  Referenz-Anschluss 110 unter dem Flansch, {winkel:3} Grad: {o:.4f} mm3 {'ok' if o < 1e-3 else 'FEHLER'}")
+                fehler += o >= 1e-3
 
     print("== Ergebnis:", "ALLES OK" if not fehler else f"{int(fehler)} FEHLER")
     return int(fehler)

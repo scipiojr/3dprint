@@ -17,6 +17,7 @@ TEILE=(
   "durchfuehrung_aussen.stl|nut|"
   "verjuengung_150_110_magnet.stl|funnel|end110=\"magnet\""
   "verjuengung_150_110_stutzen.stl|funnel|end110=\"stub\""
+  "adapter_ventilator_140_110.stl|adapter140|"
   "dichtung_150_plexiglas_tpu.stl|oring150_plexi|"
   "dichtung_150_anschluss_tpu.stl|oring150_face|"
   "dichtung_110_anschluss_tpu.stl|oring110|"

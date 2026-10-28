@@ -18,7 +18,8 @@ Ein 110-mm-Abluftschlauch (Laser-Cutter, heiße Rauchluft) soll über magnetisch
 
 1. **Durchführung** (Innenscheibe + Halteplatte): beide Außenflächen magnetisch, mit Dichtungsnuten; Verbindung der beiden Scheiben über das Rohr mit Gewinde (zugleich Luftkanal).
 2. **Verjüngung 150 → 110** auf kurzer Strecke, dann Anschluss an den 110er-Magnetanschluss.
-3. Später: weitere Teile aus dem MakerWorld-System (Umlenker, Größenadapter), die auf dieselben Magnetflächen passen müssen.
+3. **Ventilator-Adapter** (28.10.2026): Muffe für einen 140-mm-Ventilatoranschluss (Innendurchmesser 146,4 mm, höchstens 36 mm tief) → Trichter → 110er-Magnetflansch. Fixierung der Muffe am Ventilator ist **noch ungelöst**: Standard 4 Schraublöcher (parametrisch), alternativ Duct Tape.
+4. Später: weitere Teile aus dem MakerWorld-System (Umlenker, Größenadapter), die auf dieselben Magnetflächen passen müssen.
 
 ## Randbedingungen (von der Nutzerin)
 
@@ -56,6 +57,8 @@ Ein 110-mm-Abluftschlauch (Laser-Cutter, heiße Rauchluft) soll über magnetisch
 4. Nuten auf allen Magnetflächen; Halteplatte mit Steg; Gewinde 4 mm Steigung; Scheiben 10 mm.
 5. Zentrierbund; Dicken `disc_t`, `nut_t`, `adapter_t` getrennt (Standard 12/12/10); Bohrungen für Sicherungsschrauben; Gewindelänge folgt `nut_t`.
 
+6. **28.10.2026:** `part = "adapter140"`: Ventilator-Adapter (Muffe ø146,4 × 36 mm, Schulter auf ø140, 35-mm-Trichter, 110er-Magnetflansch nach Referenz, `fan_screw_*` für radiale Schraublöcher). Vorlage war `4inchto6inchDuct_v5.stl` (Muffe 35 mm tief, ID 149,2, Trichter ca. 38 mm, Stutzen); die Maße der Nutzerin weichen ab, die Form ist ähnlich.
+
 ### Geprüft (Rechenmodell, `werkzeuge/pruefung.py`)
 
 Alle STL wasserdicht; keine Überlappung Innenscheibe/Plexiglas/Halteplatte; Gewinde frei bei ca. 50° Drehspiel (0,56 mm axial); Verjüngung und Referenzadapter (150 auf Halteplatte und unter Innenscheibe, 110 auf Flansch) ohne Überlappung; Ring- und Taschenradien stimmen mit der Referenz überein. Mit abweichenden Dicken (`disc_t = 15`, `nut_t = 18`) wurden nur die Kontrollausgaben (3,6 Gänge) geprüft, nicht der volle Export.
@@ -66,6 +69,7 @@ Alle STL wasserdicht; keine Überlappung Innenscheibe/Plexiglas/Halteplatte; Gew
 - **Polungsregel der Referenzteile** unbekannt (Kerbenmarkierung im Modell ist eine eigene Konvention).
 - O-Ring-Pressung auf den Anschlussflächen: zwei Nuten à 1,9 mm gegen 4 mm Schnur ergeben nur ca. 0,2 mm Vorspannung, sobald die Flächen anliegen (110er-Flächen: 2 × 1,3 mm, also ca. 1,4 mm bzw. 35 % Pressung); bei undichtem Ring tiefere Nuten oder weichere/dickere Ringe prüfen (Referenzmaß bleibt maßgeblich).
 - Ausreichende Wand an der Plexiglasnut in der Taille (ca. 1,1 mm): am Probedruck beobachten.
+- **Ventilator-Adapter:** lichte Weite des Ventilatoranschlusses (`fan_bore_d = 140`) und sein Außendurchmesser sind Annahmen (die Muffe ist 146,4 mm, die Nutzerin hat nur diesen Wert genannt). Schrauben- oder Klebefixierung ungeklärt; Wandstärke 4 mm und Lochlage (12 mm vom Rand) nicht am Teil erprobt.
 - Möglicher Schritt: 3MF mit Druckeinstellungen (PETG: 100 % Füllung/≥ 5 Wände für Rohrteile; TPU für Dichtungen), Gewindeprobe als kleines Probestück, Bajonettvariante als Option (`fastening`), Parametertest für abweichende Magnetzahl (nur 8/6 haben Referenzumriss).
 
 ## Hinweise zur Geometrie (für Änderungen)

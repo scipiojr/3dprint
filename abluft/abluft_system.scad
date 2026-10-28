@@ -77,9 +77,10 @@ use_ref_outline = true; // 150er Umriss exakt wie Referenz-Adapter (nur fuer 8 M
 /* [Verjuengung 150 -> 110] */
 cone_len     = 35;      // axiale Laenge des Trichters
 cone_wall0   = 7.0;     // Wandstaerke (radial) am 150er-Ende
-hose_od      = 110;     // Stutzen-Aussendurchmesser unten
+hose_nom     = 100;     // Nominaldurchmesser des Schlauchs; 110 = Referenzmuster (passt auf Anschluss_110mm_Schlauch)
+hose_od      = hose_nom;   // Stutzen-Aussendurchmesser (Schlauch wird ueber den Stutzen gezogen)
 stub_taper   = 0.8;     // Verjuengung (Radius) ueber die Stutzenlaenge
-stub_bore_d  = 100;     // Innendurchmesser Stutzen (wie Referenz)
+stub_bore_d  = hose_nom - 10;   // Innendurchmesser Stutzen und Luftkanal (Referenz: 110 -> 100, Wand 5)
 stub_len     = 50;      // Stutzenlaenge
 bead_n       = 5;       // Anzahl Wulste
 bead_pitch   = 6;
@@ -97,11 +98,16 @@ pipe_dir     = 0;       // Richtung des Bogens um die Achse in Grad (0 = zur +X-
 pipe_chamfer = 1.0;     // Einfuehrfase am Rohrende (aussen)
 
 /* [110er Magnetflansch (Referenz-Muster, nur end110="magnet")] */
-R110         = 70.9;    // Teilkreisradius der Magnete (Referenz)
-gr110        = 55.5;    // Nut-Mittenradius (Referenz)
+dh           = (110 - hose_nom) / 2;   // Verkleinerung des 110er-Referenzmusters (radial) fuer kleinere Schlauchgroesse
+// Muster des Schlauch-Magnetflanschs: hose_nom 110 und 100 sind an den Referenz-Anschluessen vermessen,
+// andere Groessen werden naeherungsweise verschoben.
+R110         = hose_nom == 100 ? 61.0 : 70.9 - dh;    // Teilkreisradius der Magnete (Referenz: 110 -> 70.9, 100 -> 61.0)
+gr110        = hose_nom == 100 ? 50.5 : 55.5 - dh;    // Nut-Mittenradius (Referenz: 110 -> 55.5, 100 -> 50.5)
 flange110_t  = 8;
-body110_r    = 63.5;   // Koerperradius zwischen den Lappen (Referenz ca. 63.4)
-lobe110      = 10.4;   // Lappenradius um die Magnete (Referenz: Lappen enden bei r=81.1)
+body110_r    = hose_nom == 100 ? 55.9 : 63.5 - dh;   // Koerperradius zwischen den Lappen (Referenz: 110 -> 63.4, 100 -> 55.9)
+hose_mag_d   = mag_d;      // Magnetdurchmesser der Schlauch-Magnetflaechen (Standard 15; der vermessene 100er-Anschluss hat Taschen fuer 10 mm)
+hose_mag_clear = mag_clear;
+lobe110      = (hose_mag_d + hose_mag_clear) / 2 + 2.75;   // Lappenradius um die Magnete (Referenz 110: 10.4; Anschluss 100 mit 10-mm-Taschen: 8.0)
 
 /* [Ventilator-Adapter 140 -> 110 (part = "adapter140")] */
 fan_socket_d   = 146.4; // Innendurchmesser der Muffe (schiebt sich ueber den Ventilatoranschluss)
@@ -127,6 +133,7 @@ eps = 0.01;
 // ---------------- abgeleitete Werte ----------------
 pr          = (mag_d + mag_clear) / 2;          // Taschenradius
 pdepth      = mag_h + mag_depth_extra;          // Taschentiefe
+pr110       = (hose_mag_d + hose_mag_clear) / 2; // Taschenradius der Schlauch-Magnetflaechen
 hole_r      = hole_d / 2;
 bore_r      = bore_d / 2;
 gr150       = hole_r + plexi_gap + groove_w/2;  // Nut-Mittenradius 150er Flaeche
@@ -165,12 +172,12 @@ function qsort(v) = len(v) <= 1 ? v :
     concat(qsort([for(x=v) if (x < p) x]), [for(x=v) if (x == p) x], qsort([for(x=v) if (x > p) x]));
 
 // ---------------- Magnettasche (2D) mit feinen Klemmnasen ----------------
-module pocket2d() {
+module pocket2d(pr_ = pr) {
     difference() {
-        circle(r = pr, $fn = 72);
+        circle(r = pr_, $fn = 72);
         for (k = [0 : crush_ribs - 1])
             rotate(90 + k * 360 / max(crush_ribs, 1))
-                polygon([[pr - crush_rib_h, 0], [pr + 0.3, -crush_rib_w/2], [pr + 0.3, crush_rib_w/2]]);
+                polygon([[pr_ - crush_rib_h, 0], [pr_ + 0.3, -crush_rib_w/2], [pr_ + 0.3, crush_rib_w/2]]);
     }
 }
 
@@ -191,7 +198,7 @@ module outline2d(n, R, lr, br, off, use_ref = false) {
 }
 
 // ---------------- Magnetflansch: Magnetflaeche bei z=0, optionale Nut auf der Gegenseite ----------------
-module mag_flange(T, n, R, lr, br, off, gr_face, gd_face, hole_r, gd_far = 0, gr_far = 0, use_ref = false, hole_step_z = 0, hole_r2 = 0) {
+module mag_flange(T, n, R, lr, br, off, gr_face, gd_face, hole_r, gd_far = 0, gr_far = 0, use_ref = false, hole_step_z = 0, hole_r2 = 0, pr_ = pr) {
     bps = qsort(concat([0, gd_face, pdepth, T - gd_far, T], hole_step_z > 0 ? [hole_step_z] : []));
     for (i = [0 : len(bps) - 2]) {
         z0 = bps[i]; z1 = bps[i+1];
@@ -202,7 +209,7 @@ module mag_flange(T, n, R, lr, br, off, gr_face, gd_face, hole_r, gd_far = 0, gr
                     outline2d(n, R, lr, br, off, use_ref);
                     circle(r = (hole_step_z > 0 && zm > hole_step_z) ? hole_r2 : hole_r, $fn = 240);
                     if (zm < pdepth)
-                        for (j = [0 : n - 1]) rotate(off + j * 360 / n) translate([R, 0]) pocket2d();
+                        for (j = [0 : n - 1]) rotate(off + j * 360 / n) translate([R, 0]) pocket2d(pr_);
                     if (gd_face > 0 && zm < gd_face) ring2d(gr_face, groove_w);
                     if (gd_far > 0 && zm > T - gd_far) ring2d(gr_far, groove_w);
                 }
@@ -336,7 +343,7 @@ module part_funnel() {
         funnel_body();
         if (end110 == "magnet")
             translate([0, 0, zc + flange110_t - 0.0]) mirror([0, 0, 1])
-                mag_flange(flange110_t, n_mag_110, R110, lobe110, body110_r, 0, gr110, groove_depth_mag, stub_bore_r, 0, 0, false);
+                mag_flange(flange110_t, n_mag_110, R110, lobe110, body110_r, 0, gr110, groove_depth_mag, stub_bore_r, 0, 0, false, 0, 0, pr110);
     }
 }
 
@@ -350,7 +357,7 @@ module part_adapter140() {
     rb   = fan_bore_d / 2;
     difference() {
         union() {
-            mag_flange(T, n_mag_110, R110, lobe110, body110_r, 0, gr110, fan_flange_groove ? groove_depth_mag : 0, stub_bore_r, 0, 0, false);
+            mag_flange(T, n_mag_110, R110, lobe110, body110_r, 0, gr110, fan_flange_groove ? groove_depth_mag : 0, stub_bore_r, 0, 0, false, 0, 0, pr110);
             rotate_extrude($fn = 240)
                 polygon([[stub_bore_r, T], [stub_bore_r + ad_cone_wall0, T], [rs_o, zc], [rs_o, zt],
                          [rs_i + socket_chamfer, zt], [rs_i, zt - socket_chamfer], [rs_i, zc], [rb, zc]]);

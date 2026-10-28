@@ -31,7 +31,9 @@ Abluft-Anschluss für einen Laser-Cutter: Eine 5 mm dicke Plexiglasscheibe häng
 | `adapter_ventilator_140_110.stl` | Ventilator-Adapter: Muffe für den 140-mm-Ventilatoranschluss → Trichter → 110er-Magnetflansch, mit 4 Schraublöchern |
 | `dichtung_150_plexiglas_tpu.stl` | TPU-Ring zwischen Scheibe und Plexiglas (ID 156,4 / AD 164,4 mm) – 2 Stück |
 | `dichtung_150_anschluss_tpu.stl` | TPU-Ring für 150er-Anschlussflächen (ID 147 / AD 155 mm) |
-| `dichtung_110_anschluss_tpu.stl` | TPU-Ring für alle 110er-Magnetflächen (ID 107 / AD 115 mm, Schnur 4 mm): Flansch der Verjüngung, Ventilator-Adapter und der 110er-Schlauchanschluss, alle haben dieselbe Nut (r 53,4–57,6 mm) |
+| `dichtung_110_anschluss_tpu.stl` | TPU-Ring für alle Schlauch-Magnetflächen (bei `hose_nom=100`: ID 97 / AD 105 mm, Schnur 4 mm, Nut r 48,4–52,6 mm): Flansch der Verjüngung, Ventilator-Adapter und 100er-Schlauchanschluss haben dieselbe Nut. Bei `hose_nom=110`: ID 107 / AD 115 |
+| `schraubkappe_110_auf_100.stl` | Reduzierer: wird auf den Stutzen des vorhandenen **110er**-Schlauchanschlusses geschraubt und endet in einem 100er-Schlauchstutzen mit Wulsten (siehe Schraubkappe) |
+| `dichtung_stutzenende_tpu.stl` | TPU-O-Ring (Schnur 2,5 mm, ID 101 / AD 106) für die Dichtfläche zwischen Stutzenende des 110er-Anschlusses und Schraubkappe |
 | `dichtung_ventilator_muffe_tpu.stl` | TPU-O-Ring für die Nut in der Muffenwand des Ventilator-Adapters (Schnur 3 mm, ID 143,6 / AD 149,6 mm) |
 | `bilder/` | Vorschaubilder, erzeugt mit `werkzeuge/bilder.py` |
 | `werkzeuge/` | `export_alle.sh` (alle STL aus der SCAD erzeugen), `pruefung.py` (Passungs- und Gewindeprüfung), `bilder.py` |
@@ -74,18 +76,30 @@ Dünne Platte (Magnetdicke + 1,2 mm), die mit eingeklebten Magneten auf eine Kup
 - Stift: `pin_mode="gedruckt"` (Kegelfuß, PETG; bei Länge über 12 × Durchmesser empfindlich) oder `"loch"` (Bohrung ø5,2 mm mit Führungsnabe für einen Metallstift).
 - `werkzeuge/export_ausmesshilfe.sh [ordner] [-D ...]` erzeugt `ausmesshilfe_150.stl` und `ausmesshilfe_110.stl`. Nicht gedruckt getestet; die Winkellage der Magnete der Referenzteile (`mag_angle0`) ist nicht verifiziert.
 
+## Schlauchgröße (`hose_nom`, Standard 100 mm)
+
+Der Schlauch hat nominal **100 mm**. Alle Schlauchseiten (Verjüngung, Ventilator-Adapter) folgen dem `hose_nom` in `abluft_system.scad` und sind auf deinen vermessenen **100er-Schlauchanschluss** (`Anschluss_100mm_Schlauch.stl`) abgestimmt: 6 Magnete auf Teilkreisradius 61,0 mm, Dichtungsnut Mitte r 50,5 mm (4,2 breit), Bohrung ø90, Körperradius 55,9 mm. Stutzen-Außen ø100 (Gewindegrund deines Anschlusses), innen ø90. Mit `hose_nom=110` entsteht das ursprüngliche 110er-Muster.
+
+- **Magnete:** Standard sind 15 × 3 mm auch an den Schlauchflächen (`hose_mag_d`); dein vermessener Anschluss hat noch Taschen ø10,2 und wird bei dir noch angepasst. Mit 15-mm-Magneten bleiben nur ca. 0,75 mm Wand zwischen Tasche und Dichtungsnut. Mit `-D hose_mag_d=10` passt die Magnetfläche zum aktuellen Anschluss (Lappenradius folgt automatisch).
+- **Dichtung:** Dieselbe Nut an allen 100er-Flächen, ein Ring `dichtung_110_anschluss_tpu.stl` (ID 97 / AD 105) passt überall.
+- **Prüfung:** Verjüngung (Magnetflansch) und Ventilator-Adapter überlappen sich nicht mit deinem 100er-Anschluss (`werkzeuge/pruefung.py --ref110`).
+
+## Schraubkappe 110 → 100 (`abluft_schraubkappe.scad`)
+
+Damit der vorhandene 110er-Schlauchanschluss weiter nutzbar ist: Die Kappe wird auf dessen Stutzengewinde geschraubt (Rechtsgewinde, Steigung ca. 10 mm, ein Gang, leicht konisch, Gewindegrund ø109, Kamm ø114) und endet in einem 100er-Schlauchstutzen (Wulste wie das Abluft-System, innen ø90). Das Gewindeprofil ist direkt aus der Referenz-STL gemessen (Profiltabelle, mittlere Abweichung 0,1 mm) und wird als Innengewinde mit Spiel `thread_clear` (0,8 mm) berechnet; Länge `thr_len` 34 mm, Griffrippen, Dichtungsnut in der Deckplatte für einen O-Ring auf dem Stutzenende (`dichtung_stutzenende_tpu.stl`). Geprüft: überlappungsfrei beim Aufschrauben entlang der Gewindesteigung, kleinster Abstand zur Referenz 0,3 mm; nicht gedruckt getestet.
+
 ## Maße
 
 | | |
 |---|---|
 | Ausschnitt Plexiglas | ø155 mm, Plattendicke 5 mm |
-| Luftkanal | ø140 mm innen (150-mm-Seite), ø100 mm am 110er-Ende (Referenz) |
+| Luftkanal | ø140 mm innen (150-mm-Seite), ø90 mm an der Schlauchseite (`hose_nom` 100; bei 110: ø100) |
 | Gewinde | ø151 mm außen, Steigung 4 mm, Tiefe 1,5 mm, Wand am Gewindegrund 4 mm; Gewindelänge = Dicke Halteplatte − 3,5 mm Steg (Standard 8,5 mm = 2,1 Gänge) |
 | Plattendicken | Innenscheibe 12 mm, Halteplatte 12 mm, Flansch der Verjüngung 10 mm (alle einstellbar: `disc_t`, `nut_t`, `adapter_t`) |
 | Zentrierbund | ø153,4 mm (0,8 mm Spiel zum Ausschnitt), liegt im Bereich der Plexiglasdicke |
-| Magnete | 15 × 3 mm, 8 je 150er-Fläche (Teilkreisradius 91,0 mm), 6 je 110er-Fläche (Teilkreisradius 70,9 mm) |
+| Magnete | 15 × 3 mm, 8 je 150er-Fläche (Teilkreisradius 91,0 mm), 6 je Schlauchfläche (Teilkreisradius 61,0 mm bei `hose_nom` 100, 70,9 mm bei 110) |
 | Magnettasche | ø15,3 × 3,2 mm mit 3 feinen Klemmnasen, Magnet plan eingelassen, mit Sekundenkleber |
-| Dichtungsnut | 4,2 mm breit; Anschlussflächen 150: Radius 75,5 mm, 1,9 mm tief; 110: Radius 55,5 mm, 1,3 mm tief; Plexiglasseite: Radius 80,2 mm, 2,8 mm tief |
+| Dichtungsnut | 4,2 mm breit; Anschlussflächen 150: Radius 75,5 mm, 1,9 mm tief; Schlauchfläche: Radius 50,5 mm (100) bzw. 55,5 mm (110), 1,3 mm tief; Plexiglasseite: Radius 80,2 mm, 2,8 mm tief |
 | Trichter | 35 mm lang, innen ø140 → ø100, Wand ≥ 5 mm |
 | Ausdehnung | Scheiben ø ca. 191 mm, Flansch der Verjüngung ø ca. 203 mm; größtes Teil (Variante Stutzen) 203 × 203 × 95 mm |
 
@@ -118,6 +132,7 @@ Dünne Platte (Magnetdicke + 1,2 mm), die mit eingeklebten Magneten auf eine Kup
 | Parameter | Bedeutung |
 |---|---|
 | `part` | Teil: `inner`, `nut`, `funnel`, `adapter140`, `oring150_plexi`, `oring150_face`, `oring110`, `assembly` |
+| `hose_nom`, `hose_mag_d` | Nominaldurchmesser des Schlauchs (100 oder 110, an Referenzanschlüssen vermessen), Magnetdurchmesser der Schlauchflächen |
 | `end110` | `"magnet"` (Standard), `"stub"` (Schlauchstutzen) oder `"pipe"` (Rohrstumpf) für das 110er-Ende der Verjüngung |
 | `pipe_od`, `pipe_bore_d`, `pipe_len` | Rohrstumpf: Außen-ø (109), Innen-ø (100), Länge (36 mm) |
 | `pipe_straight` | „Bend distance“: ungebogene Strecke zwischen Trichter und Beginn des Bogens (Standard 0, nur bei `pipe_angle` > 0) |

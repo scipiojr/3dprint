@@ -137,7 +137,7 @@ def main():
 
     if args.ref110 and "magnet" in teile:
         r = trimesh.load(args.ref110)
-        a = bewegt(r, tf.translation_matrix([0, 0, teile["magnet"].bounds[1][2] + 15]))
+        a = bewegt(r, tf.translation_matrix([0, 0, teile["magnet"].bounds[1][2] - r.bounds[0][2]]))
         v = ueberlappung(zu_manifold(teile["magnet"]), zu_manifold(a))
         print(f"== Referenz-Anschluss 110 auf 110er-Flansch der Verjuengung: {v:.4f} mm3 {'ok' if v < 1e-3 else 'FEHLER'}")
         fehler += v >= 1e-3
@@ -156,7 +156,7 @@ def main():
         if ref:
             r = trimesh.load(ref)
             for winkel in (0, 30):
-                a = bewegt(r, tf.translation_matrix([0, 0, -15]), umdrehen, tf.rotation_matrix(np.radians(winkel), [0, 0, 1]))
+                a = bewegt(r, tf.translation_matrix([0, 0, r.bounds[0][2]]), umdrehen, tf.rotation_matrix(np.radians(winkel), [0, 0, 1]))
                 o = ueberlappung(v, zu_manifold(a))
                 print(f"  Referenz-Anschluss 110 unter dem Flansch, {winkel:3} Grad: {o:.4f} mm3 {'ok' if o < 1e-3 else 'FEHLER'}")
                 fehler += o >= 1e-3

@@ -69,7 +69,7 @@ Ein 110-mm-Abluftschlauch (Laser-Cutter, heiße Rauchluft) soll über magnetisch
 - Offen: nicht gedruckt, Passung der Steckverbindungen und Falze ungeprüft; Spaltenteilung wurde nur geometrisch geprüft (`werkzeuge/pruefung_fensterkanal.py`).
 
 ### Ausmesshilfe (`abluft_ausmesshilfe.scad`)
-- Eigene Datei ohne Abhängigkeit zur Hauptdatei. Platte mit Taschen (Magnete unten bündig), Speichen/Fenster, Nabe und senkrechtem 0,5-mm-Stift (gedruckt oder Bohrung für Metalldraht). Parameter für Magnetart, Anzahl, Durchmesser, Teilkreis, Stiftlänge. Nutzerwunsch: Magnetart, Anzahl, Durchmesser und Stiftlänge frei wählbar, eigenes OpenSCAD.
+- Eigene Datei ohne Abhängigkeit zur Hauptdatei. Platte mit Taschen (Magnete unten bündig), Speichen/Fenster, Nabe und senkrechtem 5-mm-Stift (gedruckt oder Bohrung für einen Metallstift). Parameter für Magnetart, Anzahl, Durchmesser, Teilkreis, Stiftlänge. Nutzerwunsch: Magnetart, Anzahl, Durchmesser und Stiftlänge frei wählbar, eigenes OpenSCAD.
 
 ### Geprüft (Rechenmodell, `werkzeuge/pruefung.py`)
 

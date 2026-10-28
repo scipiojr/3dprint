@@ -2,7 +2,7 @@
 //  Abluft-System: Ausmesshilfe.   OpenSCAD 2021.01 oder neuer.
 //
 //  Duenne Platte, die auf eine Magnetkupplungsstelle aufgelegt wird (Magnete unten buendig, wie bei
-//  den Abluft-Teilen) und in der Mitte einen senkrechten Stift traegt (Standard 0,5 mm Durchmesser).
+//  den Abluft-Teilen) und in der Mitte einen senkrechten Stift traegt (Standard 5 mm Durchmesser).
 //  Damit laesst sich die Mitte der Kupplung anpeilen, z. B. um sie zu einem Fensterausschnitt oder
 //  Rohr auszurichten oder Abstaende zu messen.
 //
@@ -36,10 +36,10 @@ plate_d  = 0;           // 0 = automatisch (Teilkreis + Magnet + Rand), sonst Au
 
 /* [Stift] */
 pin_mode = "gedruckt";  // "gedruckt" = Stift aus PETG | "loch" = Bohrung fuer Nadel/Draht aus Metall
-pin_d    = 0.5;         // Durchmesser des Stifts
+pin_d    = 5;           // Durchmesser des Stifts (5 mm = 0,5 cm)
 pin_len  = 30;          // Laenge ueber der Platte
-pin_hole_d = 0.6;       // Bohrung fuer einen Metallstift (nur "loch")
-pin_base_d = 5;         // Fuss (Kegel) des gedruckten Stifts
+pin_hole_d = 5.2;       // Bohrung fuer einen Metallstift (nur "loch")
+pin_base_d = 12;        // Fuss (Kegel) des gedruckten Stifts
 pin_base_h = 4;
 
 n  = preset == "150" ? 8 : preset == "110" ? 6 : n_mag;
@@ -77,7 +77,7 @@ module ausmesshilfe() {
             linear_extrude(plate_t) plate2d();
             // Nabe immer geschlossen, bei Metallstift hoeher zur Fuehrung
             cylinder(r = hub_r, h = plate_t);
-            if (pin_mode == "loch") cylinder(d = 5, h = plate_t + 6);
+            if (pin_mode == "loch") cylinder(d = pin_hole_d + 4, h = plate_t + 6);
         }
         for (k = [0 : n - 1]) rotate(mag_angle0 + k * 360 / n) translate([R, 0, -0.01]) {
             rotate(mag_shape == "rund" ? 0 : 90) linear_extrude(mag_h + 0.01) pocket2d();
@@ -93,8 +93,8 @@ module ausmesshilfe() {
 
 echo(str("Ausmesshilfe: Platte ø", round(2 * ro * 10) / 10, " x ", plate_t, " mm, ", n, " Magnete ", mag_shape, " ", mag_d, "x", mag_h,
          " auf R=", R, ", Stift ø", pin_d, " x ", pin_len, " mm (", pin_mode, ")"));
-if (pin_mode == "gedruckt" && pin_len > 40)
-    echo("HINWEIS: ein gedruckter Stift mit 0,5 mm ist bei mehr als ca. 40 mm Laenge sehr empfindlich -> pin_mode=\"loch\" mit Metalldraht verwenden.");
+if (pin_mode == "gedruckt" && pin_len > 12 * pin_d)
+    echo("HINWEIS: der gedruckte Stift ist sehr schlank (Laenge > 12 x Durchmesser) und biegt sich leicht -> pin_mode=\"loch\" mit Metallstift verwenden.");
 if (plate_d > 0 && plate_d / 2 < R + mext)
     echo("WARNUNG: plate_d ist zu klein, die Magnete ragen ueber den Rand.");
 ausmesshilfe();

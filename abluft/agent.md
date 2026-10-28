@@ -68,6 +68,9 @@ Ein 110-mm-Abluftschlauch (Laser-Cutter, heiße Rauchluft) soll über magnetisch
 - Nutzerwunsch: nur teilen, wenn nötig; Standard ohne Seitenteile; auf einfaches Drucken optimiert (stehend, wenige Teile). Beispiel der Nutzerin (Datei Window_Duct): Rundrohr 101,6 → Flachkanal 340 × 60, asymmetrisch (177/163), Stützblöcke.
 - Offen: nicht gedruckt, Passung der Steckverbindungen und Falze ungeprüft; Spaltenteilung wurde nur geometrisch geprüft (`werkzeuge/pruefung_fensterkanal.py`).
 
+### Ausmesshilfe (`abluft_ausmesshilfe.scad`)
+- Eigene Datei ohne Abhängigkeit zur Hauptdatei. Platte mit Taschen (Magnete unten bündig), Speichen/Fenster, Nabe und senkrechtem 0,5-mm-Stift (gedruckt oder Bohrung für Metalldraht). Parameter für Magnetart, Anzahl, Durchmesser, Teilkreis, Stiftlänge. Nutzerwunsch: Magnetart, Anzahl, Durchmesser und Stiftlänge frei wählbar, eigenes OpenSCAD.
+
 ### Geprüft (Rechenmodell, `werkzeuge/pruefung.py`)
 
 Alle STL wasserdicht; keine Überlappung Innenscheibe/Plexiglas/Halteplatte; Gewinde frei bei ca. 50° Drehspiel (0,56 mm axial); Verjüngung und Referenzadapter (150 auf Halteplatte und unter Innenscheibe, 110 auf Flansch) ohne Überlappung; Ring- und Taschenradien stimmen mit der Referenz überein. Mit abweichenden Dicken (`disc_t = 15`, `nut_t = 18`) wurden nur die Kontrollausgaben (3,6 Gänge) geprüft, nicht der volle Export.

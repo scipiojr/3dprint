@@ -65,6 +65,15 @@ Ein durchgehender Luftkanal für eine flache Fensterdurchführung: 150er-Magnetf
 - Beispiele: `-D fk_angle=45`, `-D fk_flat_in_plane=true` (Breite in der Bogenebene), `-D 'fk_bed=[220,220,250]'`, `-D fk_WL=177 -D fk_WR=163 -D fk_H=60` (breiter Kanal, 6 Teile).
 - Nicht gedruckt getestet: Passung der Steckverbindungen (Spiel 0,25 mm), Dichtheit der Klebestellen, Steifigkeit der 2,8-mm-Wand im breiten Flachkanal.
 
+## Ausmesshilfe (`abluft_ausmesshilfe.scad`)
+
+Dünne Platte (Magnetdicke + 1,2 mm), die mit eingeklebten Magneten auf eine Kupplungsstelle gelegt wird und in der Mitte einen senkrechten Stift trägt (Standard ø0,5 mm, Länge `pin_len` 30 mm). Zum Anpeilen der Kupplungsmitte, z. B. gegen einen Fensterausschnitt oder ein Rohr.
+
+- Voreinstellungen `preset="150"` (8 Magnete, Teilkreisradius 91) und `"110"` (6 Magnete, Radius 70,9), außerdem `"frei"` mit `n_mag` und `R_mag`. Magnet rund oder Quader (`mag_shape`), Durchmesser/Länge, Breite, Höhe, Spiel und Quetschrippen frei wählbar.
+- Öffnungen zwischen den Speichen (`openings`, `spoke_w`), Nabe `hub_r`, optional fester Plattendurchmesser `plate_d`. Kerbe an jedem zweiten Magneten markiert die abwechselnde Polung.
+- Stift: `pin_mode="gedruckt"` (Kegelfuß, PETG; bei mehr als etwa 40 mm sehr empfindlich) oder `"loch"` (Bohrung ø0,6 mm mit Führungsnabe für einen Metalldraht oder eine Nadel).
+- `werkzeuge/export_ausmesshilfe.sh [ordner] [-D ...]` erzeugt `ausmesshilfe_150.stl` und `ausmesshilfe_110.stl`. Nicht gedruckt getestet; die Winkellage der Magnete der Referenzteile (`mag_angle0`) ist nicht verifiziert.
+
 ## Maße
 
 | | |

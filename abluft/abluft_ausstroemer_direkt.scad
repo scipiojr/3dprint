@@ -19,7 +19,7 @@
 //  (Spigot/Muffe laengs, Halbwand-Falz in der Breite) zum Verkleben. Teil 1 (mit Flansch) steht mit
 //  der Flanschflaeche auf dem Druckbett (Stuetzen noetig), alle anderen Teile liegen flach.
 //
-//  Ausgabe ("ausgabe"): gesamt | info | teil (teil_nr) | montiert (teil_nr) | montage
+//  Ausgabe ("ausgabe"): gesamt | schnitt (Stege sichtbar) | info | teil (teil_nr) | montiert (teil_nr) | montage
 //  Alle Masse in mm. Siehe README.md ("Ausstroemer direkt") und agent.md.
 // =====================================================================
 
@@ -27,7 +27,7 @@ include <abluft_system.scad>
 part = "keiner";            // Hauptdatei: keine eigene Ausgabe (muss nach dem include stehen)
 
 /* [Ausgabe] */
-ausgabe  = "gesamt";        // gesamt | info | teil | montiert | montage
+ausgabe  = "gesamt";        // gesamt | schnitt | info | teil | montiert | montage
 teil_nr  = 1;
 
 /* [Messwerte vom Fenster (Ausmesshilfe, siehe README)] */
@@ -76,8 +76,9 @@ Ws_o  = 2 * (bore_r + 3 + fk_wall);                              // Aussenbreite
 Hs_o  = max(m_gap, 2 * ((bore_r + 4) * abs(ca) + fk_wall));      // Aussenhoehe am Flansch (senkrecht zur Achse)
 
 sL_m  = m_s_side == "links" ? m_s : m_B - m_s;
-WL0   = max(Ws_o / 2, sL_m - m_margin);
-WR0   = max(Ws_o / 2, m_B - sL_m - m_margin);
+// Von innen auf das Fenster gesehen liegt der Rand m_s_side links: dort (+y) ist der Kanal schmal, rechts (-y) breit.
+WL0   = max(Ws_o / 2, m_B - sL_m - m_margin);       // Breite bei -y = rechte Fensterseite
+WR0   = max(Ws_o / 2, sL_m - m_margin);             // Breite bei +y = linke Fensterseite
 wlim  = max(fk_bed[0], fk_bed[1]) - jl - 1;                      // nutzbare Breite pro Teil
 Wmax  = fk_max_cols > 0 ? fk_max_cols * wlim : 1e9;
 exc   = max(0, WL0 + WR0 - Wmax);
@@ -102,6 +103,8 @@ function cpt(s, off, i) =
     [-h, y, sc];
 function cut_x(sg, off) = let(s = cutS(sg, off)) s * sa + (-sg * hh(s, off)) * ca;   // x der Schnittecke in Weltkoordinaten
 zmin_cut = min(cutS(1, 0), cutS(-1, 0));
+// Spalte, in der die Flanschachse (y = 0) liegt; der 150er-Flansch gehoert zu dieser Spalte
+jf = len([for (k = [1 : ncol - 1]) if (k < ncol && -e_WL + k * W_tot / ncol <= 0) 1]);
 
 // Querschnittspruefung gegenueber dem Schlauch
 A_hose = PI * pow(stub_bore_d / 2, 2);
@@ -116,7 +119,7 @@ if (S_F0 < 100) echo(str("WARNUNG: Aufweitung nur ", round(S_F0), " mm lang (emp
 if (WL0 + WR0 > Wmax + 1) echo(str("WARNUNG: Fenster zu breit fuer ", fk_max_cols, " Teile: Kanal auf ", round(W_tot), " mm gekuerzt (volle Breite waere ", round(WL0 + WR0), " mm)."));
 if (min(abs(cut_x(1, fk_wall)), abs(cut_x(-1, fk_wall))) < bore_r + 1)
     echo("WARNUNG: Die Oeffnung am Flansch ist kleiner als die Flanschbohrung.");
-if (e_WL < 102 && m_s_side == "links" || e_WR < 102 && m_s_side != "links")
+if (e_WR < 102)
     echo("HINWEIS: Die schmale Seite ist schmaler als der 150er-Flansch (203 mm); der Flansch ragt seitlich ueber den Kanal.");
 
 // ---------------- Hilfsfunktionen ----------------
@@ -185,7 +188,7 @@ module piece_body(s0, s1, s0l, sock, spig, lo, hi, wide) {
             if (wide) intersection() { p_hollow(s0, s1, s0l, sock, spig); strip(lo, hi); }
             else p_hollow(s0, s1, s0l, sock, spig);
             if (wide && hi < 1000) intersection() { p_layer(sT, s1, s0l, hw); strip(hi, hi + jl); }          // Zunge
-            ribs_piece(s0l, sT, s1, lo, hi, wide);
+            ribs_piece(s0l, sT, spig ? s1 + jl : s1, lo, hi, wide);
         }
         if (wide && lo > -1000) intersection() { p_layer(sT, s1, s0l, hw - fk_joint_gap); strip(lo, lo + jl + fk_joint_gap); }   // Aussparung
     }
@@ -201,9 +204,9 @@ function col_ok(j, s1e) = col_w(j, s1e) > 4;
 function wpt(p) = [p[2] * sa + p[0] * ca, p[1], p[2] * ca - p[0] * sa + adapter_t];
 // Teil 1 (Flansch, Flanschflaeche unten): Bounding-Box in Weltkoordinaten
 function fit_first(s1e) =
-    let(hi_ = colb(0)[1],
+    let(lo_ = colb(jf)[0], hi_ = colb(jf)[1],
         pts = concat([for (x = [-101.5, 101.5], y = [-101.5, 101.5]) [x, y, 0]],
-                     [for (s = knots(CUT, s1e)) for (i = [0 : 3]) let(w = wpt(cpt(s, 0, i))) [w[0], min(hi_, w[1]), w[2]]]),
+                     [for (s = knots(CUT, s1e)) for (i = [0 : 3]) let(w = wpt(cpt(s, 0, i))) [w[0], min(hi_, max(lo_, w[1])), w[2]]]),
         ex = max([for (p = pts) p[0]]) - min([for (p = pts) p[0]]),
         ey = max([for (p = pts) p[1]]) - min([for (p = pts) p[1]]),
         ez = max([for (p = pts) p[2]]))
@@ -214,26 +217,26 @@ function fit_lying(j, s0, s1e) =
     2 * hm <= fk_bed[2] && fit2(col_w(j, s1e), s1e - a0, fk_bed[0], fk_bed[1]);
 function fits(s0, c) =
     let(spig = c < S_END - EPS, s1e = spig ? min(c + jl, S_END) : c)
-    len([for (j = [0 : ncol - 1]) if (col_ok(j, s1e) && !((s0 == CUT && j == 0) ? fit_first(s1e) : fit_lying(j, s0, s1e))) 1]) == 0;
+    len([for (j = [0 : ncol - 1]) if (col_ok(j, s1e) && !((s0 == CUT && j == jf) ? fit_first(s1e) : fit_lying(j, s0, s1e))) 1]) == 0;
 
 function best(s0, j, B, last) =
     let(base = s0 == CUT ? 95 : s0, c = min(base + 5 * j, B), ok = fits(s0, c))
     !ok ? (last < 0 ? min(base + 5, B) : last)
         : (c >= B - EPS ? c : best(s0, j + 1, B, (B - c >= 3 * jl) ? c : last));
 // Teilende nach vorne ruecken, damit keine Schnipsel-Teile (< 25 mm breite Spalte) entstehen
-function sliver(c) = let(s1e = min(c + jl, S_END)) len([for (j = [0 : ncol - 1]) if (col_w(j, s1e) > 4 && col_w(j, s1e) < 25) 1]) > 0;
+function sliver(c) = len([for (j = [0 : ncol - 1]) if (col_w(j, c) > 4 && col_w(j, c) < 25) 1]) > 0;
 function nosliver(c, lim, B) = (c < B - EPS && sliver(c) && c - 5 > lim) ? nosliver(c - 5, lim, B) : c;
 function plan(s0) = s0 >= S_END - EPS ? [] :
     let(B = s0 < S_F0 - EPS ? S_F0 : S_END, s1 = nosliver(best(s0, 1, B, -1), (s0 == CUT ? 95 : s0) + 30, B)) concat([[s0, s1]], plan(s1));
 RNG = plan(CUT);
-PL  = [for (r = RNG) for (j = [0 : ncol - 1]) if (col_ok(j, min(r[1] + jl, S_END))) [r[0], r[1], j]];
+PL  = [for (r = RNG) for (j = [0 : ncol - 1]) if (col_w(j, r[1]) > 4) [r[0], r[1], j]];
 
 module report() {
     echo(str("Messung: Dachneigung ", round(phi_w * 10) / 10, " Grad; Rahmenkante E ", round(uF), " mm seitlich und ",
              round(zF + adapter_t), " mm ueber der Kupplungsflaeche; Kanal ", round(al * 10) / 10, " Grad zur Flanschachse",
              al > 90 ? " (nach unten gerichtet)" : ""));
     echo(str("Laenge Mittellinie ", round(S_END), " mm: Aufweitung ", round(S_F0), " mm, Flachkanal ", round(flat_len),
-             " mm; Breite ", round(e_WL), " (links) + ", round(e_WR), " (rechts) = ", round(W_tot), " mm, Hoehe ", m_gap,
+             " mm; Breite (von innen gesehen) ", round(e_WR), " (links, schmal) + ", round(e_WL), " (rechts) = ", round(W_tot), " mm, Hoehe ", m_gap,
              " mm, Hoehe am Flansch ", round(Hs_o), " mm"));
     echo(str("Querschnitt: Schlauch innen ", round(A_hose), " mm2 (d=", stub_bore_d, "), Flachkanal innen ", round(A_flat), " mm2 (",
              n_ribs, " Stege) = ", round(100 * A_flat / A_hose), " %; Hoehe fuer gleichen Querschnitt: ", round(Hmin), " mm"));
@@ -242,7 +245,7 @@ module report() {
     for (k = [0 : len(PL) - 1]) {
         p = PL[k];
         echo(str("Teil ", k + 1, ": s = ", p[0] == CUT ? "Flansch" : str(round(p[0] * 10) / 10), " ... ", round(p[1] * 10) / 10,
-                 p[0] == CUT && p[2] == 0 ? " (Keil mit Flansch, Flansch unten" : (p[0] >= S_F0 - EPS ? " (Flachkanal, liegend" : " (Keil, liegend"),
+                 p[0] == CUT && p[2] == jf ? " (Keil mit Flansch, Flansch unten" : (p[0] >= S_F0 - EPS ? " (Flachkanal, liegend" : " (Keil, liegend"),
                  ncol > 1 ? str(", Spalte ", p[2] + 1, " von ", ncol) : "", ")"));
     }
     if (max(fk_bed[0], fk_bed[1]) < 204 || fk_bed[2] < adapter_t + 40)
@@ -265,7 +268,7 @@ module piece(k) {
     p = PL[k]; s0 = p[0]; s1 = p[1]; c = pcols(p);
     first = s0 == CUT; s0l = first ? 0 : s0;
     sock = !first; spig = s1 < S_END - EPS;
-    if (first && c[0] < -1000) {
+    if (first && p[2] == jf) {
         union() { flange150(); multmatrix(Mw(0)) piece_body(s0, s1, s0l, sock, spig, c[0], c[1], c[2]); }
     } else {
         s1e = spig ? min(s1 + jl, S_END) : s1;
@@ -280,18 +283,23 @@ module piece_montiert(k) {
     p = PL[k]; s0 = p[0]; s1 = p[1]; c = pcols(p);
     first = s0 == CUT; s0l = first ? 0 : s0;
     multmatrix(Mw(s0l)) piece_body(s0, s1, s0l, !first, s1 < S_END - EPS, c[0], c[1], c[2]);
-    if (first && c[0] < -1000) flange150();
+    if (first && p[2] == jf) flange150();
 }
 
-module gesamt() {
-    multmatrix(Mw(0)) {
-        p_hollow(CUT, S_END, 0, false, false);
-        ribs_piece(0, CUT, S_END, -2000, 2000, false);
+module gesamt(schnitt = false) {
+    multmatrix(Mw(0)) difference() {
+        union() {
+            p_hollow(CUT, S_END, 0, false, false);
+            ribs_piece(0, CUT, S_END, -2000, 2000, false);
+        }
+        // Schnittansicht: Fensterseite (x < 0) abgenommen, damit die Stroemungsstege sichtbar sind
+        if (schnitt) translate([-3000, -3000, -3000]) cube([3000.37, 6000, 6000]);
     }
     flange150();
 }
 
 if (ausgabe == "info") report();
+else if (ausgabe == "schnitt") gesamt(true);          // Vorschau mit abgenommener Fensterseite (Stege sichtbar)
 else if (ausgabe == "teil") piece(teil_nr - 1);
 else if (ausgabe == "montiert") piece_montiert(teil_nr - 1);
 else if (ausgabe == "montage") for (k = [0 : len(PL) - 1]) color([0.3 + 0.1 * k, 0.6, 1 - 0.08 * k]) piece_montiert(k);

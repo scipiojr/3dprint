@@ -59,7 +59,8 @@ m_margin     = 10;          // Abstand des Kanals zum seitlichen Fensterrand
 m_gap        = 40;          // Spalthoehe = Aussenhoehe des Flachkanals
 m_reach      = 60;          // Ueberstand des Kanals ueber die Rahmenkante hinaus
 m_frame_depth = 30;         // Strecke des Flachkanals innen bis zur Rahmenkante (Rahmen-/Fluegeltiefe)
-m_exit_tilt  = 0;           // Austrittsrichtung: 0 = parallel zur Scheibe, + nach oben geneigt
+m_exit_waagerecht = true;   // true: Kanal tritt waagerecht aus, in Verlaengerung von m_a (Flachkanal unter dem geoeffneten Fenster hindurch)
+m_exit_tilt  = 0;           // nur bei m_exit_waagerecht=false: Austrittsrichtung 0 = parallel zur Scheibe, + zum Fenster hin geneigt
 m_plate_t    = 4.2;         // Plattendicke der Ausmesshilfe (Hoehe 0 des Stabs = Oberkante Platte)
 
 /* [Druckraum und Verbindungen] */
@@ -76,10 +77,11 @@ fk_n         = 180;         // Punkte pro Querschnittsring
 phi_w   = 90 - m_beta;
 uF      = m_a * cos(phi_w);                          // Rahmenkante in Richtung Kanal
 wF      = m_plate_t + m_h + m_a * sin(phi_w);        // Hoehe der Rahmenkante ueber der Kupplungsflaeche (entlang des Stabs)
-alpha_m = 90 - m_exit_tilt;
-x_end   = uF + m_reach;                              // Ende des Auslasses in Kanalrichtung
+alpha_m = m_exit_waagerecht ? m_beta : 90 - m_exit_tilt;   // Knickwinkel gegen den Stab (waagerecht = m_beta)
+x_end   = uF + m_reach * sin(alpha_m);               // Ende des Auslasses: m_reach hinter der Rahmenkante, in Austrittsrichtung
+w_end   = wF + m_reach * cos(alpha_m);
 D_m     = (x_end - fk_bend_r * (1 - cos(alpha_m))) / sin(alpha_m);          // Strecke nach dem Bogen
-L1_m    = wF - adapter_t - fk_bend_r * sin(alpha_m) - D_m * cos(alpha_m);   // gerades Rohr vor dem Bogen
+L1_m    = w_end - adapter_t - fk_bend_r * sin(alpha_m) - D_m * cos(alpha_m);   // gerades Rohr vor dem Bogen
 flat_m  = m_reach + m_frame_depth;
 sL_m    = m_s_side == "links" ? m_s : m_B - m_s;
 e_L1 = fk_use_messung ? max(0, L1_m) : fk_L1;

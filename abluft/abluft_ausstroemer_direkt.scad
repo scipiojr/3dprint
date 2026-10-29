@@ -76,8 +76,9 @@ fk_rib_pitch = 70;          // [30:5:150]
 fk_rib_gap0  = 35;          // [15:1:80]
 
 /* [Druck und Steckverbindungen] */
-// fk_bed: nutzbarer Druckraum [x, y, z] in mm. Teile werden so geteilt, dass jedes hineinpasst.
-fk_bed       = [260, 260, 260];
+// fk_bed: wirklich NUTZBARER Druckraum [x, y, z] in mm (Nenngroesse minus Rand fuer Brim/Skirt/Stuetzen/Purge-Linie,
+//         ca. 20 mm weniger als die Nenngroesse). Teile werden so geteilt, dass jedes hineinpasst.
+fk_bed       = [240, 240, 250];
 // fk_joint_len: Laenge der Steckverbindungen (Spigot/Muffe laengs, Falz in der Breite) in mm
 fk_joint_len = 12;          // [6:1:30]
 // fk_joint_gap: Spiel in den Steckverbindungen (Klebespalt) in mm

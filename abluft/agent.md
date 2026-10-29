@@ -105,3 +105,5 @@ Alle STL wasserdicht; keine Überlappung Innenscheibe/Plexiglas/Halteplatte; Gew
 - Maße der Referenzen (zum Nachprüfen, Werte aus den STL gemessen): 110er-Adapter: Magnetkreis 70,9 mm, Tasche ø15,2–15,4, Tiefe 3,2, Nut r 53,4–57,6 / 1,3 tief, Bohrung ø100, Stutzen ø110 außen (konisch 55,1 → 54,1 mm Radius), 5 Wulste (Radius ca. 2, Teilung 6, Höhe ca. 2,4). 150er-Adapter: Magnetkreis 91,0 mm, Tasche ø15,2–15,5, Tiefe 3,1, Nut r 73,4–77,6 / 1,9 tief, Bohrung ø140, Flanschhöhe 15, Gesamthöhe 65. O-Ring-Vorlagen: Torus ø4 mm; OD 105 bzw. 110 mm.
 - Die Referenzdateien liegen nicht im Repository (MakerWorld, siehe README). Wenn sie fehlen, läuft `pruefung.py` ohne `--ref150`/`--ref110`.
 - Eine Fremdgeometrie nicht blind übernehmen: Der Umriss `ref150_pts` stammt aus der Vorlage; vor Veröffentlichung Lizenz klären.
+
+- **Lehre Ausströmer direkt:** `fk_bed` ist der *nutzbare* Raum, nicht die Nenngröße. Mit 260 füllte das Flanschteil (258,5 mm) die Platte komplett und passte praktisch nicht (Brim/Stützen/Skirt). Standard jetzt 240×240×250; Teile werden entsprechend neu geteilt (Teil 2 jetzt 236,5 × 216,4 × 114,9 mm).

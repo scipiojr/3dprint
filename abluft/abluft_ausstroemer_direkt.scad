@@ -27,39 +27,78 @@ include <abluft_system.scad>
 part = "keiner";            // Hauptdatei: keine eigene Ausgabe (muss nach dem include stehen)
 
 /* [Ausgabe] */
-ausgabe  = "gesamt";        // gesamt | schnitt | info | teil | montiert | montage
-teil_nr  = 1;
+// Was ausgegeben wird: gesamt = ganzer Kanal (Vorschau, nicht druckbar) | schnitt = Vorschau mit abgenommener
+// Fensterseite (Stroemungsstege sichtbar) | info = nur Konsole (Querschnitt, Teileplan) | teil = ein Druckteil (teil_nr)
+// | montiert = ein Teil in Einbaulage (teil_nr) | montage = alle Teile eingefaerbt in Einbaulage
+ausgabe  = "gesamt";        // [gesamt, schnitt, info, teil, montiert, montage]
+// Nummer des Druckteils bei ausgabe = teil / montiert (Liste: ausgabe = info; Teil 1 ist das mit dem 150er-Flansch)
+teil_nr  = 1;               // [1:1:30]
 
-/* [Messwerte vom Fenster (Ausmesshilfe, siehe README)] */
-m_a          = 270;         // waagerechter Abstand Mittelstab -> Unterkante Fensterrahmen
-m_beta       = 60;          // Winkel Mittelstab / Waagerechte (Dachneigung = 90 - m_beta)
-m_h          = 10;          // Hoehe des Schnittpunkts auf dem Mittelstab ab Oberkante der Ausmesshilfe-Platte
-m_plate_t    = 4.2;         // Plattendicke der Ausmesshilfe (0, wenn m_h ab Plattenunterseite gemessen)
-m_s          = 120;         // Abstand Mittelstab -> seitlicher Fensterrand
-m_s_side     = "links";     // Seite dieses Randes ("links"/"rechts"), von innen gesehen
-m_B          = 1140;        // Gesamtbreite des Fensters
-m_margin     = 10;          // Abstand des Kanals zum seitlichen Fensterrand
-m_gap        = 30;          // Spalthoehe = Aussenhoehe des Flachkanals
-m_reach      = 60;          // Ueberstand des Kanals hinter der Rahmenkante (Abtropfrand: >= 50)
-m_frame_depth = 30;         // Strecke des Flachkanals innen bis zur Rahmenkante (Rahmen-/Fluegeltiefe)
+/* [Messwerte vom Fenster (mit der Ausmesshilfe, siehe README und Messskizze)] */
+// m_a: waagerecht gemessener Abstand vom Mittelstab zur Unterkante des Fensterrahmens (Punkt E), in mm
+m_a          = 270;         // [50:1:1000]
+// m_beta: Winkel zwischen Mittelstab und dieser Waagerechten, in Grad. Dachneigung = 90 - m_beta (60 -> Fenster 30 Grad geneigt)
+m_beta       = 60;          // [10:0.5:89]
+// m_h: Hoehe des Schnittpunkts auf dem Mittelstab, gemessen ab Oberkante der Ausmesshilfe-Platte, in mm
+m_h          = 10;          // [0:1:500]
+// m_plate_t: Dicke der Ausmesshilfe-Platte, in mm (0 setzen, wenn m_h ab Plattenunterseite gemessen wurde)
+m_plate_t    = 4.2;         // [0:0.1:10]
+// m_s: Abstand vom Mittelstab zum seitlichen Fensterrand, in mm (der Rand, der in m_s_side genannt ist)
+m_s          = 120;         // [20:1:1000]
+// m_s_side: Seite dieses Randes, von INNEN auf das Fenster gesehen. Auf dieser Seite ist der Kanal schmal, auf der anderen breit
+m_s_side     = "links";     // [links, rechts]
+// m_B: Gesamtbreite des Fensters (Innenmass), in mm
+m_B          = 1140;        // [200:1:3000]
+// m_margin: Abstand des Kanals zum seitlichen Fensterrand auf beiden Seiten, in mm
+m_margin     = 10;          // [0:1:100]
+// m_gap: Spalthoehe = AUSSENHOEHE des Flachkanals, in mm. Kleiner = Fenster steht weniger offen, aber weniger Querschnitt
+// (Mindesthoehe fuer gleichen Querschnitt wie der Schlauch: Konsole, "Hoehe fuer gleichen Querschnitt")
+m_gap        = 30;          // [12:1:100]
+// m_reach: Ueberstand des Kanals hinter der Rahmenkante E, in Kanalrichtung gemessen, in mm (Abtropfrand aussen: mindestens 50)
+m_reach      = 60;          // [20:1:150]
+// m_frame_depth: Strecke, auf der der Flachkanal INNEN bis zur Rahmenkante parallel bleibt (Rahmen-/Fluegeltiefe), in mm
+m_frame_depth = 30;         // [0:1:100]
 
-/* [Kanal und Druck] */
-fk_wall      = 2.8;         // Wandstaerke
-fk_max_cols  = 3;           // hoechstens so viele Teile nebeneinander (0 = unbegrenzt); breiter wird gekuerzt
-fk_W_max     = 450;         // groesste Gesamtbreite des Kanals (0 = ganze Fensterbreite); die breite Seite wird gekuerzt
-fk_rib_t     = 2.0;         // Stegdicke im Flachkanal
-fk_rib_pitch = 70;          // gewuenschter Stegabstand im Flachkanal (Stege verbreitern sich im Keil nur auf diesen Abstand)
-fk_rib_gap0  = 35;          // Stegabstand am Stegbeginn im Keil (Anstroemkante); zu eng -> Teer/Harz setzt Kanaele zu
-fk_bed       = [260, 260, 260];   // Druckraum x, y, z
-fk_joint_len = 12;          // Laenge der Steckverbindungen
-fk_joint_gap = 0.25;        // Spiel in den Steckverbindungen (Klebespalt)
+/* [Kanal, Staerke und Stege] */
+// fk_wall: Wandstaerke des Kanals in mm (PETG: mindestens 4 Perimeter bei 0,4 mm Duese -> 1,6; Standard 2,8)
+fk_wall      = 2.8;         // [1.6:0.2:6]
+// fk_W_max: groesste Gesamtbreite des Kanals in mm. Ist das Fenster breiter, wird die BREITE Seite gekuerzt (0 = ganze Fensterbreite).
+// Schmaler = kleinerer Aufweitwinkel (bessere Luftverteilung) und weniger Teile.
+fk_W_max     = 450;         // [0:10:1500]
+// fk_max_cols: hoechstens so viele Teile nebeneinander (Breite; 0 = unbegrenzt). Mehr als 3 Spalten werden instabil.
+fk_max_cols  = 3;           // [0:1:6]
+// fk_rib_t: Dicke der Stroemungsstege in mm
+fk_rib_t     = 2.0;         // [1:0.2:4]
+// fk_rib_pitch: Stegabstand im Flachkanal in mm (Mitte zu Mitte). Im Keil fachen die Stege strahlenfoermig auf diesen Abstand auf.
+// Enger = steifer, weiter = weniger Reibung und weniger Verstopfung durch Teer/Harz.
+fk_rib_pitch = 70;          // [30:5:150]
+// fk_rib_gap0: Stegabstand am Stegbeginn im Keil (Anstroemkante) in mm. Zu eng -> Teer/Harz setzt die Kanaele zu.
+fk_rib_gap0  = 35;          // [15:1:80]
 
+/* [Druck und Steckverbindungen] */
+// fk_bed: nutzbarer Druckraum [x, y, z] in mm. Teile werden so geteilt, dass jedes hineinpasst.
+fk_bed       = [260, 260, 260];
+// fk_joint_len: Laenge der Steckverbindungen (Spigot/Muffe laengs, Falz in der Breite) in mm
+fk_joint_len = 12;          // [6:1:30]
+// fk_joint_gap: Spiel in den Steckverbindungen (Klebespalt) in mm
+fk_joint_gap = 0.25;        // [0.1:0.05:0.6]
+
+/* [Hidden] */
 EPS  = 1e-6;
 CUT  = -1000;               // Kennung fuer den schraegen Anfangsschnitt an der Flanschflaeche
 jl   = fk_joint_len;
 hw   = fk_wall / 2;
 
 // ---------------- Messwerte -> Geometrie ----------------
+// Abgeleitete Groessen (nicht einstellen):
+//   uF, zF      Lage der Rahmenkante E: seitlich Richtung Dachkante bzw. Hoehe ueber Oberkante des 150er-Flanschs
+//   al          Winkel der Kanalachse zur Flanschachse (Gerade Flansch -> Kanalmitte ueber E; > 90 = nach unten)
+//   sE, S_END   Weg entlang der Achse bis E bzw. bis zum Kanalende (E + m_reach)
+//   S_F0        Ende der Aufweitung / Beginn des geraden Flachkanals;  T0 Ende des unveraenderten Querschnitts am Flansch
+//   Ws_o, Hs_o  Aussenbreite bzw. Aussenhoehe des Kanals am Flansch
+//   e_WL, e_WR  Kanalbreite links (-y = rechte Fensterseite) bzw. rechts (+y = linke Fensterseite) der Achse nach Kuerzung
+//   ncol, jf    Anzahl Spalten nebeneinander;  jf = Spalte, in der der 150er-Flansch sitzt
+//   rib_s0      Weg, bei dem die Stroemungsstege im Keil beginnen
 // Ebene x (waagerecht Richtung Dachkante) / z (Achse des Flanschs = senkrecht zur Scheibe), y = Breite.
 phi_w = 90 - m_beta;
 uF    = m_a * cos(phi_w);                                        // Rahmenkante E: Lage in Richtung Dachkante

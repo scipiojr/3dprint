@@ -191,3 +191,12 @@ Die Magnetflächen orientieren sich an diesen MakerWorld-Modellen (nicht im Repo
 
 Verwendete Vorlagendateien (liegen bei der Nutzerin; `4inchto6inchDuct_v5.stl` war Vorbild für den Ventilator-Adapter: Muffe 35 mm tief, Trichter 35 mm, Stutzen): `Magnetic_Hose_Adapter_Parametric.stl` (110er-Adapter), `Magnetic_Hose_Adapter_150.stl` (150er-Adapter), `Anschluss_110mm_Schlauch.stl`, `Enclosure_Port*.step`, `Hose_Adapter_Model.step`, `Attachment_Holder1.step`, zwei O-Ring-STL.
 Der Umriss der 150er-Magnetflansche (`ref150_pts` in der SCAD) wurde aus `Magnetic_Hose_Adapter_150.stl` übernommen. Vor einer Veröffentlichung des Repositorys die Lizenz dieser Vorlage prüfen.
+
+## Ersatz-Füße (`abluft_fuss.scad`)
+
+Für Magnetlappen („Füße“), die mit einem verpolten Magneten bestückt wurden: Lappen samt Randsegment mit **einem geraden Sägeschnitt** (Sehne rechtwinklig zur Lappenrichtung) abtrennen und den Ersatz ankleben. Der Fuß hat denselben Umriss wie der Flansch (`outline2d`), die Magnettasche mit Klemmnasen und liegt mit der Magnetfläche auf dem Druckbett.
+
+- `fuss = "6er"` (Schlauchflansch, Dicke `f6_dicke` = 8, Sägeabstand `f6_r_saege` = Nutaußenkante + 2 mm = 54,6 mm bei 100er-Schlauch), `"8er"` (150er-Flansch, `f8_dicke` = 10, `f8_r_saege` = 79,6 mm) oder `"beide"`.
+- Weitere Parameter: `fuss_kerbe` (Polungskerbe, nur an jedem 2. Lappen), `fuss_zugabe` (Länge zum Nachschleifen), `fuss_nase_l/_b/_t` (optionale Stützlasche auf der Rückseite).
+- `f8_dicke` bei der Durchführung innen auf 12 (`disc_t`) stellen. Export: `werkzeuge/export_fuss.sh` → `fuesse/fuss_6er.stl`, `fuesse/fuss_8er.stl`.
+- Der Schnitt liegt außerhalb der Dichtungsnut (2 mm Steg) und vor der Magnettasche. Die Klebefläche ist nur die Schnittfläche (Stumpfstoß); die Haftung ist nicht erprobt.

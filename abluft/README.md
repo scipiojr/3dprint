@@ -80,7 +80,7 @@ Alternative zum Fensterkanal ohne Rohr und ohne Bogen: ein gerader Keil aus eben
 - **Breite und Teilung:** Der Kanal muss nicht die ganze Fensterbreite haben: `fk_W_max` (Standard 450 mm, 0 = ganze Fensterbreite) begrenzt die Gesamtbreite, die breite Seite wird gekürzt (Hinweis in der Konsole). Zusätzlich höchstens `fk_max_cols` (3) Teile nebeneinander. Schmaler heißt kleinerer Aufweitwinkel (bei 110 + 340 mm ca. 57° statt 73°) und weniger Teile. Steckverbindungen (Spigot/Muffe, Halbwandfalz) zum Verkleben. Teil 1 (mit Flansch) steht mit der Flanschfläche auf dem Bett (Stützen), alle anderen Teile liegen flach.
 - **Querschnitt:** Die Konsole vergleicht den Flachkanal mit dem Schlauch (ID 90 mm = 6362 mm²) und nennt die Höhe, bei der beide gleich groß sind (bei 741 mm Breite ca. 15 mm).
 - Beispiel (`m_a` 270, `m_beta` 60, `m_h` 10, `m_s` 120 links, `m_B` 1140, `m_gap` 30, `fk_W_max` 450): 56° zur Flanschachse, Länge 332 mm, Breite 110 + 340 mm (von innen links schmal, rechts breit), Querschnitt 167 % des Schlauchs, 6 Teile in `ausstroemer_direkt/ausstroemer_teil_1…6.stl`.
-- Export: `werkzeuge/export_ausstroemer.sh [ordner] [-D …]`, Prüfung (wasserdicht, Druckraum, keine Überlappung in Einbaulage): `werkzeuge/pruefung_ausstroemer.py [-D …]`.
+- Export: `werkzeuge/export_ausstroemer.sh [ordner] [-D …]` (erzeugt auch `ausstroemer_alle.3mf`: alle Teile als getrennte Objekte, je eine Plattenbreite auseinander; OpenSCAD selbst kann kein 3MF mit mehreren Platten schreiben, der Slicer verteilt sie per „Anordnen“ auf Platten), Prüfung (wasserdicht, Druckraum, keine Überlappung in Einbaulage): `werkzeuge/pruefung_ausstroemer.py [-D …]`.
 
 ## Ausmesshilfe (`abluft_ausmesshilfe.scad`)
 

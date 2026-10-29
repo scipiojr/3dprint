@@ -69,6 +69,18 @@ Ein durchgehender Luftkanal für eine flache Fensterdurchführung: 150er-Magnetf
 - Beispiele: `-D fk_angle=45`, `-D fk_flat_in_plane=true` (Breite in der Bogenebene), `-D 'fk_bed=[220,220,250]'`, `-D fk_WL=177 -D fk_WR=163 -D fk_H=60` (breiter Kanal, 6 Teile), `-D 'fk_split="zweiteilig"'`.
 - Nicht gedruckt getestet: Passung der Steckverbindungen (Spiel 0,25 mm), Dichtheit der Klebestellen, Steifigkeit der 2,8-mm-Wand im breiten Flachkanal.
 
+## Ausströmer direkt (`abluft_ausstroemer_direkt.scad`)
+
+Alternative zum Fensterkanal ohne Rohr und ohne Bogen: ein gerader Keil aus ebenen Flächen (rechteckiger Querschnitt, scharfe Kanten) vom 150er-Flansch zum flachen Ausströmer. Rund ist nur der Flansch.
+
+- **Lage am Fenster:** Die Unterseite des Flachkanals liegt auf der Unterkante des Fensterrahmens (Punkt E aus der Ausmesshilfe: `m_a`, `m_beta`, `m_h`, `m_plate_t`), das Fenster liegt auf dem Kanal. Er ragt `m_reach` (Standard 60, mindestens 50 wegen des Abtropfrands) hinter E hinaus. Die Richtung ergibt sich aus der Geraden Flansch → E; liegt E tiefer als der Flansch, zeigt der Kanal nach unten (Winkel > 90° zur Flanschachse).
+- **Form:** Am Flansch schräg abgeschnitten (Öffnung deckt die Flanschbohrung ab, Höhe ca. 90 mm), bis `S_F0` Aufweitung auf die volle Breite (links `m_s − m_margin`, rechts der Rest) und auf die Spalthöhe `m_gap`, danach Flachkanal (Länge `m_reach + m_frame_depth`).
+- **Strömungsstege:** Sie stützen Ober- und Unterwand und führen die Luft: im Keil strahlenförmig ab ca. 22 mm Abstand, im Flachkanal parallel (`fk_rib_pitch`, `fk_rib_t`).
+- **Teilung:** höchstens `fk_max_cols` (3) Teile nebeneinander; ist das Fenster breiter, wird der Kanal auf der breiten Seite gekürzt (Warnung in der Konsole). Steckverbindungen (Spigot/Muffe, Halbwandfalz) zum Verkleben. Teil 1 (mit Flansch) steht mit der Flanschfläche auf dem Bett (Stützen), alle anderen Teile liegen flach.
+- **Querschnitt:** Die Konsole vergleicht den Flachkanal mit dem Schlauch (ID 90 mm = 6362 mm²) und nennt die Höhe, bei der beide gleich groß sind (bei 741 mm Breite ca. 15 mm).
+- Beispiel (`m_a` 270, `m_beta` 60, `m_h` 10, `m_s` 120 links, `m_B` 1140, `m_gap` 30): 56° zur Flanschachse, Länge 332 mm, Breite 110 + 631 mm, 8 Teile in `ausstroemer_direkt/ausstroemer_teil_1…8.stl`.
+- Export: `werkzeuge/export_ausstroemer.sh [ordner] [-D …]`, Prüfung (wasserdicht, Druckraum, keine Überlappung in Einbaulage): `werkzeuge/pruefung_ausstroemer.py [-D …]`.
+
 ## Ausmesshilfe (`abluft_ausmesshilfe.scad`)
 
 Dünne Platte (Magnetdicke + 1,2 mm), die mit eingeklebten Magneten auf eine Kupplungsstelle gelegt wird und in der Mitte einen senkrechten Stift trägt (Standard ø5 mm, Länge `pin_len` 150 mm). Zum Anpeilen der Kupplungsmitte, z. B. gegen einen Fensterausschnitt oder ein Rohr.

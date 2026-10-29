@@ -73,6 +73,13 @@ Ein 110-mm-Abluftschlauch (Laser-Cutter, heiße Rauchluft) soll über magnetisch
 - Messwert-Formel (`fk_use_messung`): Dachneigung phi = 90 − Winkel(Stab, Waagerechte); Rahmenkante bei u = a·cos(phi), w = Plattendicke + h + a·sin(phi); Kanalende = Rahmenkante + m_reach in Austrittsrichtung (Standard `m_exit_waagerecht=true`: waagerecht in Verlängerung von m_a, Knickwinkel = m_beta; sonst parallel zur Scheibe mit `m_exit_tilt`); daraus fk_L1/fk_after_total. Nutzer: Spalthöhe variabel (klein, ggf. mehrere cm), Überstand 60 mm (mehr gern, aber keine zusätzliche Druckplatte), Fenster geneigt, Stab senkrecht zur Scheibe; zwei Varianten: einteilig und zweiteilig (`fk_split`). Messdaten folgen.
 - Offen: nicht gedruckt, Passung der Steckverbindungen und Falze ungeprüft; Spaltenteilung wurde nur geometrisch geprüft (`werkzeuge/pruefung_fensterkanal.py`).
 
+### Ausströmer direkt (`abluft_ausstroemer_direkt.scad`, bindet `abluft_system.scad` per `include` ein)
+- Nutzerwunsch: kein Bogen, gerader Keil vom 150er-Flansch zum Flachkanal, ohne Rundungen (außer Flansch); Unterseite des Kanals liegt auf der Rahmenkante E; Überstand ≥ 50 mm (Abtropfrand); höchstens 3 Teile nebeneinander; Stützen beim Druck erlaubt; Strömungsstege sollen Stabilität und Luftführung verbinden.
+- Aufbau: Mittellinie gerade, Winkel `al` aus Iteration (E = Unterseite, Kanalmitte um m_gap/2 versetzt); Querschnitte rechteckig, Eckpunkte als Ring mit 4 Punkten (`cpt`, `sweep4`); Anfang schräg an der Flanschebene (`CUT`, `cutS`), bis `T0` konstanter Querschnitt (symmetrischer Schnitt), dann lineare Aufweitung bis `S_F0`, danach Flachkanal. Teilkoordinaten: x zum Raum, y Breite, z Achse; `Mw(s0)` rechnet in Weltkoordinaten (Flanschfläche z=0).
+- Stege (`vane`): strahlenförmig ab `rib_s0`, parallel im Flachkanal; in Spalten auf den Kern der Spalte begrenzt (Falzbereiche ausgenommen). Planer (`plan`, `fits`): Teil 1 mit Flansch in Weltlage, alle anderen liegend; Schnipsel (< 25 mm Spalte) werden vermieden (`nosliver`).
+- Lehren: Der Anfangsschnitt braucht konstante Höhe/Breite bis `T0`, sonst wird die Öffnung asymmetrisch und ragt über den Flansch; Wandstärke bleibt wegen der Schräge nur nahe Nenn (Querschnittsrahmen senkrecht zur Achse).
+- Offen: nicht gedruckt; Passung der Falze, Stützen für Teil 1 und Druckreihenfolge ungeprüft.
+
 ### Ausmesshilfe (`abluft_ausmesshilfe.scad`)
 - Eigene Datei ohne Abhängigkeit zur Hauptdatei. Platte mit Taschen (Magnete unten bündig), Speichen/Fenster, Nabe und senkrechtem 5-mm-Stift (gedruckt oder Bohrung für einen Metallstift). Parameter für Magnetart, Anzahl, Durchmesser, Teilkreis, Stiftlänge. Nutzerwunsch: Magnetart, Anzahl, Durchmesser und Stiftlänge frei wählbar, eigenes OpenSCAD.
 

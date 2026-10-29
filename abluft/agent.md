@@ -79,7 +79,8 @@ Ein 110-mm-Abluftschlauch (Laser-Cutter, heiße Rauchluft) soll über magnetisch
 - Seiten: e_WL liegt bei −y = rechte Fensterseite von innen, e_WR bei +y = linke (Nutzer: breite Seite muss rechts sein); Flansch gehört zur Spalte `jf` (enthält y=0). Vorschau mit Stegen: `ausgabe="schnitt"`.
 - Stege (`vane`): strahlenförmig ab `rib_s0`, parallel im Flachkanal; durchgehend durch Spigot/Muffe bis zum Stegbeginn des Folgeteils (Klebefläche); in Spalten auf den Kern der Spalte begrenzt (Falzbereiche ausgenommen). Planer (`plan`, `fits`): Teil 1 mit Flansch in Weltlage, alle anderen liegend; Schnipsel (< 25 mm Spalte) werden vermieden (`nosliver`).
 - Lehren: Der Anfangsschnitt braucht konstante Höhe/Breite bis `T0`, sonst wird die Öffnung asymmetrisch und ragt über den Flansch; Wandstärke bleibt wegen der Schräge nur nahe Nenn (Querschnittsrahmen senkrecht zur Achse).
-- Offen: nicht gedruckt; Passung der Falze, Stützen für Teil 1 und Druckreihenfolge ungeprüft.
+- Nutzer: Kanal muss nicht so breit werden -> `fk_W_max` 450. Lehre: Falz-Aussparung muss auch die Spigot-Hülse (s1..s1+jl) abtragen, sonst entsteht eine freiliegende Hülsenfläche (nicht wasserdicht). Stegabstand: `fk_rib_pitch` 70, `fk_rib_gap0` 35 (enge Kanäle würden mit Teer zuwachsen; Reibungsverlust der Stege nur 1-3 Pa).
+- Offen: nicht gedruckt; Passung der Falze, Stützen für Teil 1 und Druckreihenfolge ungeprüft; keine Strömungssimulation (Aufweitwinkel noch groß).
 
 ### Ausmesshilfe (`abluft_ausmesshilfe.scad`)
 - Eigene Datei ohne Abhängigkeit zur Hauptdatei. Platte mit Taschen (Magnete unten bündig), Speichen/Fenster, Nabe und senkrechtem 5-mm-Stift (gedruckt oder Bohrung für einen Metallstift). Parameter für Magnetart, Anzahl, Durchmesser, Teilkreis, Stiftlänge. Nutzerwunsch: Magnetart, Anzahl, Durchmesser und Stiftlänge frei wählbar, eigenes OpenSCAD.

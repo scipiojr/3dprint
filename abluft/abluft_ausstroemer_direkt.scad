@@ -46,6 +46,7 @@ m_frame_depth = 30;         // Strecke des Flachkanals innen bis zur Rahmenkante
 /* [Kanal und Druck] */
 fk_wall      = 2.8;         // Wandstaerke
 fk_max_cols  = 3;           // hoechstens so viele Teile nebeneinander (0 = unbegrenzt); breiter wird gekuerzt
+fk_W_max     = 450;         // groesste Gesamtbreite des Kanals (0 = ganze Fensterbreite); die breite Seite wird gekuerzt
 fk_rib_t     = 2.0;         // Stegdicke im Flachkanal
 fk_rib_pitch = 70;          // gewuenschter Stegabstand im Flachkanal (Stege verbreitern sich im Keil nur auf diesen Abstand)
 fk_rib_gap0  = 35;          // Stegabstand am Stegbeginn im Keil (Anstroemkante); zu eng -> Teer/Harz setzt Kanaele zu
@@ -81,7 +82,7 @@ sL_m  = m_s_side == "links" ? m_s : m_B - m_s;
 WL0   = max(Ws_o / 2, m_B - sL_m - m_margin);       // Breite bei -y = rechte Fensterseite
 WR0   = max(Ws_o / 2, sL_m - m_margin);             // Breite bei +y = linke Fensterseite
 wlim  = max(fk_bed[0], fk_bed[1]) - jl - 1;                      // nutzbare Breite pro Teil
-Wmax  = fk_max_cols > 0 ? fk_max_cols * wlim : 1e9;
+Wmax  = min(fk_max_cols > 0 ? fk_max_cols * wlim : 1e9, fk_W_max > 0 ? fk_W_max : 1e9);
 exc   = max(0, WL0 + WR0 - Wmax);
 e_WL  = WR0 >= WL0 ? WL0 : WL0 - exc;
 e_WR  = WR0 >= WL0 ? WR0 - exc : WR0;
@@ -117,11 +118,11 @@ Hmin   = A_hose / max(1, Win - n_ribs * fk_rib_t) + 2 * fk_wall;   // Hoehe, bei
 
 if (al > 80) echo("WARNUNG: Der Kanal liegt fast parallel zum Flansch (Winkel > 80 Grad). Dafuer ist abluft_fensterkanal.scad (mit Bogen) besser.");
 if (S_F0 < 100) echo(str("WARNUNG: Aufweitung nur ", round(S_F0), " mm lang (empfohlen mindestens 100)."));
-if (WL0 + WR0 > Wmax + 1) echo(str("WARNUNG: Fenster zu breit fuer ", fk_max_cols, " Teile: Kanal auf ", round(W_tot), " mm gekuerzt (volle Breite waere ", round(WL0 + WR0), " mm)."));
+if (WL0 + WR0 > Wmax + 1) echo(str("HINWEIS: Kanal auf ", round(W_tot), " mm gekuerzt (Fensterbreite waere ", round(WL0 + WR0), " mm; Grenzen fk_W_max ", fk_W_max, ", fk_max_cols ", fk_max_cols, ")."));
 if (min(abs(cut_x(1, fk_wall)), abs(cut_x(-1, fk_wall))) < bore_r + 1)
     echo("WARNUNG: Die Oeffnung am Flansch ist kleiner als die Flanschbohrung.");
-if (e_WR < 102)
-    echo("HINWEIS: Die schmale Seite ist schmaler als der 150er-Flansch (203 mm); der Flansch ragt seitlich ueber den Kanal.");
+if (e_WR < 102 || seam(jf) > -101.5 || (jf < ncol - 1 ? seam(jf + 1) : e_WR) < 101.5)
+    echo("HINWEIS: Der 150er-Flansch (ca. 203 mm breit) liegt nicht ganz in seiner Spalte bzw. ragt ueber den Kanal: fk_W_max/Breiten pruefen.");
 
 // ---------------- Hilfsfunktionen ----------------
 function knots(a, b) = concat([a], [for (k = [T0, S_F0]) if (k > a + EPS && k < b - EPS) k], [b]);
@@ -158,7 +159,7 @@ module p_layer(sa_, sb_, s0l, off_a) {
 // (y = a * Aufweitungsanteil), im Flachkanal verlaufen sie parallel. Abstand am Stegbeginn fk_rib_gap0.
 rib_all = n_ribs > 0 ? [for (k = [1 : n_ribs]) -e_WL + fk_wall + k * Win / (n_ribs + 1)] : [];
 rib_s0  = min(S_F0 - 20, T0 + fk_rib_gap0 / fk_rib_pitch * (S_F0 - T0));      // Beginn der Stege (Anstroemkante)
-function seam(k) = -e_WL + k * W_tot / ncol;
+function seam(k) = -e_WL + k * W_tot / ncol ;
 function vy(a, s) = a * frac(s);
 module strip(a1, a2) { translate([-3000, a1, -3000]) cube([6000, a2 - a1, 6000]); }
 
@@ -184,14 +185,15 @@ module ribs_piece(s0l, sT, s1, lo, hi, wide) {
 
 module piece_body(s0, s1, s0l, sock, spig, lo, hi, wide) {
     sT = sock ? s0 + jl : s0;
+    sF = sT == CUT ? T0 : sT;        // Falzschichten beginnen nie im schraegen Anfangsschnitt (dort liegt die Teilungsebene nicht)
     difference() {
         union() {
             if (wide) intersection() { p_hollow(s0, s1, s0l, sock, spig); strip(lo, hi); }
             else p_hollow(s0, s1, s0l, sock, spig);
-            if (wide && hi < 1000) intersection() { p_layer(sT, s1, s0l, hw); strip(hi, hi + jl); }          // Zunge
+            if (wide && hi < 1000) intersection() { p_layer(sF, s1, s0l, hw); strip(hi, hi + jl); }          // Zunge
             ribs_piece(s0l, sT, spig ? s1 + jl : s1, lo, hi, wide);
         }
-        if (wide && lo > -1000) intersection() { p_layer(sT, s1, s0l, hw - fk_joint_gap); strip(lo, lo + jl + fk_joint_gap); }   // Aussparung
+        if (wide && lo > -1000) intersection() { p_layer(sF, spig ? s1 + jl : s1, s0l, hw - fk_joint_gap); strip(lo, lo + jl + fk_joint_gap); }   // Aussparung
     }
 }
 

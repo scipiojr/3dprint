@@ -47,7 +47,8 @@ m_frame_depth = 30;         // Strecke des Flachkanals innen bis zur Rahmenkante
 fk_wall      = 2.8;         // Wandstaerke
 fk_max_cols  = 3;           // hoechstens so viele Teile nebeneinander (0 = unbegrenzt); breiter wird gekuerzt
 fk_rib_t     = 2.0;         // Stegdicke im Flachkanal
-fk_rib_pitch = 50;          // gewuenschter Stegabstand
+fk_rib_pitch = 70;          // gewuenschter Stegabstand im Flachkanal (Stege verbreitern sich im Keil nur auf diesen Abstand)
+fk_rib_gap0  = 35;          // Stegabstand am Stegbeginn im Keil (Anstroemkante); zu eng -> Teer/Harz setzt Kanaele zu
 fk_bed       = [260, 260, 260];   // Druckraum x, y, z
 fk_joint_len = 12;          // Laenge der Steckverbindungen
 fk_joint_gap = 0.25;        // Spiel in den Steckverbindungen (Klebespalt)
@@ -154,9 +155,9 @@ module p_layer(sa_, sb_, s0l, off_a) {
 
 // ---------------- Stroemungsstege und Teilung ----------------
 // Die Stege stuetzen Ober- und Unterwand UND fuehren die Luft: im Keil fachen sie strahlenfoermig vom Flansch auf
-// (y = a * Aufweitungsanteil), im Flachkanal verlaufen sie parallel. Abstand am Stegbeginn mindestens ca. 22 mm.
+// (y = a * Aufweitungsanteil), im Flachkanal verlaufen sie parallel. Abstand am Stegbeginn fk_rib_gap0.
 rib_all = n_ribs > 0 ? [for (k = [1 : n_ribs]) -e_WL + fk_wall + k * Win / (n_ribs + 1)] : [];
-rib_s0  = min(S_F0 - 20, T0 + 22 / fk_rib_pitch * (S_F0 - T0));      // Beginn der Stege (Anstroemkante)
+rib_s0  = min(S_F0 - 20, T0 + fk_rib_gap0 / fk_rib_pitch * (S_F0 - T0));      // Beginn der Stege (Anstroemkante)
 function seam(k) = -e_WL + k * W_tot / ncol;
 function vy(a, s) = a * frac(s);
 module strip(a1, a2) { translate([-3000, a1, -3000]) cube([6000, a2 - a1, 6000]); }

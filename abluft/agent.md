@@ -109,3 +109,5 @@ Alle STL wasserdicht; keine Überlappung Innenscheibe/Plexiglas/Halteplatte; Gew
 - **Lehre Ausströmer direkt:** `fk_bed` ist der *nutzbare* Raum, nicht die Nenngröße. Mit 260 füllte das Flanschteil (258,5 mm) die Platte komplett und passte praktisch nicht (Brim/Stützen/Skirt). Standard jetzt 240×240×250; Teile werden entsprechend neu geteilt (Teil 2 jetzt 236,5 × 216,4 × 114,9 mm).
 
 - **Ersatz-Füße:** `abluft_fuss.scad` (include system, `part="keiner"`). Lehre: In OpenSCAD wird eine nach einem `include` überschriebene Variable an der Stelle der ERSTEN Zuweisung ausgewertet; deshalb dürfen überschriebene Systemvariablen (`polarity_marks`) nur Literale sein, nicht von später definierten Parametern abhängen. Export `werkzeuge/export_fuss.sh`.
+
+- **DN110-Doppelbogen:** `abluft_dn110_winkel.scad`, Rohrbausteine (`tube_s`, `tube_b`, `rotate_extrude(angle=90)`), Frame-Konvention lokal: Fahrtrichtung +y, links = −x. CGAL-Render von Teil 2 ca. 50 s (`fn=80`). Montierte Pose und Überlappungsprüfung (0 mm³) per trimesh/manifold gegen die Druckposen geprüft.

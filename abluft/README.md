@@ -200,3 +200,11 @@ Für Magnetlappen („Füße“), die mit einem verpolten Magneten bestückt wur
 - Weitere Parameter: `fuss_kerbe` (Polungskerbe, nur an jedem 2. Lappen), `fuss_zugabe` (Länge zum Nachschleifen), `fuss_nase_l/_b/_t` (optionale Stützlasche auf der Rückseite).
 - `f8_dicke` bei der Durchführung innen auf 12 (`disc_t`) stellen. Export: `werkzeuge/export_fuss.sh` → `fuesse/fuss_6er.stl`, `fuesse/fuss_8er.stl`.
 - Der Schnitt liegt außerhalb der Dichtungsnut (2 mm Steg) und vor der Magnettasche. Die Klebefläche ist nur die Schnittfläche (Stumpfstoß); die Haftung ist nicht erprobt.
+
+## DN110-Doppelbogen (`abluft_dn110_winkel.scad`)
+
+Anschluss an ein DN110-Rohr: Rohrstumpf ø109/100 (36 mm, wie bei der Verjuengung) → 90° nach links → 100 mm waagerecht → 90° nach oben → 30 mm senkrecht → Magnetflansch (6 Magnete, wie das 110er-Ende von Verjuengung/Adapter; Magnetfläche zeigt nach oben).
+
+- Zwei Druckteile (Teilung in der Waagerechten bei `wk_split` = 50 mm, Halbwand-Steckverbindung mit 0,25 mm Klebespalt): Teil 1 liegt flach (Stützen unter dem Rohr), Teil 2 steht mit dem Flansch auf der Platte (Stützen unter dem oberen Bogen, ca. 109 × 200 × 163 mm).
+- Parameter: `wk_links`, `wk_h` (100), `wk_v` (30), `wk_r` (Biegeradius Mittellinie, 70), `wk_stumpf`, `wk_od/id`, `wk_split`, `wk_joint_len/gap`, `ausgabe` (`gesamt`, `teil`, `montiert`, `info`). Maße `wk_h` und `wk_v` sind Strecken zwischen den Bogenenden (Rohrmitte), nicht Außenmaße.
+- Export: `werkzeuge/export_dn110_winkel.sh` → `dn110_winkel/dn110_winkel_teil_1.stl`, `_2.stl`. Der Flansch-Innendurchmesser (90) ist kleiner als das Rohr (100): kleiner Absatz am Übergang.

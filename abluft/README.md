@@ -210,3 +210,12 @@ Anschluss an ein DN110-Rohr: Rohrstumpf ø109/100 (36 mm, wie bei der Verjüngun
 - **Flanschring:** Lippe 2,9 mm mit Bohrung ø90 und Dichtungsnut auf der Magnetfläche; das Rohrende liegt von hinten an der Lippe an. `wk_thread_l` (20 mm) = Gewindelänge = Einschraubtiefe. Gewinde im Rohr: Grund ø106 (Wand 3 mm). Dichtung der Gewindeverbindung: Teflonband oder Silikon (nicht erprobt); Gewindepassung per Software geprüft (Gewinde greift ohne Überlappung ineinander), gedruckt noch nicht.
 - Weitere Parameter: `wk_links`, `wk_r` (Biegeradius, 70), `wk_stumpf`, `wk_od/id`, `wk_joint_len/gap`, `ausgabe` (`gesamt`, `teil` mit `teil_nr` 1–3, `montiert`, `info`).
 - Export: `werkzeuge/export_dn110_winkel.sh` → `dn110_winkel/dn110_winkel_teil_1.stl` … `_3.stl` (ca. 5 Minuten).
+
+## DN110-Doppelbogen für die Arbeitsplatte (`abluft_dn110_arbeitsplatte.scad`)
+
+Variante des Doppelbogens für den Einbau unter einer waagerechten Arbeitsplatte, die an eine 30°-Dachschräge stößt (Winkeladapter `Hose_Adapter_Angled_v4`: Flansch unten, Stutzen 30° aus der Senkrechten gekippt = 120° zur Waagerechten). Die Datei bindet `abluft_dn110_winkel.scad` ein und berechnet daraus die Längen:
+
+- Rohr (Muffe Ø118 geschätzt) liegt tangential im Knick zwischen Dach und Plattenunterseite (4 mm Luft nach oben, 3 mm zum Dach), läuft nach dem 90°-Knick nach vorn, biegt durch die 30 mm dicke Platte nach oben; der Flanschring sitzt waagerecht auf der Plattenoberseite (Gewinde 20 mm über der Platte).
+- Flanschmitte `dp_u_flansch` = 285 mm vor der Schnittkante Dach/Plattenoberseite: Mindestabstand, damit der Adapter (Flansch 22,9 mm über der Platte, 5 mm Luft) bei zur Wand gekipptem Stutzen unter die Schräge passt (seitlich gekippt ca. 317–321 mm). Ergebnis: waagerechte Strecke `wk_h` = 203 mm, Senkrechte `wk_v` = 54 mm, Bogenradius 59,5 mm (eng: Bogenende bleibt 3,5 mm unter der Platte).
+- Teile (alle wasserdicht, passen in 240×240×250): Teil 1 215 × 150 × 109, Teil 2 109 × 228 × 168, Teil 3 153 × 135 × 23 mm. Export: `werkzeuge/export_dn110_arbeitsplatte.sh` → `dn110_arbeitsplatte/`.
+- Annahmen (nicht bestätigt): Plattendicke 30 mm (= Senkrechte des ersten Doppelbogens), Biegung nach links (`wk_links`), Stutzen kippt zur Wand. Das Modell `Hose_Adapter_Angled_v41` (45°) wurde nicht verwendet.

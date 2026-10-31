@@ -29,7 +29,7 @@ wk_links = true;
 wk_h = 100;                      // [30:5:400]
 // wk_v: LAENGE SENKRECHT: gerade Strecke zwischen dem Bogen nach oben und der Rueckseite des Magnetflansches, mm (0 = Flansch sitzt direkt am Bogen)
 wk_v = 30;                       // [0:5:300]
-// wk_r: Biegeradius der Rohrmittellinie beider Boegen (muss > Rohraussenradius + 5 sein)
+// wk_r: Biegeradius der Rohrmittellinie beider Boegen (mindestens Rohraussenradius + 4,5)
 wk_r = 70;                       // [60:5:150]
 // wk_stumpf: Laenge des Rohrstumpfs fuer das DN110-Rohr (hinter dem Bogen)
 wk_stumpf = pipe_len;            // [20:1:80]
@@ -62,7 +62,7 @@ jl = wk_joint_len; jg = wk_joint_gap;
 h1 = max(jl, min(wk_split > 0 ? wk_split : wk_h / 2, wk_h - jl));   // Waagerechte in Teil 1
 hb = wk_h - h1 + jl;                      // gerade Laenge in Teil 2 (inkl. Spigot, der in Teil 1 steckt)
 fn = 80;
-assert(Rc > ro + 5, "wk_r muss groesser als Rohraussenradius + 5 sein");
+assert(Rc >= ro + 4.5, "wk_r muss mindestens Rohraussenradius + 4,5 sein");
 assert(wk_v >= 8, "wk_v mindestens 8 mm (Gewinde)");
 assert(wk_h >= 2 * jl + 2, "wk_h zu kurz fuer die Teilung");
 
@@ -102,24 +102,23 @@ ztop = Rc + wk_v;                         // Oberkante des Rohrs (Anlage des Fla
 yc   = hb + Rc;                           // Achse der Senkrechten in y
 Lt   = min(wk_thread_l, wk_v);            // Gewindelaenge am Rohrende
 module teil2_lokal() {
-    union() {
-        difference() {
-            union() {
-                difference() {            // Spigot: aussen abdrehen
-                    tube_s(hb + 0.01, ro);
-                    translate([0, -0.01, 0]) difference() { tube_s(jl + 0.01, ro + 1); tube_s(jl + 0.01, rm - jg / 2); }
-                }
-                translate([0, hb, 0]) {
-                    bend_up(ro);
-                    translate([0, Rc, Rc]) rotate([90, 0, 0]) tube_s(wk_v - Lt + 0.01, ro);   // glatter Teil der Senkrechten
-                }
+    difference() {
+        union() {
+            difference() {            // Spigot: aussen abdrehen
+                tube_s(hb + 0.3, ro);
+                translate([0, -0.01, 0]) difference() { tube_s(jl + 0.01, ro + 1); tube_s(jl + 0.01, rm - jg / 2); }
             }
-            translate([0, -0.5, 0]) tube_s(hb + 0.5, ri);
-            translate([0, hb, 0]) { bend_up(ri); translate([0, Rc, Rc]) rotate([90, 0, 0]) tube_s(wk_v - Lt + 0.02, ri); }
+            translate([0, hb, 0]) {
+                bend_up(ro);
+                translate([0, Rc, Rc]) rotate([90, 0, 0]) translate([0, -0.3, 0]) tube_s(wk_v - Lt + 0.31, ro);   // glatter Teil der Senkrechten
+            }
+            // Aussengewinde (Gewindegrund = Aussenradius - Gewindetiefe) als Vollkoerper, Bohrung folgt unten in einem Zug
+            translate([0, yc, ztop - Lt])
+                helix_extrude(Lt, thr_pts(ro - thread_depth, thread_depth, thr_hr, thr_hc, NT), circ_pts(20, 48));
         }
-        // Aussengewinde (Gewindegrund = Aussenradius - Gewindetiefe), innen glatt (ri)
-        translate([0, yc, ztop - Lt])
-            helix_extrude(Lt, thr_pts(ro - thread_depth, thread_depth, thr_hr, thr_hc, NT), circ_pts(ri, 240));
+        // eine durchgehende Bohrung (kein Absatz an der Gewindegrenze)
+        translate([0, -0.5, 0]) tube_s(hb + 1.5, ri);
+        translate([0, hb, 0]) { bend_up(ri); translate([0, Rc, Rc]) rotate([90, 0, 0]) translate([0, -1, 0]) tube_s(wk_v + 2.0, ri); }
     }
 }
 

@@ -34,6 +34,8 @@ wk_r = 70;                       // [60:5:150]
 // wk_stumpf: Laenge des Rohrstumpfs fuer das DN110-Rohr (hinter dem Bogen)
 wk_stumpf = pipe_len;            // [20:1:80]
 
+// wk_ring_t: Dicke der Flanschplatte des Rings (Magnetlappen). Mindestens Taschentiefe + 1,2 mm Deckschicht = 4,4 mm; 5 mm empfohlen als flacher Ring, 8 = Referenz
+wk_ring_t = 8;                   // [5:0.5:12]
 // wk_kegel_l: Laenge des inneren Uebergangskegels am oberen Rohrende (Innen-Durchmesser wk_id -> Bohrung des Flanschrings), mm; 0 = Absatz statt Kegel
 wk_kegel_l = 15;                 // [0:1:30]
 // wk_thread_l: Laenge des Aussengewindes am oberen Rohrende (= Einschraubtiefe des Flanschrings), mm; max. wk_v
@@ -58,13 +60,14 @@ wk_bed = [240, 240, 250];
 
 // ---------------- abgeleitet ----------------
 ro = wk_od / 2;  ri = wk_id / 2;  rm = (ro + ri) / 2;
-T  = flange110_t;                         // Flanschdicke
+T  = wk_ring_t;                           // Dicke der Flanschplatte des Rings
 Rc = wk_r;
 jl = wk_joint_len; jg = wk_joint_gap;
 h1 = max(jl, min(wk_split > 0 ? wk_split : wk_h / 2, wk_h - jl));   // Waagerechte in Teil 1
 hb = wk_h - h1 + jl;                      // gerade Laenge in Teil 2 (inkl. Spigot, der in Teil 1 steckt)
 fn = 80;
 assert(Rc >= ro + 4.5, "wk_r muss mindestens Rohraussenradius + 4,5 sein");
+assert(wk_ring_t >= groove_depth_mag + 1.6 && wk_ring_t >= mag_h + mag_depth_extra + 1.2, "wk_ring_t zu klein: Taschentiefe + 1,2 mm Deckschicht noetig (>= 4,4)");
 assert(wk_v >= 8, "wk_v mindestens 8 mm (Gewinde)");
 assert(wk_h >= 2 * jl + 2, "wk_h zu kurz fuer die Teilung");
 

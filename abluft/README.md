@@ -216,8 +216,8 @@ Anschluss an ein DN110-Rohr: Rohrstumpf ø109/100 (36 mm, wie bei der Verjüngun
 Variante des Doppelbogens für den Einbau unter einer waagerechten Arbeitsplatte, die an eine 30°-Dachschräge stößt. Adapter: `Hose_Adapter_Angled_v42` (Flansch unten, Stutzen 60° aus der Senkrechten = Einschlusswinkel 120°, Schlauch läuft parallel zum Dach). Die Datei bindet `abluft_dn110_winkel.scad` ein und rechnet die Längen aus der Einbausituation:
 
 - Rohr (Muffe Ø128,4 gemessen) liegt tangential im Knick zwischen Dach und Plattenunterseite (4 mm Luft nach oben, 3 mm zum Dach), läuft nach dem 90°-Knick nach vorn und biegt (Radius 66 mm) durch die 30 mm dicke Platte nach oben.
-- **Flanschring flach:** Die 8 mm dicke Ringplatte liegt auf der Arbeitsplatte, der Gewindehals steckt im Plattenloch (**Loch ≥ Ø120 mm**). Magnetfläche 8 mm über der Plattenoberseite.
-- **Flanschmitte** `dp_u_flansch` = 260 mm vor der Schnittkante Dach/Plattenoberseite (Mindestabstand aus dem v42-Modell mit 5 mm Luft; bei seitlich gekipptem Stutzen 280–305 mm). Ergebnis: waagerechte Strecke 164 mm, Senkrechte 37 mm.
+- **Flanschring flach:** Die nur 5 mm dicke Ringplatte (3,2 mm Magnettasche + 1,8 mm Deckschicht, `dp_ring_aufl`; Mindestmaß 4,4 mm)  liegt auf der Arbeitsplatte, der Gewindehals steckt im Plattenloch (**Loch ≥ Ø120 mm**). Magnetfläche 5 mm über der Plattenoberseite.
+- **Flanschmitte** `dp_u_flansch` = 255 mm vor der Schnittkante Dach/Plattenoberseite (Mindestabstand aus dem v42-Modell mit 5 mm Luft; bei seitlich gekipptem Stutzen 280–305 mm). Ergebnis: waagerechte Strecke 159 mm, Senkrechte 34 mm.
 - **Übergangskegel:** Am oberen Rohrende verjüngt sich die Bohrung auf 15 mm Länge von Ø100 auf Ø90 (`wk_kegel_l`), danach folgt die Ringbohrung Ø90 ohne Absatz.
-- Teile (alle wasserdicht, passen in 240×240×250): Teil 1 202 × 157 × 109, Teil 2 109 × 214 × 158, Teil 3 153 × 135 × 23 mm. Export: `werkzeuge/export_dn110_arbeitsplatte.sh` → `dn110_arbeitsplatte/`.
+- Teile (alle wasserdicht, passen in 240×240×250): Teil 1 200 × 157 × 109, Teil 2 109 × 212 × 155, Teil 3 153 × 135 × 23 mm. Export: `werkzeuge/export_dn110_arbeitsplatte.sh` → `dn110_arbeitsplatte/`.
 - Annahmen: Plattendicke 30 mm, Biegung nach links (`wk_links`). Offen: Standard-Rohrbogen statt Teil 1 (Schenkellänge des Bogens fehlt).

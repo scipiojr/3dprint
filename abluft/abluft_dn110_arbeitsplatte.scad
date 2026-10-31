@@ -7,8 +7,10 @@
 //    - Das DN110-Rohr (Stumpf) liegt quer zur Zeichenebene im Knick zwischen Dach und Plattenunterseite
 //      (Muffenaussenradius dp_muffe_r, dp_spiel_oben Luft nach oben zur Platte), laeuft nach dem 90-Grad-Knick nach vorn,
 //      biegt durch die Platte nach oben und endet in einem Flanschring (Magnetflansch), der waagerecht auf der Platte sitzt.
-//    - Auf den Flansch kommt der Winkeladapter (Hose_Adapter_Angled_v4: Flansch unten, Stutzen 30 Grad aus der Senkrechten
-//      gekippt = 120 Grad zur Waagerechten). Der Flansch muss so weit vom Dach weg sitzen, dass der Adapter unter der Dachschraege Platz hat.
+//    - Auf den Flansch kommt der Winkeladapter: Flansch unten, Stutzen um 60 Grad aus der Senkrechten gekippt (Einschlusswinkel 120 Grad),
+//      so dass der Schlauch parallel zur Dachschraege (30 Grad) nach vorn/oben am Dach entlang laeuft. (Die Dateien Hose_Adapter_Angled_v4/v41
+//      haben nur 30 bzw. 45 Grad; der Mindestabstand unten ist fuer einen 60-Grad-Adapter mit Biegeradius 65-90 mm gerechnet.)
+//      Der Flansch muss so weit vom Dach weg sitzen, dass der Adapter unter der Dachschraege Platz hat.
 //
 //  Aufbau: Das Teil ist der Doppelbogen aus abluft_dn110_winkel.scad; hier werden nur dessen Laengen aus der Einbausituation berechnet.
 //  Export: werkzeuge/export_dn110_arbeitsplatte.sh
@@ -26,9 +28,9 @@ dp_spiel_oben = 4;               // [0:1:15]
 // dp_spiel_dach: Luft zwischen Muffe und Dachschraege, mm
 dp_spiel_dach = 3;               // [0:1:15]
 // dp_u_flansch: waagerechter Abstand der Flanschmitte (Magnetflansch) von der Schnittkante Dach/Plattenoberseite, mm.
-//   Mindestwerte aus dem Adaptermodell (Hose_Adapter_Angled_v4, Flansch 22,9 mm ueber der Platte, 5 mm Luft zum Dach),
-//   je nach Richtung, in die der Stutzen kippt: zur Wand 282, seitlich 317-321, vom Dach weg 317. Standard: 285 (Stutzen kippt zur Wand = 120 Grad).
-dp_u_flansch = 285;              // [200:5:450]
+//   Mindestwert fuer einen 60-Grad-Adapter (Stutzen parallel zum Dach nach vorn, Flansch 22,9 mm ueber der Platte, 5 mm Luft zum Dach):
+//   ca. 300 mm bei Biegeradius 65 mm, ca. 325 mm bei 90 mm. Bei kleinerem Wert Adapter pruefen. Standard 320 (laengere Strecke braucht 3 Teile).
+dp_u_flansch = 320;              // [200:5:450]
 
 // ---- aus der Einbausituation abgeleitete Laengen des Doppelbogens ----
 dp_t = tan(dp_dach);
@@ -46,5 +48,5 @@ wk_h = dp_lauf - 2 * dp_r_bogen;
 wk_thread_l = dp_ring_l;
 wk_v = dp_ring_l - dp_zc - dp_r_bogen;   // Ringauflage (Gewindelaenge ueber der Plattenoberseite) minus Hoehe des Bogenendes
 wk_links = true;
-wk_split = 0;
+wk_split = 125;                  // Teil 1 bekommt 125 mm der Waagerechten (so passen beide Teile in 240 mm)
 echo(str("Einbau: Rohrachse ", round(dp_zc), " mm unter Plattenoberseite, ", round(-dp_u_stumpf), " mm hinter der Dach/Platten-Kante; Flanschmitte ", dp_u_flansch, " mm davor; waagerechte Strecke wk_h = ", round(wk_h), " mm, Senkrechte wk_v = ", round(wk_v), " mm"));

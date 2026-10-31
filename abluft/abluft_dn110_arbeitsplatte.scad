@@ -9,8 +9,9 @@
 //      biegt durch die Platte nach oben und endet in einem Flanschring (Magnetflansch), der waagerecht auf der Platte sitzt.
 //    - Auf den Flansch kommt der Winkeladapter Hose_Adapter_Angled_v42: Flansch unten, Stutzen um 60 Grad aus der Senkrechten gekippt (Einschlusswinkel 120 Grad),
 //      so dass der Schlauch parallel zur Dachschraege (30 Grad) nach vorn/oben am Dach entlang laeuft.
-//    - Der Flanschring sitzt versenkt: seine Platte (dp_ring_aufl, 5 mm) liegt flach auf der Arbeitsplatte, der Gewindehals ragt nach unten in ein
-//      Loch der Platte (dp_loch >= 120 mm noetig). Die Magnetflaeche liegt damit nur dp_ring_aufl (5 mm) ueber der Plattenoberseite.
+//    - Ring (Teil 3) und Deckel (Teil 4) sind runde Scheiben (ø153) und sitzen in einer runden Senkung (ø155, Tiefe Ring 5 + Deckel 5 = 10 mm) der
+//      Arbeitsplatte; der Gewindehals ragt nach unten in ein Loch (ø120). Mit aufgelegtem magnetischem Deckel schliesst alles buendig mit der Plattenoberseite ab.
+//      Ohne Deckel liegt die Magnetflaeche 5 mm unter der Plattenoberseite, der Adapterflansch sinkt in die Senkung (dp_deckel_t = 0: Ring liegt oben auf).
 //      Der Flansch muss so weit vom Dach weg sitzen, dass der Adapter unter der Dachschraege Platz hat.
 //
 //  Aufbau: Das Teil ist der Doppelbogen aus abluft_dn110_winkel.scad; hier werden nur dessen Laengen aus der Einbausituation berechnet.
@@ -32,9 +33,14 @@ dp_spiel_dach = 3;               // [0:1:15]
 //   Mindestwert aus dem Adaptermodell Hose_Adapter_Angled_v42 (Stutzen 60 Grad aus der Senkrechten, parallel zum Dach nach vorn),
 //   Magnetflaeche 8 mm ueber der Platte, 5 mm Luft zum Dach: 259 mm. Kippt der Stutzen in eine andere Richtung (Flansch in 60-Grad-Schritten
 //   gedreht): +60/-60 Grad 280 mm, +/-120 Grad 305 mm, zur Wand 302 mm. Standard 260.
-dp_u_flansch = 255;              // [200:5:450]
-// dp_ring_aufl: Hoehe der Magnetflaeche ueber der Plattenoberseite = Dicke der Ringplatte (5 mm: 3,2 mm Magnettasche + 1,8 mm Deckschicht; Referenz 8); der Gewindehals sitzt im Plattenloch
-dp_ring_aufl = 5;                // [4.5:0.5:12]
+dp_u_flansch = 237;              // [200:5:450]
+// dp_ring_t: Dicke der runden Ringplatte (Magnetlappen-Ersatz) = 3,2 mm Magnettasche + 1,8 mm Deckschicht
+dp_ring_t = 5;                   // [4.5:0.5:12]
+// dp_deckel_t: Dicke des magnetischen Deckels (Teil 4). > 0: Ring und Deckel sitzen in einer runden Senkung (Tiefe dp_ring_t + dp_deckel_t, ø155) und
+//   schliessen bei aufgelegtem Deckel buendig mit der Plattenoberseite ab. 0: kein Deckel/keine Senkung, Ring liegt auf der Platte.
+dp_deckel_t = 5;                 // [0:0.5:10]
+// dp_senk_d: Durchmesser der Senkung in der Arbeitsplatte (Ring/Deckel ø153 + 2 mm Spiel)
+dp_senk_d = 155;
 // dp_lippe: Lippe des Flanschrings an der Magnetflaeche (groove_depth_mag + 1,6 = 2,9 mm)
 dp_lippe = 2.9;
 // dp_loch: noetiger Lochdurchmesser in der Arbeitsplatte fuer den Ring-Gewindehals (Hals-Durchmesser 2 x 58,0 plus Spiel)
@@ -47,6 +53,7 @@ dp_u_unten = -dp_platte / dp_t;                              // Dachschnitt an d
 dp_zc = -dp_platte - dp_muffe_r - dp_spiel_oben;             // Rohrachse unter der Plattenoberseite
 dp_u_stumpf = dp_u_unten + ((dp_muffe_r + dp_spiel_dach) / cos(dp_dach) - dp_muffe_r - dp_spiel_oben) / dp_t;  // Rohrachse, tangential am Dach
 dp_lauf = dp_u_flansch - dp_u_stumpf;                        // Achse Stumpf -> Flanschmitte (waagerecht)
+dp_flaeche_h = dp_deckel_t > 0 ? -dp_deckel_t : dp_ring_t;   // Hoehe der Magnetflaeche ueber der Plattenoberseite (negativ: versenkt)
 dp_ring_l = 20;                                              // Gewindelaenge am Rohrende = Einschraubtiefe des Ringes (wk_thread_l)
 
 include <abluft_dn110_winkel.scad>
@@ -54,8 +61,10 @@ include <abluft_dn110_winkel.scad>
 wk_r = dp_r_bogen;
 wk_h = dp_lauf - 2 * dp_r_bogen;
 wk_thread_l = dp_ring_l;
-wk_ring_t = dp_ring_aufl;
-wk_v = (dp_ring_aufl - dp_lippe) - dp_zc - dp_r_bogen;   // Rohrende liegt an der Lippe an: Plattenoberseite + (Ringplatte - Lippe); minus Hoehe des Bogenendes
+wk_ring_t = dp_ring_t;
+wk_ring_rund = true;
+wk_deckel_t = dp_deckel_t;
+wk_v = (dp_flaeche_h - dp_lippe) - dp_zc - dp_r_bogen;   // Rohrende liegt an der Lippe an: Plattenoberseite + (Ringplatte - Lippe); minus Hoehe des Bogenendes
 wk_links = true;
 wk_split = 0;                    // automatisch: Haelfte der Waagerechten je Teil
 echo(str("Einbau: Rohrachse ", round(dp_zc), " mm unter Plattenoberseite, ", round(-dp_u_stumpf), " mm hinter der Dach/Platten-Kante; Flanschmitte ", dp_u_flansch, " mm davor; waagerechte Strecke wk_h = ", round(wk_h), " mm, Senkrechte wk_v = ", round(wk_v), " mm"));

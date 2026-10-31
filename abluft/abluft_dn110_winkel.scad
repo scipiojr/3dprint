@@ -20,7 +20,7 @@ part = "keiner";                 // keine Ausgabe des Systems (muss nach dem inc
 
 /* [Ausgabe] */
 ausgabe = "gesamt";              // ["gesamt", "teil", "montiert", "info"]
-teil_nr = 1;                     // [1, 2, 3]  (nur bei ausgabe="teil")
+teil_nr = 1;                     // [1, 2, 3, 4]  (nur bei ausgabe="teil")
 
 /* [Verlauf] */
 // wk_links: true = Bogen nach links (von oben gesehen, in Stroemungsrichtung), false = nach rechts
@@ -36,6 +36,16 @@ wk_stumpf = pipe_len;            // [20:1:80]
 
 // wk_ring_t: Dicke der Flanschplatte des Rings (Magnetlappen). Mindestens Taschentiefe + 1,2 mm Deckschicht = 4,4 mm; 5 mm empfohlen als flacher Ring, 8 = Referenz
 wk_ring_t = 8;                   // [5:0.5:12]
+// wk_ring_rund: true = runde Flanschplatte (Scheibe ø2*wk_ring_r statt Lappen) fuer eine runde Senkung in der Platte; die Magnete sitzen im selben Lochbild
+wk_ring_rund = false;
+// wk_ring_r: Aussenradius der runden Platte (Ring und Deckel), mm. Lappenkreis des Lochbilds: R110 + Lappenradius = 76,4
+wk_ring_r = 76.5;                // [72:0.5:90]
+// wk_ring_loecher: zwei Stiftloecher ø4,5 x 3 mm auf der Magnetflaeche (Winkel 30/210 Grad, r 64) zum Festdrehen des Rings mit einem Hakenschluessel/Stiften
+wk_ring_loecher = true;
+// wk_deckel_t: Dicke des magnetischen Deckels (0 = kein Deckel). Teil 4. Mit Griffmulde am Rand (wk_deckel_griff)
+wk_deckel_t = 0;                 // [0:0.5:10]
+// wk_deckel_griff: Radius der Griffmulde am Deckelrand (Winkel 30 Grad), mm; 0 = keine
+wk_deckel_griff = 8;             // [0:1:15]
 // wk_kegel_l: Laenge des inneren Uebergangskegels am oberen Rohrende (Innen-Durchmesser wk_id -> Bohrung des Flanschrings), mm; 0 = Absatz statt Kegel
 wk_kegel_l = 15;                 // [0:1:30]
 // wk_thread_l: Laenge des Aussengewindes am oberen Rohrende (= Einschraubtiefe des Flanschrings), mm; max. wk_v
@@ -144,11 +154,22 @@ rrout = body110_r - 0.4;                                  // Halsradius aussen (
 module teil3_ring() {
     union() {
         // Flanschplatte (Dicke T) mit Magnettaschen; oberhalb der Lippe grosse Bohrung, in die der Gewindering eingreift
-        mag_flange(T, n_mag_110, R110, lobe110, body110_r, 0, gr110, groove_depth_mag, stub_bore_r, 0, 0, false, lip, rrout - 1.5, pr110);
+        difference() {
+            mag_flange(T, n_mag_110, R110, lobe110, wk_ring_rund ? wk_ring_r : body110_r, 0, gr110, groove_depth_mag, stub_bore_r, 0, 0, false, lip, rrout - 1.5, pr110);
+            if (wk_ring_loecher) for (a = [30, 210]) translate([64 * cos(a), 64 * sin(a), -0.01]) cylinder(d = 4.5, h = 3.01, $fn = 32);
+        }
         // Hals mit Innengewinde (ueber die Platte hinaus bis lip + Lr)
         translate([0, 0, lip])
             helix_extrude(Lr, circ_pts(rrout, 180),
                           thr_pts(rrin, thread_depth, thr_hr + thread_widen, thr_hc + thread_widen, NT));
+    }
+}
+// ---------------- Teil 4: magnetischer Deckel (runde Abdeckung, buendig in der Senkung) ----------------
+// Magnetflaeche (Taschen offen) unten; Deckel passt gedreht (Kerbe auf glatt) auf die Magnetflaeche des Rings
+module teil4_deckel() {
+    difference() {
+        mag_flange(wk_deckel_t, n_mag_110, R110, lobe110, wk_ring_r, 0, 0, 0, 0.001, 0, 0, false, 0, 0, pr110);
+        if (wk_deckel_griff > 0) translate([wk_ring_r * cos(30), wk_ring_r * sin(30), -1]) cylinder(r = wk_deckel_griff, h = wk_deckel_t + 2, $fn = 64);
     }
 }
 // Druckposen
@@ -179,5 +200,5 @@ echo(str("Teil 1: Stumpf ", wk_stumpf, " + Bogen + ", h1, " mm Waagerechte;  Tei
 echo(str("Gewinde: Rohr Aussen ø", wk_od, ", Gewindegrund ø", 2 * (ro - thread_depth), ", Steigung ", thread_pitch, ", Wand am Grund ", ro - thread_depth - ri, " mm; Flansch-Magnetflaeche liegt ", wk_v + lip, " mm ueber dem Bogenende"));
 if (ausgabe == "info") { }
 else if (ausgabe == "montiert") montiert();
-else if (ausgabe == "teil") { if (teil_nr == 1) teil1_druck(); else if (teil_nr == 2) teil2_druck(); else teil3_ring(); }
-else { teil1_druck(); translate([0, 300, 0]) teil2_druck(); translate([300, 0, 0]) teil3_ring(); }
+else if (ausgabe == "teil") { if (teil_nr == 1) teil1_druck(); else if (teil_nr == 2) teil2_druck(); else if (teil_nr == 3) teil3_ring(); else teil4_deckel(); }
+else { teil1_druck(); translate([0, 300, 0]) teil2_druck(); translate([300, 0, 0]) teil3_ring(); if (wk_deckel_t > 0) translate([300, 300, 0]) teil4_deckel(); }

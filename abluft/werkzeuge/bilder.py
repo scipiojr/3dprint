@@ -13,7 +13,7 @@ from matplotlib.patches import Rectangle
 
 tf = trimesh.transformations
 O = Path(__file__).resolve().parent.parent
-text = (O / "abluft_system.scad").read_text()
+text = "\n".join((O / n).read_text() for n in ("abluft_system.scad", "abluft_durchfuehrung.scad", "abluft_verjuengung.scad", "abluft_ventilator_adapter.scad"))
 wert = lambda n: float(re.search(rf"^{n}\s*=\s*([-0-9.]+)\s*;", text, re.M).group(1))
 disc_t, nut_t, plate_t, hole_r = wert("disc_t"), wert("nut_t"), wert("plate_t"), wert("hole_d") / 2
 lade = lambda n: trimesh.load(O / n)

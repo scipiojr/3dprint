@@ -21,7 +21,7 @@ Abluft-Anschluss für einen Laser-Cutter: Eine 5 mm dicke Plexiglasscheibe häng
 
 | Datei | Inhalt |
 |---|---|
-| `abluft_system.scad` | **Basis**: gemeinsame Parameter, Magnetflansch, Gewinde, Rohrstumpf, O-Ring (gibt selbst kein Teil aus; OpenSCAD 2021.01 oder neuer) |
+| `abluft_system.scad` | **Basis**: gemeinsame Parameter, Magnetflansch, Gewinde, O-Ring (gibt selbst kein Teil aus; OpenSCAD 2021.01 oder neuer) |
 | `abluft_durchfuehrung.scad` | Durchführung durch das Plexiglas (`part` = inner, nut, oring150_plexi, assembly) |
 | `abluft_verjuengung.scad` | Verjüngung 150 → 100/110 (`part` = funnel, oring150_face) |
 | `abluft_ventilator_adapter.scad` | Ventilator-Muffe mit 100er Magnetflansch (`part` = adapter140, oring_fan, oring110) |
@@ -100,7 +100,7 @@ Dünne Platte (Magnetdicke + 1,2 mm), die mit eingeklebten Magneten auf eine Kup
 
 Dateinamen: `…_100_…` = Schlauchseite für 100-mm-Schlauch; `verjuengung_150_110_rohr*.stl` behalten die 110, weil dort das 110er-KG-Rohr (Muffe über ø109) gemeint ist.
 
-Der Schlauch hat nominal **100 mm**. Alle Schlauchseiten (Verjüngung, Ventilator-Adapter) folgen dem `hose_nom` in `abluft_system.scad` und sind auf deinen vermessenen **100er-Schlauchanschluss** (`Anschluss_100mm_Schlauch.stl`) abgestimmt: 6 Magnete (Taschen ø15,2) auf Teilkreisradius 66,0 mm, Dichtungsnut Mitte r 50,5 mm (4,2 breit), Bohrung ø90, Körperradius 58,4 mm, Lappen bis r 76,5 mm. Stutzen-Außen ø100 (Gewindegrund deines Anschlusses), innen ø90. Mit `hose_nom=110` entsteht das ursprüngliche 110er-Muster.
+Der Schlauch hat nominal **100 mm**. Alle Schlauchseiten (Verjüngung, Ventilator-Adapter) folgen dem `hose_nom` in der Basis `abluft_system.scad` und sind auf deinen vermessenen **100er-Schlauchanschluss** (`Anschluss_100mm_Schlauch.stl`) abgestimmt: 6 Magnete (Taschen ø15,2) auf Teilkreisradius 66,0 mm, Dichtungsnut Mitte r 50,5 mm (4,2 breit), Bohrung ø90, Körperradius 58,4 mm, Lappen bis r 76,5 mm. Stutzen-Außen ø100 (Gewindegrund deines Anschlusses), innen ø90. Mit `hose_nom=110` entsteht das ursprüngliche 110er-Muster.
 
 - **Magnete:** 15 × 3 mm auch an den Schlauchflächen (`hose_mag_d`). Der erste vermessene 100er-Anschluss hatte noch Taschen ø10,2 auf R 61,0; der aktuelle (15-mm-Magnete, R 66,0) ist die Referenz.
 - **Dichtung:** Dieselbe Nut an allen 100er-Flächen, ein Ring `dichtung_100_anschluss_tpu.stl` (ID 97 / AD 105) passt überall.
@@ -149,28 +149,30 @@ Damit der vorhandene 110er-Schlauchanschluss weiter nutzbar ist: Die Kappe wird 
 5. Verjüngung (um 22,5° gedreht) mit einem 150er-Anschlussring an die Innenscheibe setzen, 110er-Anschluss mit dem 110er-Ring auf den Flansch der Verjüngung.
 6. Schlauch zusätzlich an einem Dachbalken abfangen: Magnete halten seitlich nur über Reibung.
 
-## Wichtige Parameter (`abluft_system.scad`)
+## Wichtige Parameter – wo sie stehen
+
+Jedes Bauteil hat **seine eigenen Parameter in seiner eigenen Datei**; nur gemeinsam genutzte Maße stehen in der Basis `abluft_system.scad`. `part` wird in der jeweiligen Teile-Datei gesetzt (oder per `-D part="…"`).
+
+**Basis `abluft_system.scad`** (gemeinsam, von mehreren Dateien genutzt)
 
 | Parameter | Bedeutung |
 |---|---|
-| `part` | Teil: `inner`, `nut`, `funnel`, `adapter140`, `oring150_plexi`, `oring150_face`, `oring110`, `assembly` |
+| `mag_d`, `mag_h`, `mag_clear`, `crush_ribs`, `polarity_marks` | Magnetmaße, Spiel, Klemmnasen, Polungskerbe |
+| `n_mag_150`, `n_mag_110` | Magnetzahl je Fläche (Referenzumrisse nur für 8 bzw. 6; sonst runder Fallback-Umriss) |
+| `oring_d`, `groove_w`, `groove_depth_mag`, `groove_depth_150` | Dichtschnur, Nutbreite und Nuttiefen auf den Magnetflächen |
+| `hole_d`, `plate_t` | Ausschnitt und Plattendicke des Fensters |
+| `bore_d`, `R150`, `adapter_t`, `lobe_offset_funnel`, `use_ref_outline` | 150er Flanschmuster: Luftkanal, Teilkreis, Flanschdicke, Drehlage |
+| `thread_pitch`, `thread_depth`, `thr_hr`, `thr_hc`, `thread_clear`, `thread_widen` | Gewindeprofil (Durchführung, Doppelbogen, Schraubkappe) |
 | `hose_nom`, `hose_mag_d` | Nominaldurchmesser des Schlauchs (100 oder 110, an Referenzanschlüssen vermessen), Magnetdurchmesser der Schlauchflächen |
-| `end110` | `"magnet"` (Standard), `"stub"` (Schlauchstutzen) oder `"pipe"` (Rohrstumpf) für das 110er-Ende der Verjüngung |
-| `pipe_od`, `pipe_bore_d`, `pipe_len` | Rohrstumpf: Außen-ø (109), Innen-ø (100), Länge (36 mm) |
-| `pipe_straight` | „Bend distance“: ungebogene Strecke zwischen Trichter und Beginn des Bogens (Standard 0, nur bei `pipe_angle` > 0) |
-| `pipe_angle`, `pipe_bend_r`, `pipe_dir` | Rohrstumpf gewinkelt: Winkel in Grad (0 = gerade), Biegeradius der Mittellinie (80), Richtung um die Achse (0 = +X) |
-| `pipe_chamfer` | Einführfase außen am Rohrende (1 mm) |
-| `mag_d`, `mag_h`, `mag_clear`, `crush_ribs` | Magnetmaße, Spiel, Klemmnasen |
-| `n_mag_150`, `n_mag_110` | Magnetzahl je Fläche (die Referenzumrisse gelten nur für 8 bzw. 6; sonst runder Fallback-Umriss) |
-| `hole_d`, `plate_t` | Ausschnitt und Plattendicke |
-| `disc_t`, `nut_t`, `adapter_t` | Dicken von Innenscheibe, Halteplatte, Flansch der Verjüngung (Gewindelänge wächst mit `nut_t`) |
-| `thread_pitch`, `thread_depth`, `thread_clear`, `thread_widen` | Gewinde |
-| `collar`, `collar_clear` | Zentrierbund |
-| `lock_screw_n`, `lock_screw_d` | Bohrungen für Sicherungsschrauben |
-| `cone_len`, `stub_len`, `bead_n` | Trichterlänge, Stutzenlänge und Wulste |
-| `fan_socket_d`, `fan_bore_d`, `socket_depth`, `socket_wall`, `ad_cone_len` | Ventilator-Adapter: Muffe, lichte Weite, Tiefe, Wand, Trichterlänge |
-| `fan_screw_n`, `fan_screw_d`, `fan_screw_from_mouth` | Schraublöcher in der Muffe |
-| `oring_d`, `groove_depth_*` | Dichtschnurdurchmesser und Nuttiefen |
+| `cone_len`, `stub_len`, `stub_taper`, `bead_*` | Trichterlänge sowie Schlauchstutzen mit Wulsten (auch von der Schraubkappe genutzt) |
+
+**`abluft_durchfuehrung.scad`:** `disc_t`, `nut_t` (Dicken von Innenscheibe und Halteplatte; Gewindelänge wächst mit `nut_t`), `thread_major`, `collar`, `collar_clear` (Zentrierbund), `lock_screw_n`, `lock_screw_d` (Sicherungsschrauben), `tube_gap`, `plexi_gap`, `groove_depth_plexi`, `lobe_offset150`, `edge_free`.
+
+**`abluft_verjuengung.scad`:** `end110` (`"magnet"` Standard, `"stub"` Schlauchstutzen, `"pipe"` Rohrstumpf), `cone_wall0`; Rohrstumpf `pipe_od` (109), `pipe_bore_d` (100), `pipe_len` (36), `pipe_straight` (ungebogene Strecke vor dem Bogen), `pipe_angle` (0 = gerade), `pipe_bend_r` (80), `pipe_dir` (0 = +X), `pipe_chamfer` (1 mm).
+
+**`abluft_ventilator_adapter.scad`:** `fan_socket_d`, `fan_bore_d`, `socket_depth`, `socket_wall`, `socket_chamfer`, `ad_cone_len`, `ad_cone_wall0`; Schraublöcher `fan_screw_n/_d/_from_mouth/_angle0`; Dichtung `fan_groove`, `fan_oring_d`, `fan_groove_depth`, `fan_groove_from_mouth`, `fan_flange_groove`.
+
+**`abluft_magnetring.scad`:** `ring_t`, `ring150_bore_d`, `ring100_bore_d`, `ring_groove`, `ring_screw_n/_d`, `ring150_screw_r`, `ring100_screw_r`, `ring_offset150`.
 
 Beim Rendern gibt die SCAD eine Kontrollausgabe (Konsole): Ausdehnung der Scheiben über der Ausschnittkante, Gewindedaten (Wand, Gänge) und O-Ring-Maße.
 

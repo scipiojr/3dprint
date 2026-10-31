@@ -1,19 +1,20 @@
 // =====================================================================
-//  Abluft-System: gemeinsame BASIS (Parameter, Hilfsfunktionen, Magnetflansch, Gewinde, Rohrstumpf, O-Ring)
+//  Abluft-System: gemeinsame BASIS (Parameter, Hilfsfunktionen, Magnetflansch, Gewinde, O-Ring)
 //  OpenSCAD 2021.01 oder neuer.   Diese Datei erzeugt selbst KEIN Teil; sie wird von den Teile-Dateien
 //  per  include <abluft_system.scad>  eingebunden. Einzelne Bauteile liegen in eigenen Dateien:
 //
 //    abluft_durchfuehrung.scad        part = inner | nut | oring150_plexi | assembly   (150er Durchfuehrung im Plexiglas)
 //    abluft_verjuengung.scad          part = funnel | oring150_face                    (Magnetflansch 150 + Trichter + 110er-Ende)
 //    abluft_ventilator_adapter.scad   part = adapter140 | oring_fan | oring110         (Muffe fuer Ventilator + 100er Magnetflansch)
-//    abluft_magnetring.scad           part = ring150 | ring100 | ring150_gewinde ...    (freie Magnetringe zum Anschrauben/Kombinieren)
+//    abluft_magnetring.scad           part = ring150 | ring100 | deckel150 | deckel100 (freie Magnetringe zum Anschrauben/Kombinieren)
 //    abluft_fuss, _dn110_winkel, _dn110_arbeitsplatte, _fensterkanal, _ausstroemer_direkt, _schraubkappe, _ausmesshilfe
 //
+//  Parameter: jedes Teil hat seine eigenen in seiner Datei; hier stehen nur gemeinsam genutzte Maße.
 //  Gemeinsame Bausteine dieser Basis (fuer eigene Teile wiederverwendbar):
 //    mag_flange(...)   Magnetflansch mit Taschen/Nut/Bohrung (Magnetflaeche bei z=0)
 //    outline2d, pocket2d, ring2d, ref150_pts   Umriss/Taschen/Nutring
 //    thread_tube(L), thread_nut_ring(L, rout)   Aussen- und Innengewinde (Steigung thread_pitch)
-//    pipe_stub()       Rohrstumpf gerade/gewinkelt (pipe_*), stub_r/arc_pts (Schlauchstutzen mit Wulsten)
+//    stub_r/arc_pts    Profil des Schlauchstutzens mit Wulsten  (pipe_stub() liegt in abluft_verjuengung.scad)
 //    oring(rc, d)      TPU-O-Ring liegend druckbar
 //  Alle Teile sind in Druckrichtung modelliert: die Magnetflaeche liegt auf dem Druckbett (z=0). Masse in mm.
 //  README.md beschreibt das System, agent.md den Arbeitsstand fuer KI-Agenten.
@@ -23,9 +24,6 @@
 //  ACHTUNG: Ueberschreibt eine Datei Parameter NACH dem include, werden abgeleitete Werte dieser Basis
 //  nicht neu berechnet (OpenSCAD wertet beim ersten Vorkommen aus) - nur Literale oder vorher definierte Variablen.
 // =====================================================================
-
-end110 = "magnet";      // Verjuengung, 110er-Ende: "magnet" | "stub" | "pipe" (siehe abluft_verjuengung.scad)
-
 
 /* [Magnete] */
 mag_d        = 15;      // Magnet-Durchmesser
@@ -43,41 +41,31 @@ polarity_marks = true;  // Kerbe am Lappenrand bei jedem 2. Magnet (gleiche Polu
 oring_d      = 4.0;     // O-Ring-Schnurdurchmesser (TPU)
 groove_w     = 4.2;     // Nutbreite
 groove_depth_mag   = 1.3;  // Nuttiefe auf Magnetflaechen (wie Referenz)
-groove_depth_plexi = 2.8;  // Nuttiefe auf der Plexiglas-Seite
 
-/* [Fenster / Platte] */
+/* [Fenster / Platte (gemeinsam)] */
 hole_d       = 155;     // Ausschnitt in der Platte
 plate_t      = 5;       // Plattendicke (Plexiglas)
-edge_free    = 20;      // frei verfuegbarer Rand ab Ausschnittkante (nur fuer Kontrollausgabe)
 
-/* [150er Durchfuehrung] */
-disc_t       = 12;      // Dicke der Innenscheibe (min. 5)
-nut_t        = 12;      // Dicke der Aussen-Halteplatte (min. 5) - mehr Dicke = laengeres Gewinde = mehr Gaenge
+/* [150er Flansch-Muster (gemeinsam)] */
+
 adapter_t    = 10;      // Dicke des Magnetflanschs an der Verjuengung
-collar       = true;    // Zentrierbund am Rohr (liegt im Bereich der Plexiglasdicke, leitet Seitenkraefte ins Plexiglas)
-collar_clear = 0.8;     // radiales Spiel Bund <-> Ausschnitt
-lock_screw_n = 2;       // Anzahl radialer Sicherungsschrauben in der Halteplatte (0 = keine)
-lock_screw_d = 3.3;     // Kernloch fuer M4 (selbstschneidend in PETG) - Madenschraube mit Kunststoffspitze empfohlen
+
 bore_d       = 140;     // Innendurchmesser Luftkanal
-thread_major = 151;     // Gewinde-Aussendurchmesser (muss < hole_d)
+
 thread_pitch = 4;       // Steigung (feiner als vorher)
 thread_depth = 1.5;     // Gewindetiefe
 thr_hr       = 0.34;    // Profil: halbe Zahnbreite am Grund (Anteil der Steigung)
 thr_hc       = 0.14;    // Profil: halbe Zahnbreite an der Spitze
 thread_clear = 0.35;    // Radialspiel Mutter
 thread_widen = 0.03;    // Flankenspiel Mutter (Anteil der Steigung je Seite)
-tube_gap     = 0.3;     // Luft zwischen Rohrende und Steg der Halteplatte
-plexi_gap    = 0.6;     // Abstand Dichtungsnut zur Ausschnittkante (klein halten: Steg nach aussen soll >= 1 mm bleiben)
-land_wall    = 2.0;     // Steg zwischen Nut und Magnettasche / Tasche und Aussenrand
-lobe_offset150 = 22.5;  // Drehlage der Scheiben-Lappen (22.5: Lappen liegen NICHT auf den Achsen, Ausdehnung 95.7 mm). Anschluss-Teile um 22.5 drehen aufsetzen.
+
 lobe_offset_funnel = 0; // Verjuengung: wie Referenz-Adapter (Lappen auf den Achsen)
 groove_depth_150 = 1.9; // Nuttiefe auf 150er Anschluss-Flaechen (Referenz Magnetic_Hose_Adapter_150)
 R150 = 91.0;            // Magnet-Teilkreisradius 150 (Referenz)
 use_ref_outline = true; // 150er Umriss exakt wie Referenz-Adapter (nur fuer 8 Magnete)
 
-/* [Verjuengung 150 -> 110] */
+/* [Schlauchseite / Trichter (gemeinsam, auch von Schraubkappe etc. genutzt)] */
 cone_len     = 35;      // axiale Laenge des Trichters
-cone_wall0   = 7.0;     // Wandstaerke (radial) am 150er-Ende
 hose_nom     = 100;     // Nominaldurchmesser des Schlauchs; 110 = Referenzmuster (passt auf Anschluss_110mm_Schlauch)
 hose_od      = hose_nom;   // Stutzen-Aussendurchmesser (Schlauch wird ueber den Stutzen gezogen)
 stub_taper   = 0.8;     // Verjuengung (Radius) ueber die Stutzenlaenge
@@ -87,16 +75,6 @@ bead_n       = 5;       // Anzahl Wulste
 bead_pitch   = 6;
 bead_r       = 2.0;
 bead_first   = 10;      // erster Wulst ab Stutzenanfang
-
-/* [Rohrstumpf am 110er-Ende (nur end110="pipe")] */
-pipe_od      = 109;     // Aussendurchmesser des Stumpfs (Muffe des 110er-Rohrs wird darueber geschoben)
-pipe_bore_d  = 100;     // Innendurchmesser (lichte Weite)
-pipe_len     = 36;      // Laenge des geraden Stumpfs (bei Winkel: gemessen ab Ende des Bogens)
-pipe_angle   = 0;       // 0 = gerade, sonst Winkel des Bogens in Grad (z. B. 45 oder 90)
-pipe_straight = 0;      // "bend distance": ungebogene Strecke zwischen Trichter und Beginn des Bogens (nur bei pipe_angle > 0)
-pipe_bend_r  = 80;      // Biegeradius der Mittellinie (muss groesser als pipe_od/2 sein)
-pipe_dir     = 0;       // Richtung des Bogens um die Achse in Grad (0 = zur +X-Seite)
-pipe_chamfer = 1.0;     // Einfuehrfase am Rohrende (aussen)
 
 /* [110er Magnetflansch (Referenz-Muster, nur end110="magnet")] */
 dh           = (110 - hose_nom) / 2;   // Verkleinerung des 110er-Referenzmusters (radial) fuer kleinere Schlauchgroesse
@@ -110,7 +88,6 @@ hose_mag_d   = mag_d;      // Magnetdurchmesser der Schlauch-Magnetflaechen (15;
 hose_mag_clear = hose_nom == 100 ? 0.2 : mag_clear;   // Referenz 100: Taschen ø15,2
 lobe110      = (hose_mag_d + hose_mag_clear) / 2 + (hose_nom == 100 ? 2.9 : 2.75);   // Lappenradius um die Magnete (Referenz 110: 10.4, 100: 10.5)
 
-
 $fn = 96;
 eps = 0.01;
 
@@ -120,33 +97,17 @@ pdepth      = mag_h + mag_depth_extra;          // Taschentiefe
 pr110       = (hose_mag_d + hose_mag_clear) / 2; // Taschenradius der Schlauch-Magnetflaechen
 hole_r      = hole_d / 2;
 bore_r      = bore_d / 2;
-gr150       = hole_r + plexi_gap + groove_w/2;  // Nut-Mittenradius 150er Flaeche
+
 gr150_face  = bore_r + 5.5;                     // Nut-Mittenradius der Anschluss-Flaechen (Referenz: 75.5)
 lobe150     = 10.5;                             // Lappenradius (Referenz)
 body150     = 84.2;                             // Koerperradius (nur Fallback ohne Referenz-Umriss)
-nut_lip     = groove_depth_150 + 1.6;          // geschlossener Steg an der Magnetflaeche der Halteplatte (Nut + Boden)
-tube_len    = plate_t + (nut_t - nut_lip) - tube_gap;      // gesamte Rohrlaenge ab Scheibe (Bund + Gewinde)
-r_major     = thread_major / 2;
-r_minor     = r_major - thread_depth;
+
 stub_r0     = hose_od / 2;
 stub_bore_r = stub_bore_d / 2;
 
 // ---------------- Kontrollausgabe ----------------
 // Umriss des Referenz-Adapters Magnetic_Hose_Adapter_150 (Lappen auf +X, 8-zaehlig), aus dem STL uebernommen
 ref150_pts = [[35.50,-76.40],[38.53,-74.20],[41.70,-72.23],[45.63,-79.04],[52.63,-79.29],[55.65,-79.23],[58.64,-78.81],[61.56,-78.04],[64.37,-76.93],[67.04,-75.51],[69.51,-73.78],[71.77,-71.77],[73.78,-69.51],[75.51,-67.04],[76.93,-64.37],[78.04,-61.56],[78.81,-58.64],[79.23,-55.65],[79.29,-52.63],[79.04,-45.63],[72.23,-41.70],[74.20,-38.53],[76.40,-35.50],[78.79,-32.64],[79.23,-28.17],[79.79,-24.86],[80.56,-21.59],[88.15,-23.62],[93.28,-18.85],[95.37,-16.67],[97.19,-14.26],[98.71,-11.65],[99.92,-8.88],[100.79,-5.99],[101.32,-3.02],[101.50,0.00],[101.32,3.02],[100.79,5.99],[99.92,8.88],[98.71,11.65],[97.19,14.26],[95.37,16.67],[93.28,18.85],[88.15,23.62],[80.56,21.59],[79.72,25.23],[79.13,28.91],[78.79,32.64],[76.40,35.50],[74.20,38.53],[72.23,41.70],[79.04,45.63],[79.29,52.63],[79.23,55.65],[78.81,58.64],[78.04,61.56],[76.93,64.37],[75.51,67.04],[73.78,69.51],[71.77,71.77],[69.51,73.78],[67.04,75.51],[64.37,76.93],[61.56,78.04],[58.64,78.81],[55.65,79.23],[52.63,79.29],[45.63,79.04],[41.70,72.23],[38.53,74.20],[35.50,76.40],[32.64,78.79],[28.91,79.13],[25.23,79.72],[21.59,80.56],[23.62,88.15],[18.85,93.28],[16.67,95.37],[14.26,97.19],[11.65,98.71],[8.88,99.92],[5.99,100.79],[3.02,101.32],[-0.00,101.50],[-3.02,101.32],[-5.99,100.79],[-8.88,99.92],[-11.65,98.71],[-14.26,97.19],[-16.67,95.37],[-18.85,93.28],[-23.62,88.15],[-21.59,80.56],[-25.23,79.72],[-28.91,79.13],[-32.64,78.79],[-35.50,76.40],[-38.53,74.20],[-41.70,72.23],[-45.63,79.04],[-52.63,79.29],[-55.65,79.23],[-58.64,78.81],[-61.56,78.04],[-64.37,76.93],[-67.04,75.51],[-69.51,73.78],[-71.77,71.77],[-73.78,69.51],[-75.51,67.04],[-76.93,64.37],[-78.04,61.56],[-78.81,58.64],[-79.23,55.65],[-79.29,52.63],[-79.04,45.63],[-72.23,41.70],[-74.20,38.53],[-76.40,35.50],[-78.79,32.64],[-79.13,28.91],[-79.72,25.23],[-80.56,21.59],[-88.15,23.62],[-93.28,18.85],[-95.37,16.67],[-97.19,14.26],[-98.71,11.65],[-99.92,8.88],[-100.79,5.99],[-101.32,3.02],[-101.50,-0.00],[-101.32,-3.02],[-100.79,-5.99],[-99.92,-8.88],[-98.71,-11.65],[-97.19,-14.26],[-95.37,-16.67],[-93.28,-18.85],[-88.15,-23.62],[-80.56,-21.59],[-79.72,-25.23],[-79.13,-28.91],[-78.79,-32.64],[-76.40,-35.50],[-74.20,-38.53],[-72.23,-41.70],[-79.04,-45.63],[-79.29,-52.63],[-79.23,-55.65],[-78.81,-58.64],[-78.04,-61.56],[-76.93,-64.37],[-75.51,-67.04],[-73.78,-69.51],[-71.77,-71.77],[-69.51,-73.78],[-67.04,-75.51],[-64.37,-76.93],[-61.56,-78.04],[-58.64,-78.81],[-55.65,-79.23],[-52.63,-79.29],[-45.63,-79.04],[-41.70,-72.23],[-38.84,-74.00],[-37.72,-74.77],[-35.02,-76.78],[-32.64,-78.79],[-28.91,-79.13],[-25.23,-79.72],[-21.59,-80.56],[-23.62,-88.15],[-18.85,-93.28],[-16.67,-95.37],[-14.26,-97.19],[-11.65,-98.71],[-8.88,-99.92],[-5.99,-100.79],[-3.02,-101.32],[0.00,-101.50],[3.02,-101.32],[5.99,-100.79],[8.88,-99.92],[11.65,-98.71],[14.26,-97.19],[16.67,-95.37],[18.85,-93.28],[23.62,-88.15],[21.59,-80.56],[25.23,-79.72],[28.91,-79.13],[32.64,-78.79]];
-function ext_dir(n, R, lr, br, off) =
-    [ max(br, max([for(i=[0:n-1]) abs(R*cos(off+i*360/n)) + lr])),      // Ausdehnung in +-X
-      max(br, max([for(i=[0:n-1]) abs(R*sin(off+i*360/n)) + lr])) ];    // Ausdehnung in +-Y
-function ext_ref(off) = [ max([for(p=ref150_pts) abs(p[0]*cos(off) - p[1]*sin(off))]),
-                          max([for(p=ref150_pts) abs(p[0]*sin(off) + p[1]*cos(off))]) ];
-e150 = (use_ref_outline && n_mag_150 == 8) ? ext_ref(lobe_offset150) : ext_dir(n_mag_150, R150, lobe150, body150, lobe_offset150);
-echo(str("150er Flaeche: Magnet-Teilkreis R=", R150, "  Nut Anschluss r=", gr150_face, "  Nut Plexi r=", gr150));
-echo(str("Ausdehnung vom Mittelpunkt in X/Y: ", e150, "  -> ueber Ausschnittkante hinaus: ", e150 - [hole_r, hole_r],
-         "  (frei: ", edge_free, ")"));
-echo(str("Gewinde: major=", thread_major, " minor=", 2*r_minor, "  Wand am Gewindegrund=", r_minor - bore_r,
-         "  Rohrlaenge=", tube_len, "  Gewindelaenge in Mutter=", nut_t - nut_lip, " (", (nut_t - nut_lip)/thread_pitch, " Gaenge)"));
-echo(str("O-Ring 150 Plexi: ID=", 2*(gr150-oring_d/2), " AD=", 2*(gr150+oring_d/2), "   O-Ring 150 Anschluss: ID=", 2*(gr150_face-oring_d/2), " AD=", 2*(gr150_face+oring_d/2)));
-echo(str("Magnete gesamt: inner=", n_mag_150, " nut=", n_mag_150, " funnel=", n_mag_150 + (end110=="magnet" ? n_mag_110 : 0)));
 
 // ---------------- Hilfsfunktionen ----------------
 function qsort(v) = len(v) <= 1 ? v :
@@ -224,42 +185,6 @@ module thread_nut_ring(L, rout) {
 
 function stub_r(z) = stub_r0 - stub_taper * z / stub_len;     // z ab Stutzenanfang
 function arc_pts(zc, rc, br) = [for (a = [-80 : 20 : 80]) [rc + br * cos(a), zc + br * sin(a)]];
-// ---- Rohrstumpf (gerade oder gewinkelt) als ein Polyeder ohne Boolesche Operationen ----
-// Ringe senkrecht zum Pfad: [Mittelpunkt, Richtung e1 in der Biegeebene, Aussenradius]; Start bei z=0 in +Z-Richtung
-NP = 240;
-function pipe_path() =
-    let(a = pipe_angle, Rb = pipe_bend_r,
-        nb = a > 0 ? max(2, ceil(a / 5)) : 0,
-        s  = a > 0 ? pipe_straight : 0,
-        E  = [Rb * (1 - cos(a)), 0, s + Rb * sin(a)],
-        t  = [sin(a), 0, cos(a)],
-        e1 = [cos(a), 0, -sin(a)],
-        ro = pipe_od / 2)
-    concat([[[0, 0, 0], [1, 0, 0], ro]],
-           s > 0 ? [[[0, 0, s], [1, 0, 0], ro]] : [],
-           nb > 0 ? [for (k = [1 : nb]) let(f = a * k / nb) [[Rb * (1 - cos(f)), 0, s + Rb * sin(f)], [cos(f), 0, -sin(f)], ro]] : [],
-           [[E + t * (pipe_len - pipe_chamfer), e1, ro]],
-           [[E + t * pipe_len, e1, ro - pipe_chamfer]]);
-module pipe_stub() {
-    assert(pipe_angle == 0 || pipe_bend_r > pipe_od / 2 + 5, "pipe_bend_r muss deutlich groesser als pipe_od/2 sein");
-    path = pipe_path();
-    K = len(path);
-    ri = pipe_bore_d / 2;
-    // Punkte: erst alle Aussenringe, dann alle Innenringe (gleiche Winkelphase wie rotate_extrude)
-    pts = concat(
-        [for (k = [0 : K - 1]) for (i = [0 : NP - 1])
-            path[k][0] + path[k][2] * (cos(360 * i / NP) * path[k][1] + sin(360 * i / NP) * [0, 1, 0])],
-        [for (k = [0 : K - 1]) for (i = [0 : NP - 1])
-            path[k][0] + ri * (cos(360 * i / NP) * path[k][1] + sin(360 * i / NP) * [0, 1, 0])]);
-    faces = concat(
-        [for (k = [0 : K - 2], i = [0 : NP - 1]) each let(j = (i + 1) % NP, a = k * NP + i, b = k * NP + j, c = (k + 1) * NP + j, d = (k + 1) * NP + i) [[a, d, c], [a, c, b]]],
-        [for (k = [0 : K - 2], i = [0 : NP - 1]) each let(j = (i + 1) % NP, a = K * NP + k * NP + i, b = K * NP + k * NP + j, c = K * NP + (k + 1) * NP + j, d = K * NP + (k + 1) * NP + i) [[a, b, c], [a, c, d]]],
-        [for (i = [0 : NP - 1]) each let(j = (i + 1) % NP) [[i, j, K * NP + j], [i, K * NP + j, K * NP + i]]],
-        [for (i = [0 : NP - 1]) each let(j = (i + 1) % NP, o = (K - 1) * NP) [[o + i, K * NP + o + j, o + j], [o + i, K * NP + o + i, K * NP + o + j]]]);
-    polyhedron(points = pts, faces = faces, convexity = 10);
-}
-
-
 // TPU-O-Ring: liegend druckbar (kleine Abflachung oben/unten wie in deinen Vorlagen)
 module oring(rc, d = oring_d) {
     h = d / 2 - 0.025;      // Abflachung oben/unten (Druckauflage)

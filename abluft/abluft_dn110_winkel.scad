@@ -32,7 +32,7 @@ wk_v = 30;                       // [0:5:300]
 // wk_r: Biegeradius der Rohrmittellinie beider Boegen (mindestens Rohraussenradius + 4,5)
 wk_r = 70;                       // [60:5:150]
 // wk_stumpf: Laenge des Rohrstumpfs fuer das DN110-Rohr (hinter dem Bogen)
-wk_stumpf = pipe_len;            // [20:1:80]
+wk_stumpf = 36;            // [20:1:80]
 
 // wk_ring_t: Dicke der Flanschplatte des Rings (Magnetlappen). Mindestens Taschentiefe + 1,2 mm Deckschicht = 4,4 mm; 5 mm empfohlen als flacher Ring, 8 = Referenz
 wk_ring_t = 8;                   // [5:0.5:12]
@@ -53,8 +53,8 @@ wk_thread_l = 20;                // [8:1:60]
 
 /* [Rohr] */
 // wk_od / wk_id: Aussen-/Innendurchmesser (wie Rohrstumpf der Verjuengung: 109 / 100)
-wk_od = pipe_od;
-wk_id = pipe_bore_d;
+wk_od = 109;
+wk_id = 100;
 // wk_fase: Einfuehrfase am Stumpfende (aussen), mm
 wk_fase = 1.0;
 

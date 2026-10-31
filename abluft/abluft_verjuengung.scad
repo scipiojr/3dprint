@@ -1,9 +1,63 @@
 // =====================================================================
 //  Verjuengung 150 -> 100/110: 150er Magnetflansch + Trichter + 110er-Ende (Magnetflansch, Schlauchstutzen oder Rohrstumpf)
-//  Einzelnes Bauteil; Parameter und gemeinsame Bausteine stehen in abluft_system.scad (Basis).
+//  Eigene Parameter (end110, Trichterwand, Rohrstumpf pipe_*) stehen HIER; gemeinsam genutzt (cone_len, stub_*, bead_*, adapter_t) in abluft_system.scad.
 //  part = funnel | oring150_face | assembly
 // =====================================================================
 include <abluft_system.scad>
+
+end110 = "magnet";      // 110er-Ende: "magnet" = Magnetflansch | "stub" = Schlauchstutzen mit Wulsten | "pipe" = glatter Rohrstumpf (gerade oder gewinkelt) zum Ueberstuelpen der Muffe eines 110er-Rohrs
+cone_wall0   = 7.0;     // Wandstaerke (radial) am 150er-Ende
+
+/* [Rohrstumpf am 110er-Ende (nur end110="pipe")] */
+pipe_od      = 109;     // Aussendurchmesser des Stumpfs (Muffe des 110er-Rohrs wird darueber geschoben)
+pipe_bore_d  = 100;     // Innendurchmesser (lichte Weite)
+pipe_len     = 36;      // Laenge des geraden Stumpfs (bei Winkel: gemessen ab Ende des Bogens)
+pipe_angle   = 0;       // 0 = gerade, sonst Winkel des Bogens in Grad (z. B. 45 oder 90)
+pipe_straight = 0;      // "bend distance": ungebogene Strecke zwischen Trichter und Beginn des Bogens (nur bei pipe_angle > 0)
+pipe_bend_r  = 80;      // Biegeradius der Mittellinie (muss groesser als pipe_od/2 sein)
+pipe_dir     = 0;       // Richtung des Bogens um die Achse in Grad (0 = zur +X-Seite)
+pipe_chamfer = 1.0;     // Einfuehrfase am Rohrende (aussen)
+
+
+// ---- Rohrstumpf (gerade oder gewinkelt) als ein Polyeder ohne Boolesche Operationen ----
+// Ringe senkrecht zum Pfad: [Mittelpunkt, Richtung e1 in der Biegeebene, Aussenradius]; Start bei z=0 in +Z-Richtung
+NP = 240;
+function pipe_path() =
+    let(a = pipe_angle, Rb = pipe_bend_r,
+        nb = a > 0 ? max(2, ceil(a / 5)) : 0,
+        s  = a > 0 ? pipe_straight : 0,
+        E  = [Rb * (1 - cos(a)), 0, s + Rb * sin(a)],
+        t  = [sin(a), 0, cos(a)],
+        e1 = [cos(a), 0, -sin(a)],
+        ro = pipe_od / 2)
+    concat([[[0, 0, 0], [1, 0, 0], ro]],
+           s > 0 ? [[[0, 0, s], [1, 0, 0], ro]] : [],
+           nb > 0 ? [for (k = [1 : nb]) let(f = a * k / nb) [[Rb * (1 - cos(f)), 0, s + Rb * sin(f)], [cos(f), 0, -sin(f)], ro]] : [],
+           [[E + t * (pipe_len - pipe_chamfer), e1, ro]],
+           [[E + t * pipe_len, e1, ro - pipe_chamfer]]);
+module pipe_stub() {
+    assert(pipe_angle == 0 || pipe_bend_r > pipe_od / 2 + 5, "pipe_bend_r muss deutlich groesser als pipe_od/2 sein");
+    path = pipe_path();
+    K = len(path);
+    ri = pipe_bore_d / 2;
+    // Punkte: erst alle Aussenringe, dann alle Innenringe (gleiche Winkelphase wie rotate_extrude)
+    pts = concat(
+        [for (k = [0 : K - 1]) for (i = [0 : NP - 1])
+            path[k][0] + path[k][2] * (cos(360 * i / NP) * path[k][1] + sin(360 * i / NP) * [0, 1, 0])],
+        [for (k = [0 : K - 1]) for (i = [0 : NP - 1])
+            path[k][0] + ri * (cos(360 * i / NP) * path[k][1] + sin(360 * i / NP) * [0, 1, 0])]);
+    faces = concat(
+        [for (k = [0 : K - 2], i = [0 : NP - 1]) each let(j = (i + 1) % NP, a = k * NP + i, b = k * NP + j, c = (k + 1) * NP + j, d = (k + 1) * NP + i) [[a, d, c], [a, c, b]]],
+        [for (k = [0 : K - 2], i = [0 : NP - 1]) each let(j = (i + 1) % NP, a = K * NP + k * NP + i, b = K * NP + k * NP + j, c = K * NP + (k + 1) * NP + j, d = K * NP + (k + 1) * NP + i) [[a, b, c], [a, c, d]]],
+        [for (i = [0 : NP - 1]) each let(j = (i + 1) % NP) [[i, j, K * NP + j], [i, K * NP + j, K * NP + i]]],
+        [for (i = [0 : NP - 1]) each let(j = (i + 1) % NP, o = (K - 1) * NP) [[o + i, K * NP + o + j, o + j], [o + i, K * NP + o + i, K * NP + o + j]]]);
+    polyhedron(points = pts, faces = faces, convexity = 10);
+}
+
+
+
+echo(str("Magnete gesamt: inner=", n_mag_150, " nut=", n_mag_150, " funnel=", n_mag_150 + (end110=="magnet" ? n_mag_110 : 0)));
+
 
 module funnel_body() {
     T = adapter_t;

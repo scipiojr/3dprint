@@ -37,11 +37,14 @@ DATEIEN = {
 }
 
 
+SCAD_DATEIEN = ("abluft_system.scad", "abluft_durchfuehrung.scad", "abluft_verjuengung.scad", "abluft_ventilator_adapter.scad")
+
+
 def scad_wert(name):
-    text = "\n".join((ORDNER / n).read_text() for n in ("abluft_system.scad", "abluft_ventilator_adapter.scad"))
+    text = "\n".join((ORDNER / n).read_text() for n in SCAD_DATEIEN)
     m = re.search(rf"^{name}\s*=\s*([-0-9.]+)\s*;", text, re.M)
     if not m:
-        sys.exit(f"Parameter {name} nicht in abluft_system.scad / abluft_ventilator_adapter.scad gefunden")
+        sys.exit(f"Parameter {name} nicht in den abluft_*.scad-Dateien gefunden")
     return float(m.group(1))
 
 

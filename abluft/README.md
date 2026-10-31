@@ -213,9 +213,11 @@ Anschluss an ein DN110-Rohr: Rohrstumpf ø109/100 (36 mm, wie bei der Verjüngun
 
 ## DN110-Doppelbogen für die Arbeitsplatte (`abluft_dn110_arbeitsplatte.scad`)
 
-Variante des Doppelbogens für den Einbau unter einer waagerechten Arbeitsplatte, die an eine 30°-Dachschräge stößt (Winkeladapter `Hose_Adapter_Angled_v4`: Flansch unten, Stutzen 30° aus der Senkrechten gekippt = 120° zur Waagerechten). Die Datei bindet `abluft_dn110_winkel.scad` ein und berechnet daraus die Längen:
+Variante des Doppelbogens für den Einbau unter einer waagerechten Arbeitsplatte, die an eine 30°-Dachschräge stößt. Adapter: `Hose_Adapter_Angled_v42` (Flansch unten, Stutzen 60° aus der Senkrechten = Einschlusswinkel 120°, Schlauch läuft parallel zum Dach). Die Datei bindet `abluft_dn110_winkel.scad` ein und rechnet die Längen aus der Einbausituation:
 
-- Rohr (Muffe Ø118 geschätzt) liegt tangential im Knick zwischen Dach und Plattenunterseite (4 mm Luft nach oben, 3 mm zum Dach), läuft nach dem 90°-Knick nach vorn, biegt durch die 30 mm dicke Platte nach oben; der Flanschring sitzt waagerecht auf der Plattenoberseite (Gewinde 20 mm über der Platte).
-- Flanschmitte `dp_u_flansch` = 285 mm vor der Schnittkante Dach/Plattenoberseite: Mindestabstand, damit der Adapter (Flansch 22,9 mm über der Platte, 5 mm Luft) bei zur Wand gekipptem Stutzen unter die Schräge passt (seitlich gekippt ca. 317–321 mm). Ergebnis: waagerechte Strecke `wk_h` = 203 mm, Senkrechte `wk_v` = 54 mm, Bogenradius 59,5 mm (eng: Bogenende bleibt 3,5 mm unter der Platte).
-- Teile (alle wasserdicht, passen in 240×240×250): Teil 1 215 × 150 × 109, Teil 2 109 × 228 × 168, Teil 3 153 × 135 × 23 mm. Export: `werkzeuge/export_dn110_arbeitsplatte.sh` → `dn110_arbeitsplatte/`.
-- Annahmen (nicht bestätigt): Plattendicke 30 mm (= Senkrechte des ersten Doppelbogens), Biegung nach links (`wk_links`), Stutzen kippt zur Wand. Das Modell `Hose_Adapter_Angled_v41` (45°) wurde nicht verwendet.
+- Rohr (Muffe Ø128,4 gemessen) liegt tangential im Knick zwischen Dach und Plattenunterseite (4 mm Luft nach oben, 3 mm zum Dach), läuft nach dem 90°-Knick nach vorn und biegt (Radius 66 mm) durch die 30 mm dicke Platte nach oben.
+- **Flanschring flach:** Die 8 mm dicke Ringplatte liegt auf der Arbeitsplatte, der Gewindehals steckt im Plattenloch (**Loch ≥ Ø120 mm**). Magnetfläche 8 mm über der Plattenoberseite.
+- **Flanschmitte** `dp_u_flansch` = 260 mm vor der Schnittkante Dach/Plattenoberseite (Mindestabstand aus dem v42-Modell mit 5 mm Luft; bei seitlich gekipptem Stutzen 280–305 mm). Ergebnis: waagerechte Strecke 164 mm, Senkrechte 37 mm.
+- **Übergangskegel:** Am oberen Rohrende verjüngt sich die Bohrung auf 15 mm Länge von Ø100 auf Ø90 (`wk_kegel_l`), danach folgt die Ringbohrung Ø90 ohne Absatz.
+- Teile (alle wasserdicht, passen in 240×240×250): Teil 1 202 × 157 × 109, Teil 2 109 × 214 × 158, Teil 3 153 × 135 × 23 mm. Export: `werkzeuge/export_dn110_arbeitsplatte.sh` → `dn110_arbeitsplatte/`.
+- Annahmen: Plattendicke 30 mm, Biegung nach links (`wk_links`). Offen: Standard-Rohrbogen statt Teil 1 (Schenkellänge des Bogens fehlt).

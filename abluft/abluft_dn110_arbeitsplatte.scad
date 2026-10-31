@@ -22,8 +22,8 @@
 dp_dach = 30;                    // [10:1:60]
 // dp_platte: Dicke der Arbeitsplatte = Strecke, die das Rohr senkrecht durch die Platte laeuft, mm
 dp_platte = 30;                  // [15:1:60]
-// dp_muffe_r: Aussenradius des DN110-Rohrs samt Muffe (Schaetzung: Aussendurchmesser 118), mm
-dp_muffe_r = 59;                 // [50:1:70]
+// dp_muffe_r: Aussenradius des DN110-Rohrs samt Muffe (gemessen: Aussendurchmesser 128,4), mm
+dp_muffe_r = 64.2;                 // [50:1:70]
 // dp_spiel_oben: Luft zwischen Muffe und Plattenunterseite (Befestigung), mm
 dp_spiel_oben = 4;               // [0:1:15]
 // dp_spiel_dach: Luft zwischen Muffe und Dachschraege, mm
@@ -42,7 +42,7 @@ dp_loch = 120;
 
 // ---- aus der Einbausituation abgeleitete Laengen des Doppelbogens ----
 dp_t = tan(dp_dach);
-dp_r_bogen = 59.5;                                           // enger Bogen: Mittellinie 5 mm ueber Rohrradius (= pipe_od/2 + 5)
+dp_r_bogen = 66;                                             // Bogenradius Mittellinie; Bogenende muss unter der Plattenunterseite bleiben: <= dp_muffe_r + dp_spiel_oben (68,2)
 dp_u_unten = -dp_platte / dp_t;                              // Dachschnitt an der Plattenunterseite
 dp_zc = -dp_platte - dp_muffe_r - dp_spiel_oben;             // Rohrachse unter der Plattenoberseite
 dp_u_stumpf = dp_u_unten + ((dp_muffe_r + dp_spiel_dach) / cos(dp_dach) - dp_muffe_r - dp_spiel_oben) / dp_t;  // Rohrachse, tangential am Dach

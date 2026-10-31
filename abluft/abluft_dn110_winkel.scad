@@ -34,6 +34,8 @@ wk_r = 70;                       // [60:5:150]
 // wk_stumpf: Laenge des Rohrstumpfs fuer das DN110-Rohr (hinter dem Bogen)
 wk_stumpf = pipe_len;            // [20:1:80]
 
+// wk_kegel_l: Laenge des inneren Uebergangskegels am oberen Rohrende (Innen-Durchmesser wk_id -> Bohrung des Flanschrings), mm; 0 = Absatz statt Kegel
+wk_kegel_l = 15;                 // [0:1:30]
 // wk_thread_l: Laenge des Aussengewindes am oberen Rohrende (= Einschraubtiefe des Flanschrings), mm; max. wk_v
 wk_thread_l = 20;                // [8:1:60]
 
@@ -101,6 +103,7 @@ module bend_up(r) { rotate([0, 90, 0]) tube_b(r); }
 ztop = Rc + wk_v;                         // Oberkante des Rohrs (Anlage des Flanschrings)
 yc   = hb + Rc;                           // Achse der Senkrechten in y
 Lt   = min(wk_thread_l, wk_v);            // Gewindelaenge am Rohrende
+Lk   = min(wk_kegel_l, wk_v - 1);         // Laenge des inneren Uebergangskegels
 module teil2_lokal() {
     difference() {
         union() {
@@ -118,7 +121,14 @@ module teil2_lokal() {
         }
         // eine durchgehende Bohrung (kein Absatz an der Gewindegrenze)
         translate([0, -0.5, 0]) tube_s(hb + 1.5, ri);
-        translate([0, hb, 0]) { bend_up(ri); translate([0, Rc, Rc]) rotate([90, 0, 0]) translate([0, -1, 0]) tube_s(wk_v + 2.0, ri); }
+        translate([0, hb, 0]) {
+            bend_up(ri);
+            translate([0, Rc, Rc]) rotate([90, 0, 0]) {
+                translate([0, -1, 0]) tube_s(wk_v - Lk + 1.0, ri);
+                if (Lk > 0) translate([0, wk_v - Lk, 0]) rotate([-90, 0, 0]) cylinder(h = Lk + 0.01, r1 = ri, r2 = stub_bore_r, $fn = fn);
+                translate([0, wk_v - 0.01, 0]) tube_s(2.0, stub_bore_r);
+            }
+        }
     }
 }
 

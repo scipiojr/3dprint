@@ -1,30 +1,31 @@
 // =====================================================================
-//  Abluft-System: magnetischer Schlauchanschluss fuer einen 150-mm-Fensterdurchlass
-//  (Plexiglas im Dachfenster) mit Verjuengung 150 -> 110 mm.   OpenSCAD 2021.01 oder neuer.
+//  Abluft-System: gemeinsame BASIS (Parameter, Hilfsfunktionen, Magnetflansch, Gewinde, Rohrstumpf, O-Ring)
+//  OpenSCAD 2021.01 oder neuer.   Diese Datei erzeugt selbst KEIN Teil; sie wird von den Teile-Dateien
+//  per  include <abluft_system.scad>  eingebunden. Einzelne Bauteile liegen in eigenen Dateien:
 //
-//  Teile (Variable "part", jeweils ein STL, Dateinamen siehe werkzeuge/export_alle.sh):
-//    "inner"           Durchfuehrung, Innenseite: Scheibe + Zentrierbund + Gewinderohr (= Luftkanal), Magnete zum Schlauch
-//    "nut"             Durchfuehrung, Aussenseite: Halteplatte mit Innengewinde und Steg, Magnete z. B. fuer Umlenker
-//    "funnel"          Verjuengung 150 -> 110: Magnetflansch 150, Trichter, am 110er-Ende Magnetflansch
-//                      (end110="magnet", Standard), Schlauchstutzen mit Wulsten (end110="stub") oder glatter
-//                      Rohrstumpf ø109 x 36 mm, optional gewinkelt (end110="pipe", pipe_*-Parameter)
-//    "adapter140"      Ventilator-Adapter: Muffe fuer 140-mm-Ventilatoranschluss (Innendurchmesser 146,4 mm) ->
-//                      Trichter -> 110er-Magnetflansch (Anschluss fuer 110-mm-Schlauch), Schraubloecher in der Muffe
-//    "oring_fan"       TPU-O-Ring fuer die Nut in der Muffenwand des Ventilator-Adapters (3 mm Schnur)
-//    "oring150_plexi"  TPU-Dichtung zwischen Scheibe und Plexiglas
-//    "oring150_face"   TPU-Dichtung fuer 150er-Anschlussflaechen (Verjuengung/Adapter auf Scheibe)
-//    "oring110"        TPU-Dichtung fuer 110er-Anschlussflaechen
-//    "assembly"        Vorschau des zusammengebauten Systems (nicht drucken)
+//    abluft_durchfuehrung.scad        part = inner | nut | oring150_plexi | assembly   (150er Durchfuehrung im Plexiglas)
+//    abluft_verjuengung.scad          part = funnel | oring150_face                    (Magnetflansch 150 + Trichter + 110er-Ende)
+//    abluft_ventilator_adapter.scad   part = adapter140 | oring_fan | oring110         (Muffe fuer Ventilator + 100er Magnetflansch)
+//    abluft_magnetring.scad           part = ring150 | ring100 | ring150_gewinde ...    (freie Magnetringe zum Anschrauben/Kombinieren)
+//    abluft_fuss, _dn110_winkel, _dn110_arbeitsplatte, _fensterkanal, _ausstroemer_direkt, _schraubkappe, _ausmesshilfe
 //
-//  Alle Teile sind in Druckrichtung modelliert: die Magnetflaeche liegt auf dem Druckbett (z=0).
-//  Masse in mm. README.md beschreibt das System, agent.md den Arbeitsstand fuer KI-Agenten.
+//  Gemeinsame Bausteine dieser Basis (fuer eigene Teile wiederverwendbar):
+//    mag_flange(...)   Magnetflansch mit Taschen/Nut/Bohrung (Magnetflaeche bei z=0)
+//    outline2d, pocket2d, ring2d, ref150_pts   Umriss/Taschen/Nutring
+//    thread_tube(L), thread_nut_ring(L, rout)   Aussen- und Innengewinde (Steigung thread_pitch)
+//    pipe_stub()       Rohrstumpf gerade/gewinkelt (pipe_*), stub_r/arc_pts (Schlauchstutzen mit Wulsten)
+//    oring(rc, d)      TPU-O-Ring liegend druckbar
+//  Alle Teile sind in Druckrichtung modelliert: die Magnetflaeche liegt auf dem Druckbett (z=0). Masse in mm.
+//  README.md beschreibt das System, agent.md den Arbeitsstand fuer KI-Agenten.
 //
 //  Hinweis: ref150_pts (Umriss der 150er-Magnetflansche) wurde aus dem Referenz-Adapter
 //  "Magnetic_Hose_Adapter_150" uebernommen, damit Teile nahtlos aufeinander passen.
+//  ACHTUNG: Ueberschreibt eine Datei Parameter NACH dem include, werden abgeleitete Werte dieser Basis
+//  nicht neu berechnet (OpenSCAD wertet beim ersten Vorkommen aus) - nur Literale oder vorher definierte Variablen.
 // =====================================================================
 
-part = "assembly";      // inner | nut | funnel | adapter140 | oring_fan | oring150_plexi | oring150_face | oring110 | assembly
-end110 = "magnet";      // funnel, 110er-Ende: "magnet" = Magnetflansch (Referenz-Muster, passt auf Anschluss_110mm_Schlauch) | "stub" = Schlauchstutzen mit Wulsten | "pipe" = glatter Rohrstumpf (gerade oder gewinkelt) zum Ueberstuelpen der Muffe eines 110er-Rohrs
+end110 = "magnet";      // Verjuengung, 110er-Ende: "magnet" | "stub" | "pipe" (siehe abluft_verjuengung.scad)
+
 
 /* [Magnete] */
 mag_d        = 15;      // Magnet-Durchmesser
@@ -240,37 +241,6 @@ module thread_nut_ring(L, rout) {
                   thr_pts(r_minor + thread_clear, thread_depth, thr_hr + thread_widen, thr_hc + thread_widen, NT));
 }
 
-// ---------------- Teile ----------------
-module part_inner() {
-    union() {
-        mag_flange(disc_t, n_mag_150, R150, lobe150, body150, lobe_offset150, gr150_face, groove_depth_150, bore_r, groove_depth_plexi, gr150, true);
-        // Zentrierbund: glatter Ring im Bereich der Plexiglasdicke
-        if (collar)
-            translate([0, 0, disc_t]) linear_extrude(height = plate_t)
-                difference() { circle(r = hole_r - collar_clear, $fn = 240); circle(r = bore_r, $fn = 240); }
-        // Gewinde darueber (stoesst plan auf, keine ueberlappenden Wandflaechen)
-        translate([0, 0, disc_t + (collar ? plate_t : 0)]) thread_tube(tube_len - (collar ? plate_t : 0));
-    }
-}
-
-nut_ring_out = hole_r + plexi_gap - 0.4;   // 77.7
-lock_z = (nut_lip + nut_t - groove_depth_plexi) / 2;   // Mitte zwischen Steg und Plexiglas-Nut
-module part_nut() {
-    difference() {
-        union() {
-            // unten (Magnetflaeche) geschlossener Steg mit Dichtungsnut und Bohrung = Luftkanal, darueber der Gewindeabschnitt
-            mag_flange(nut_t, n_mag_150, R150, lobe150, body150, lobe_offset150, gr150_face, groove_depth_150, bore_r, groove_depth_plexi, gr150, true, nut_lip, nut_ring_out - 0.2);
-            translate([0, 0, nut_lip]) thread_nut_ring(nut_t - nut_lip, nut_ring_out);
-        }
-        // radiale Sicherungsschrauben (zwischen den Lappen, auf Hoehe der Gewindezone)
-        if (lock_screw_n > 0)
-            for (j = [0 : lock_screw_n - 1])
-                rotate(lobe_offset150 + 180 / n_mag_150 + j * 360 / lock_screw_n)
-                    translate([r_minor, 0, lock_z]) rotate([0, 90, 0]) cylinder(d = lock_screw_d, h = 20, $fn = 32);
-    }
-}
-
-// Aussenprofil des Stutzens inkl. Wulste (r,z)
 function stub_r(z) = stub_r0 - stub_taper * z / stub_len;     // z ab Stutzenanfang
 function arc_pts(zc, rc, br) = [for (a = [-80 : 20 : 80]) [rc + br * cos(a), zc + br * sin(a)]];
 // ---- Rohrstumpf (gerade oder gewinkelt) als ein Polyeder ohne Boolesche Operationen ----
@@ -308,75 +278,6 @@ module pipe_stub() {
     polyhedron(points = pts, faces = faces, convexity = 10);
 }
 
-module funnel_body() {
-    T = adapter_t;
-    zc = T + cone_len;
-    rc0 = bore_r + cone_wall0;
-    ztop = zc + stub_len;
-    beads = [for (k = [0 : bead_n - 1]) bead_first + k * bead_pitch];
-    outer_stub = [ for (k = [0 : bead_n - 1]) each concat(
-                        [[stub_r(beads[k] - bead_r), zc + beads[k] - bead_r]],
-                        arc_pts(zc + beads[k], stub_r(beads[k]), bead_r),
-                        [[stub_r(beads[k] + bead_r), zc + beads[k] + bead_r]]) ];
-    if (end110 == "stub") {
-        rotate_extrude($fn = 240)
-            polygon(concat(
-                [[bore_r, T - 1], [rc0, T - 1], [rc0, T], [stub_r0, zc], [stub_r0, zc + 0.01]],
-                outer_stub,
-                [[stub_r(stub_len), ztop - 1.5], [stub_r(stub_len) - 1.2, ztop],
-                 [stub_bore_r + 1.0, ztop], [stub_bore_r, ztop - 1.0], [stub_bore_r, zc], [bore_r, T]]));
-    } else if (end110 == "pipe") {
-        rotate_extrude($fn = 240)
-            polygon([[bore_r, T - 1], [rc0, T - 1], [rc0, T], [pipe_od / 2, zc], [pipe_bore_d / 2, zc], [bore_r, T]]);
-        translate([0, 0, zc]) rotate(pipe_dir) pipe_stub();
-    } else {
-        rotate_extrude($fn = 240)
-            polygon([[bore_r, T - 1], [rc0, T - 1], [rc0, T], [stub_r0, zc + 0.5],
-                     [stub_bore_r, zc + 0.5], [stub_bore_r, zc], [bore_r, T]]);
-    }
-}
-module part_funnel() {
-    T = adapter_t;
-    zc = T + cone_len;
-    union() {
-        mag_flange(T, n_mag_150, R150, lobe150, body150, lobe_offset_funnel, gr150_face, groove_depth_150, bore_r, 0, 0, true);
-        funnel_body();
-        if (end110 == "magnet")
-            translate([0, 0, zc + flange110_t - 0.0]) mirror([0, 0, 1])
-                mag_flange(flange110_t, n_mag_110, R110, lobe110, body110_r, 0, gr110, groove_depth_mag, stub_bore_r, 0, 0, false, 0, 0, pr110);
-    }
-}
-
-// Ventilator-Adapter: Magnetflansch (110er Muster) unten auf dem Druckbett, Trichter, Muffe oben
-module part_adapter140() {
-    T  = flange110_t;
-    zc = T + ad_cone_len;           // Muffenboden (Schulter)
-    zt = zc + socket_depth;         // Muffenrand
-    rs_i = fan_socket_d / 2;
-    rs_o = rs_i + socket_wall;
-    rb   = fan_bore_d / 2;
-    difference() {
-        union() {
-            mag_flange(T, n_mag_110, R110, lobe110, body110_r, 0, gr110, fan_flange_groove ? groove_depth_mag : 0, stub_bore_r, 0, 0, false, 0, 0, pr110);
-            rotate_extrude($fn = 240)
-                polygon([[stub_bore_r, T], [stub_bore_r + ad_cone_wall0, T], [rs_o, zc], [rs_o, zt],
-                         [rs_i + socket_chamfer, zt], [rs_i, zt - socket_chamfer], [rs_i, zc], [rb, zc]]);
-        }
-        // O-Ring-Nut in der Muffenwand, Dach unter 45 Grad (ohne Stuetzen druckbar)
-        if (fan_groove) {
-            fw = fan_oring_d + 0.2;
-            zg = zt - fan_groove_from_mouth;
-            rotate_extrude($fn = 240)
-                polygon([[rs_i - 0.2, zg - fw/2], [rs_i + fan_groove_depth, zg - fw/2],
-                         [rs_i + fan_groove_depth, zg + fw/2 - fan_groove_depth], [rs_i - 0.2, zg + fw/2 + 0.2]]);
-        }
-        if (fan_screw_n > 0)
-            for (j = [0 : fan_screw_n - 1])
-                rotate(fan_screw_angle0 + j * 360 / fan_screw_n)
-                    translate([rs_i - 1, 0, zt - fan_screw_from_mouth]) rotate([0, 90, 0])
-                        cylinder(d = fan_screw_d, h = socket_wall + 2, $fn = 32);
-    }
-}
 
 // TPU-O-Ring: liegend druckbar (kleine Abflachung oben/unten wie in deinen Vorlagen)
 module oring(rc, d = oring_d) {
@@ -385,22 +286,4 @@ module oring(rc, d = oring_d) {
         rotate_extrude($fn = 240) translate([rc, 0]) circle(d = d, $fn = 48);
         translate([-rc - d, -rc - d, -h]) cube([2 * (rc + d), 2 * (rc + d), 2 * h]);
     }
-}
-
-// ---------------- Ausgabe ----------------
-if (part == "inner") part_inner();
-else if (part == "nut") part_nut();
-else if (part == "funnel") part_funnel();
-else if (part == "adapter140") part_adapter140();
-else if (part == "oring150_plexi") translate([0, 0, 1.975]) oring(gr150);
-else if (part == "oring150_face") translate([0, 0, 1.975]) oring(gr150_face);
-else if (part == "oring110") translate([0, 0, 1.975]) oring(gr110);
-else if (part == "oring_fan") translate([0, 0, fan_oring_d / 2 - 0.025]) oring(fan_socket_d / 2 + fan_groove_depth - fan_oring_d / 2, fan_oring_d);
-else if (part == "assembly") {
-    color("steelblue") part_inner();
-    color("lightblue", 0.35) translate([-200, -200, disc_t]) difference() {
-        cube([400, 400, plate_t]); translate([200, 200, -1]) cylinder(r = hole_r, h = plate_t + 2);
-    }
-    color("orange") translate([0, 0, disc_t + plate_t + nut_t]) rotate([180, 0, 0]) part_nut();
-    color("seagreen") translate([0, 0, disc_t + plate_t + nut_t]) part_funnel();
 }

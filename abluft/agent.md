@@ -12,6 +12,25 @@ Arbeitsanweisung und Projektstand für KI-Agenten. Sprache mit der Nutzerin: **D
 - README und dieses Dokument aktuell halten, wenn sich Parameter, Teile oder Entscheidungen ändern.
 - Werkzeuge: OpenSCAD 2021.01 (CGAL, langsam: Gewindeteile 1–2 Minuten, alles ca. 6 Minuten auf 2 Kernen); Python mit `trimesh`, `numpy`, `manifold3d`, `matplotlib` (`pip install --break-system-packages …`). **STEP gibt es nicht**, OpenSCAD exportiert kein STEP; MakerWorld nimmt STL.
 
+## Übergabe: Dateikarte und Stand (01.11.2026) – zuerst lesen
+
+**Aufbau der Quellen (seit der Aufteilung):** `abluft_system.scad` ist nur noch die **Basis** (alle gemeinsamen Parameter, Hilfsfunktionen, `mag_flange`, Gewinde, `pipe_stub`, `stub_r`/`arc_pts`, `oring`) und gibt **kein Teil** aus. Einzelteile liegen in eigenen Dateien, die per `include <abluft_system.scad>` einbinden und danach ihr eigenes `part` setzen:
+
+| Datei | `part` | Inhalt |
+|---|---|---|
+| `abluft_durchfuehrung.scad` | `inner`, `nut`, `oring150_plexi`, `assembly` | 150er Durchführung durch das Plexiglas |
+| `abluft_verjuengung.scad` | `funnel`, `oring150_face`, `assembly` | Magnetflansch 150 + Trichter + 110er-Ende (`end110` = magnet/stub/pipe) |
+| `abluft_ventilator_adapter.scad` | `adapter140`, `oring_fan`, `oring110` | Muffe für Ventilator → 100er Magnetflansch; mit einem `ring100` (oder dem Muster aus `mag_flange`) kann jedes Rohr/jeder Filterkasten angeschlossen werden |
+| `abluft_magnetring.scad` | `ring150`, `ring100`, `deckel150`, `deckel100` | freie Magnetringe (Dicke, Bohrung, Nut, optionale Schraublöcher) zum Anbau an eigene Teile |
+| `abluft_fuss`, `_dn110_winkel`, `_dn110_arbeitsplatte`, `_fensterkanal`, `_ausstroemer_direkt`, `_schraubkappe`, `_ausmesshilfe` | siehe Abschnitte unten | abhängige Konstruktionen (nutzen die Basis; `part="keiner"` darin ist harmlos) |
+
+- Alle **Parameter** stehen weiter in der Basis (auch die der Verjüngung und des Ventilator-Adapters), weil `werkzeuge/pruefung.py`/`bilder.py` sie dort per Regex lesen und andere Dateien (`adapter_t`, `lobe_offset_funnel`, `pipe_*`, `cone_len`, `stub_*`, `bead_*`) sie mitbenutzen. Neue Teile: eigene Datei anlegen, Basis includen, nur teilespezifische Parameter in der eigenen Datei definieren.
+- **Falle:** Variablen, die nach einem `include` überschrieben werden, werden an der Stelle der ersten Zuweisung ausgewertet; Überschreibungen dürfen nur Literale oder vorher definierte Variablen verwenden (wie `dp_*` in `abluft_dn110_arbeitsplatte.scad`).
+- **Exporte:** `werkzeuge/export_alle.sh` (System-Teile inkl. Magnetringe; Spalten: Datei | scad | part | -D-Args), `export_fuss.sh`, `export_dn110_winkel.sh`, `export_dn110_arbeitsplatte.sh`, `export_fensterkanal.sh`, `export_ausstroemer.sh`, `export_ausmesshilfe.sh`. Kein `pkill -f` mit Muster verwenden (killt die eigene Shell).
+- **Nutzer-Konventionen:** Deutsch; direkt auf `main` committen und pushen (`git pull --rebase origin main` davor); Commit-Trailer `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>` und `Claude-Session: …`; STL einchecken; keine `_v2`-Namen; nutzbares Druckbett **240×240×250** (Nenn 260³); grafische Darstellung/bemaßte Skizze wird oft gewünscht (Bilder per trimesh/matplotlib, Skripte in `werkzeuge/`, Ergebnisse nach `bilder/`); Rückfragen bei Geometrie-Unklarheiten sind willkommen (mehrere Missverständnisse beim Adapter v4/v41/v42).
+- **Zuletzt abgeschlossen:** Fuß-Ersatzteile (6er/8er), DN110-Doppelbogen (3 Teile), Arbeitsplatten-Variante (4 Teile: Rohr 1/2, runder Flanschring ø153×5, runder magnetischer Deckel; Senkung ø155×10, Bohrung ø120, Flanschmitte 237 mm vor der Dach-/Plattenkante, 102 mm entlang der Wand ab Stutzenfläche; Adapter `Hose_Adapter_Angled_v42`, Muffe AD 128,4, Platte 30 mm, Dach 30°). Dachabstand 237 mm aus Halbraumtest der Adapter-STL gegen die Dachebene (Zugabe = Flächenhöhe + 15 mm, 5 mm Reserve).
+- **Offen:** Standard-Rohrbogen statt Teil 1 (Schenkellänge nötig); Skizze `bilder/bohrloch.png` ist veraltet (260 mm, ohne Senkung) und müsste mit 237 mm und Senkung ø155×10 neu gezeichnet werden; Annahmen noch unbestätigt (Platte 30 mm, Bogen links, Neigung nach vorn); nichts davon (Gewinde, Fugen, Polung von Ring/Deckel, Muffentoleranz, Strömung) ist gedruckt erprobt; Tag `abluft-v1` ließ sich nicht pushen (403).
+
 ## Ziel
 
 Ein 110-mm-Abluftschlauch (Laser-Cutter, heiße Rauchluft) soll über magnetische Kupplungen an ein **Plexiglas im Dachfenster** angeschlossen werden. Dieses Plexiglas ist 5 mm dick und hat einen runden Ausschnitt ø155 mm (für 150-mm-Schläuche) in einer Ecke, 45 mm von zwei Kanten entfernt. Wegen des Rahmens bleiben nur etwa 20 mm Rand ab der Ausschnittkante. Auch 150-mm-Schläuche sollen so angeschlossen werden. Die Teile:

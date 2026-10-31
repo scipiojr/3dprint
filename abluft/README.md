@@ -21,7 +21,12 @@ Abluft-Anschluss für einen Laser-Cutter: Eine 5 mm dicke Plexiglasscheibe häng
 
 | Datei | Inhalt |
 |---|---|
-| `abluft_system.scad` | Quelle, alles parametrisch, Customizer auf Deutsch (OpenSCAD 2021.01 oder neuer). `part` wählt das Teil. |
+| `abluft_system.scad` | **Basis**: gemeinsame Parameter, Magnetflansch, Gewinde, Rohrstumpf, O-Ring (gibt selbst kein Teil aus; OpenSCAD 2021.01 oder neuer) |
+| `abluft_durchfuehrung.scad` | Durchführung durch das Plexiglas (`part` = inner, nut, oring150_plexi, assembly) |
+| `abluft_verjuengung.scad` | Verjüngung 150 → 100/110 (`part` = funnel, oring150_face) |
+| `abluft_ventilator_adapter.scad` | Ventilator-Muffe mit 100er Magnetflansch (`part` = adapter140, oring_fan, oring110) |
+| `abluft_magnetring.scad` | freie Magnetringe/Deckel zum Anbau an eigene Rohre, Filterkästen usw. (`part` = ring150, ring100, deckel150, deckel100) |
+| `magnetring_150.stl`, `magnetring_100.stl` | Magnetringe in Standardmaßen (Dicke 8, ohne Schraublöcher) |
 | `durchfuehrung_innen.stl` | Innenscheibe mit Zentrierbund und Gewinderohr (Raumseite) |
 | `durchfuehrung_aussen.stl` | Halteplatte mit Innengewinde (Dachseite), mit Bohrungen für zwei M4-Sicherungsschrauben |
 | `verjuengung_150_100_magnet.stl` | Verjüngung 150 → 100 mit Schlauch-Magnetflansch, 100er Schlauchmuster (Standard) |

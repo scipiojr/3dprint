@@ -110,23 +110,6 @@ hose_mag_d   = mag_d;      // Magnetdurchmesser der Schlauch-Magnetflaechen (15;
 hose_mag_clear = hose_nom == 100 ? 0.2 : mag_clear;   // Referenz 100: Taschen ø15,2
 lobe110      = (hose_mag_d + hose_mag_clear) / 2 + (hose_nom == 100 ? 2.9 : 2.75);   // Lappenradius um die Magnete (Referenz 110: 10.4, 100: 10.5)
 
-/* [Ventilator-Adapter 140 -> 110 (part = "adapter140")] */
-fan_socket_d   = 146.4; // Innendurchmesser der Muffe (schiebt sich ueber den Ventilatoranschluss)
-fan_bore_d     = 140;   // Innendurchmesser des Ventilatoranschlusses = lichte Weite hinter der Muffe (Annahme)
-socket_depth   = 36;    // Tiefe der Muffe (max. 36 mm)
-socket_wall    = 4;     // Wandstaerke der Muffe (dick genug fuer Schrauben)
-socket_chamfer = 1.5;   // Einfuehrfase am Muffenrand (innen)
-ad_cone_len    = 35;    // axiale Laenge des Trichters (ca. 30 Grad Halbwinkel)
-ad_cone_wall0  = 5.5;   // Wandstaerke (radial) des Trichters am 110er-Ende
-fan_screw_n    = 4;     // Anzahl radialer Schraubloecher in der Muffe (0 = keine)
-fan_screw_d    = 4.5;   // Lochdurchmesser (Durchgangsloch fuer M4 / Blechschraube 4,2 mit Unterlegscheibe)
-fan_screw_from_mouth = 12;  // Abstand der Loecher vom Muffenrand
-fan_screw_angle0 = 45;  // Drehlage des ersten Lochs
-fan_groove     = true;  // O-Ring-Nut in der Muffenwand (dichtet radial gegen den Ventilatoranschluss)
-fan_oring_d    = 3.0;   // Schnurdurchmesser des Muffen-O-Rings (TPU)
-fan_groove_depth = 1.6; // Nuttiefe in der Wand (Restwand = socket_wall - Tiefe)
-fan_groove_from_mouth = 24; // Lage der Nutmitte ab Muffenrand (zwischen Schraublochkreis und Schulter)
-fan_flange_groove = true;   // Dichtungsnut auf dem 110er-Magnetflansch des Adapters (optional, wie Referenz)
 
 $fn = 96;
 eps = 0.01;
@@ -163,8 +146,6 @@ echo(str("Ausdehnung vom Mittelpunkt in X/Y: ", e150, "  -> ueber Ausschnittkant
 echo(str("Gewinde: major=", thread_major, " minor=", 2*r_minor, "  Wand am Gewindegrund=", r_minor - bore_r,
          "  Rohrlaenge=", tube_len, "  Gewindelaenge in Mutter=", nut_t - nut_lip, " (", (nut_t - nut_lip)/thread_pitch, " Gaenge)"));
 echo(str("O-Ring 150 Plexi: ID=", 2*(gr150-oring_d/2), " AD=", 2*(gr150+oring_d/2), "   O-Ring 150 Anschluss: ID=", 2*(gr150_face-oring_d/2), " AD=", 2*(gr150_face+oring_d/2)));
-echo(str("Ventilator-Adapter: Muffe ID=", fan_socket_d, " Tiefe=", socket_depth, " Wand=", socket_wall, "  Schulter=", (fan_socket_d - fan_bore_d)/2, "  Hoehe gesamt=", flange110_t + ad_cone_len + socket_depth));
-echo(str("O-Ring Muffe: Schnur ", fan_oring_d, "  Mittenradius=", fan_socket_d / 2 + fan_groove_depth - fan_oring_d / 2, " -> ID=", fan_socket_d + 2 * fan_groove_depth - 2 * fan_oring_d, " AD=", fan_socket_d + 2 * fan_groove_depth, "  Nut: Restwand=", socket_wall - fan_groove_depth));
 echo(str("Magnete gesamt: inner=", n_mag_150, " nut=", n_mag_150, " funnel=", n_mag_150 + (end110=="magnet" ? n_mag_110 : 0)));
 
 // ---------------- Hilfsfunktionen ----------------

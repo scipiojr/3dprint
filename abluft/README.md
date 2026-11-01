@@ -244,7 +244,7 @@ Kompakter Filterkasten zwischen dem 100er Schlauch und dem Ventilator: Einschub-
 | `filterkasten_einlass_magnet.stl` | Variante: **100er Magnetflansch des Systems** (passt auf Schlauchanschluss und Ventilator-Adapter) statt Stutzen (`einlass_typ = "magnet"`) | Magnetfläche auf dem Bett, 156 × 168 × 68 mm |
 | `filterkasten_auslass_ventilator.stl` | Trichter → **Ventilator-Muffe** (146,4 mm, O-Ring-Nut und Schraublöcher aus `abluft_ventilator_adapter.scad`) → Zapfen | Muffenmündung auf dem Bett, 156 × 168 × 81 mm |
 | `filterkasten_deckel.stl` | Klappdeckel, hohl (Deckplatte + Rippenraster, Vollrand an Scharnier/Verschluss) mit Lippe | Außenseite unten |
-| `filterkasten_kassette.stl`, `filterkasten_lehre.stl`, `filterkasten_lehre_klemmleiste.stl` | Kassette und Schneidlehre für das Vlies, unverändert | |
+| `filterkasten_kassette.stl`, `filterkasten_lehre.stl`, `filterkasten_lehre_klemmleiste.stl` | Kassette (reiner Rahmen mit Schlitz, ohne Kreuz und Griffsteg, 20 cm³) und Schneidlehre für das Vlies | |
 
 - **Zusammenbau:** Einlass und Auslass haben je einen 10 mm langen Steckzapfen (0,25 mm Spiel je Seite), der in den Rahmen geschoben wird. Je vier M3-Schrauben (selbstschneidend, Kernloch im Zapfen) fixieren sie; die Fuge mit Dichtband oder einer Raupe Silikon abdichten. Der Kassettenanschlag sitzt am Ende des Einlass-Zapfens. Das Vlies liegt auf dem Stützgitter im Rahmen.
 - **Ablauf:** Schlauch (100er Magnetflansch) → Einlass → Kassette → G4-Vlies → Gitter → Auslass → Ventilator. Standard ist der glatte ø100-Stutzen aus dem Briefing; mit `einlass_typ = "magnet"` gibt es stattdessen den Magnetflansch.

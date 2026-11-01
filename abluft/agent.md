@@ -151,3 +151,5 @@ Alle STL wasserdicht; keine Überlappung Innenscheibe/Plexiglas/Halteplatte; Gew
 - **Versenkt + Deckel:** dp_flaeche_h (Magnetflaeche relativ zur Plattenoberseite) muss VOR dem include stehen (Auswertung an der ersten Zuweisung!). wk_ring_rund/wk_deckel_t im Doppelbogen; Teil 4 = Deckel.
 
 - Filterkasten Auslass: Der aeussere Startkreis des Trichters (`fan_socket_d + 2`) ueberlappt die Muffenwand, sonst blieb zwischen Trichter und 140er-Muffe eine offene Schulter (r 72 bis 73,2 mm). Der Auslass ist jetzt ein geschlossener Koerper.
+
+- Kassette: Kreuz (3 mm Stege) und Griffsteg (T, 40x2 mm) entfernt, weil sie als Brücke bzw. freistehende Rippe nicht sauber druckbar waren. Das Vlies stuetzt das Gitter im Rahmen. Falls ein Griff gewuenscht ist: als Lasche mit max. 45 Grad Schraege ausserhalb des Rahmens ergaenzen.

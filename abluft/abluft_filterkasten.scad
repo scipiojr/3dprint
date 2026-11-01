@@ -10,7 +10,7 @@
 //              -> Trichter -> Steckzapfen mit Kassettenanschlag
 //    auslass   Auslass: Trichter -> Ventilator-Muffe (146,4 mm, O-Ring-Nut, Schraublöcher wie Ventilator-Adapter)
 //    lid       Klappdeckel: hohl (Boden + Rippen) statt 12 mm Vollmaterial; liegt zum Druck auf der Aussenseite
-//    cartridge Filterkassette (unveraendert)      jig, jig_clamp   Schneidlehre fuer das Vlies (unveraendert)
+//    cartridge Filterkassette (Rahmen mit Schlitz, ohne Kreuz und Griffsteg)      jig, jig_clamp   Schneidlehre fuer das Vlies (unveraendert)
 //
 //  Druckpose: alle Teile liegen so, dass sie ohne Stuetzen druckbar sind (siehe README/agent.md):
 //    rahmen: wie gebaut (Deckelseite oben) | einlass: Magnetflaeche auf dem Bett | auslass: Muffenmuendung auf dem Bett
@@ -279,15 +279,13 @@ module lid() {
 // 5. KASSETTE, 6. LEHRE (unveraendert)
 // ==========================================
 module cartridge() {
+    // reiner Rahmen mit Schlitz: kein Kreuz, kein Griffsteg (nicht druckbar; das Stuetzgitter im Rahmen haelt das Vlies)
     union() {
         difference() {
             cube([c_d, c_w, c_h]);
             translate([c_wall, c_wall, c_wall]) cube([c_d - 2*c_wall, c_w - 2*c_wall, c_h + 1]);
             translate([-1, c_wall + c_lip, c_wall + c_lip]) cube([c_d + 2, c_w - 2*(c_wall + c_lip), c_h]);
         }
-        translate([c_d - c_wall - 0.1, c_w/2 - 1.5, c_wall]) cube([c_wall + 0.2, 3, c_h - c_wall]);
-        translate([c_d - c_wall - 0.1, c_wall, c_h/2 - 1.5]) cube([c_wall + 0.2, c_w - 2*c_wall, 3]);
-        translate([0, c_w/2 - 20, c_h - 2]) cube([c_d, 40, 2]);
     }
 }
 module jig() {

@@ -1,3 +1,4 @@
+import math
 #!/usr/bin/env python3
 """Prueft den Filterkasten (abluft_filterkasten.scad) in der MONTIERTEN Pose:
   - alle Teile wasserdicht, paarweise Ueberlappung (soll ~0 mm3 sein),
@@ -46,8 +47,10 @@ print("Gesamtmasse montiert [mm]:", (b.max(0) - b.min(0)).round(1))
 txt = (ORDNER / "abluft_filterkasten.scad").read_text()
 import re
 def par(n):
-    m = re.search(rf"^{n}\s*=\s*([-0-9.]+)\s*;", txt, re.M); return float(m.group(1))
-inner_w, inner_h, wand, rand = par("inner_w"), par("inner_h"), par("box_wall"), par("frame_t")
+    m = re.search(rf"(?:^|;)\s*{n}\s*=\s*([-0-9.]+)\s*;", txt, re.M); return float(m.group(1))
+wand, rand = par("box_wall"), par("frame_t")
+inner_w = par("filter_w") + 2 * par("c_wall") + 2 + 2      # = c_w + 2
+inner_h = math.ceil(par("filter_l") / par("filter_n") + 2 * par("c_wall") + 1.3) + par("cart_head")   # = c_h + cart_head
 box_w, box_h = inner_w + 2 * wand, inner_h + 2 * wand
 for w in (30, 60, 75):   # ab ca. 85 Grad streift die Deckelkante an der Rahmen-Scharnierkante (9 mm3 bei 90)
     T = trimesh.transformations.rotation_matrix(np.radians(-w), [1, 0, 0], [0, box_w + rand / 2, box_h])

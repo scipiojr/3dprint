@@ -27,16 +27,28 @@ einlass_typ = "stutzen"; // ["stutzen", "magnet"]
 include <abluft_ventilator_adapter.scad>   // bringt abluft_system.scad (Basis) und die fan_*/socket_*-Parameter mit
 part = "keiner";          // Ausgabe der eingebundenen Dateien aus (muss nach dem include stehen)
 
+/* [Funkenfilter und Kassette] */
+// Funkenfilter: vhbw Metallfettfilter (Bauknecht 481948048232), 452 x 160 x 3,5 mm, in 3 Streifen geschnitten und gestapelt
+filter_l = 452;  filter_w = 160;  filter_t = 3.5;   // Maße des Metallfilters
+filter_n = 3;                                        // Streifen = Lagen im Stapel (nur 2 Schnitte, Breite 160 bleibt ungeschnitten)
+c_wall = 2.0;  c_lip = 5.0;  cart_grid_t = 4;
+strip_l = filter_l / filter_n;                       // Streifenlaenge 150,7
+c_w = filter_w + 2*c_wall + 2;                       // 166: Filterbreite + Waende + 1 mm Spiel je Seite
+c_h = ceil(strip_l + 2*c_wall + 1.3);                // 156: Streifenlaenge + Waende + Spiel
+c_d = filter_n*filter_t + 0.5 + cart_grid_t;         // 15: Stapel + Spiel + Gitter
+cart_head = 1.5;   // Luft ueber der Kassette (Spalt, durch den Luft an der Kassette vorbei kann: moeglichst klein)
+cart_tab_h = 10;  cart_tab_t = 6;  cart_tab_w = 40;   // Griffasche zum Herausziehen (ragt nach oben in die Deckeltasche)
+
 /* [Kammer] */
-inner_w   = 168;    // Innenbreite der Kammer (Kassette 166 + Spiel)
-inner_h   = 157;    // Innenhoehe der Kammer (Kassette 151 + Boden/Spiel)
+inner_w   = c_w + 2;  // Innenbreite der Kammer (Kassette + Spiel)
+inner_h   = c_h + cart_head;  // Innenhoehe der Kammer (Kassette + kleiner Spalt oben, verbleibender Umgehungsspalt)
 box_wall  = 1.6;    // Wandstaerke Rahmen (Original 4 mm; Druckzeit ist fast proportional zur Wandstaerke)
 frame_t   = 12;     // Kragen (Deckelauflage) seitlich ueber die Wand hinaus
 collar_h  = 20;     // Hoehe des Kragens unter der Deckelauflage
 box_w     = inner_w + 2*box_wall;
 box_h     = inner_h + 2*box_wall;
 
-slot_cartridge = 13;   // Fach Kassette
+slot_cartridge = c_d + 1;   // Fach Kassette
 slot_divider   = 2;    // Anschlagrahmen zwischen Kassette und G4
 slot_g4        = 23;   // Fach G4-Vlies
 filter_slot    = slot_cartridge + slot_divider + slot_g4;
@@ -62,10 +74,6 @@ join_screw_z     = [38, 118];   // Hoehen der Verbindungsschrauben (je an beiden
 in_pipe_id   = 100.0;  // Aussendurchmesser des glatten Stutzens (einlass_typ = "stutzen")
 in_tube_len  = 20.0;   // Stutzenlaenge
 in_tube_wall = 2.0;   // Stutzenwand (Innendurchmesser 96)
-
-/* [Kassette] */
-c_w = 166.0;  c_h = 151.0;  c_d = 12.0;  c_wall = 2.0;  c_lip = 5.0;  cart_grid_t = 4;
-cart_tab_h = 14;  cart_tab_t = 6;  cart_tab_w = 40;   // Griffasche zum Herausziehen (ragt nach oben in die Deckeltasche)
 
 /* [Deckel] */
 lid_t      = 12;     // Gesamtdicke (Hoehe der Auflage, Scharnier- und Verschlusshoehe)
@@ -140,7 +148,7 @@ module rahmen() {
                 rotate([-90, 0, 0]) cylinder(d = latch_hole_dia, h = latch_hole_depth + 0.1);
         // Schraubloecher fuer die Zapfen (M3), je Seite
         for (xs = [5, RL - 5]) for (z = join_screw_z)
-            translate([xs, -1, z]) rotate([-90, 0, 0]) cylinder(d = join_screw_d, h = box_w + 2, $fn = 24);
+            for (y0 = [-1, box_w - box_wall - 0.1]) translate([xs, y0, z]) rotate([-90, 0, 0]) cylinder(d = join_screw_d, h = box_wall + 1.1, $fn = 24);   // nur durch die jeweilige Wand (Sacklochcharakter), keine Durchgangsbohrung durch die Kammer
     }
     // Anschlagrahmen zwischen Kassette und G4 (U-Profil: unten und seitlich 5 mm, oben offen)
     difference() {
@@ -296,8 +304,8 @@ module cartridge() {
     // Griffasche oben: liegt in Druckpose flach auf dem Bett (x = c_d - cart_tab_t ... c_d), Fingerloch als Langloch
     difference() {
         translate([c_d - cart_tab_t, c_w/2 - cart_tab_w/2, c_h - c_wall]) cube([cart_tab_t, cart_tab_w, cart_tab_h + c_wall]);
-        translate([c_d - cart_tab_t - 1, c_w/2, c_h + cart_tab_h/2 + 1]) hull() for (dy = [-9, 9])
-            translate([0, dy, 0]) rotate([0, 90, 0]) cylinder(d = 7, h = cart_tab_t + 2, $fn = 40);
+        translate([c_d - cart_tab_t - 1, c_w/2, c_h + cart_tab_h/2]) hull() for (dy = [-9, 9])
+            translate([0, dy, 0]) rotate([0, 90, 0]) cylinder(d = 5, h = cart_tab_t + 2, $fn = 40);
     }
     intersection() {
         translate([c_d - grid_d, wy0 - 0.1, wz0 - 0.1]) cube([grid_d, ww + 0.2, wh + 0.2]);

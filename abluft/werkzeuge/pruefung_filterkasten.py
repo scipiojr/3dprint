@@ -49,7 +49,7 @@ import re
 def par(n):
     m = re.search(rf"(?:^|;)\s*{n}\s*=\s*([-0-9.]+)\s*;", txt, re.M); return float(m.group(1))
 wand, rand = par("box_wall"), par("frame_t")
-inner_w = par("filter_w") + 2 * par("c_wall") + 2 + 2      # = c_w + 2
+inner_w = par("filter_w") + 2 * par("c_wall") + 2 + 0.6      # = c_w + 0.6
 inner_h = math.ceil(par("filter_l") / par("filter_n") + 2 * par("c_wall") + 1.3) + par("cart_head")   # = c_h + cart_head
 box_w, box_h = inner_w + 2 * wand, inner_h + 2 * wand
 for w in (30, 60, 75):   # ab ca. 85 Grad streift die Deckelkante an der Rahmen-Scharnierkante (9 mm3 bei 90)

@@ -43,7 +43,7 @@ cart_head = 1.5;   // Luft ueber der Kassette (Spalt, durch den Luft an der Kass
 cart_tab_h = 10;  cart_tab_t = 6;  cart_tab_w = 40;   // Griffasche zum Herausziehen (ragt nach oben in die Deckeltasche)
 
 /* [Kammer] */
-inner_w   = c_w + 2;  // Innenbreite der Kammer (Kassette + Spiel)
+inner_w   = c_w + 0.6;  // Innenbreite der Kammer (Kassette + 0,3 mm Spiel je Seite: Spalt neben der Kassette moeglichst klein)
 inner_h   = c_h + cart_head;  // Innenhoehe der Kammer (Kassette + kleiner Spalt oben, verbleibender Umgehungsspalt)
 box_wall  = 1.6;    // Wandstaerke Rahmen (Original 4 mm; Druckzeit ist fast proportional zur Wandstaerke)
 frame_t   = 12;     // Kragen (Deckelauflage) seitlich ueber die Wand hinaus
@@ -51,7 +51,7 @@ collar_h  = 20;     // Hoehe des Kragens unter der Deckelauflage
 box_w     = inner_w + 2*box_wall;
 box_h     = inner_h + 2*box_wall;
 
-slot_cartridge = c_d_max + 1;   // Fach Kassette
+slot_cartridge = c_d_max + 3;   // Kassette + 0,5 mm vorn + 2,5 mm Platz fuer den Deckeldamm hinter der Kassette   // Fach Kassette
 slot_divider   = 2;    // Anschlagrahmen zwischen Kassette und G4
 slot_g4        = 23;   // Fach G4-Vlies
 filter_slot    = slot_cartridge + slot_divider + slot_g4;
@@ -86,12 +86,13 @@ lid_t      = 12;     // Gesamtdicke (Hoehe der Auflage, Scharnier- und Verschlus
 lid_plate  = 2.4;      // Deckplatte (Aussenseite)
 lid_rib    = 1.6;    // Rippen-/Wandstaerke
 lid_rim_x  = 6;      // umlaufender Vollrand in x
+lid_dam_t  = 1.6;    // Dicke des Damms hinter der Kassette
 
 /* [Befestigung GH-4001 Verschluss] */
 latch_hole_x = 15;  latch_hole_z = 15;  latch_hole_dia = 2.5;  latch_hole_depth = 10;
 
 /* [Schneidlehre] */
-target_w = 150.6;  mat_h = 162.0;  mat_t = 3.5;  jig_wall = 3.0;
+target_w = inner_h + 1;  mat_h = inner_w + 1;  mat_t = 3.5;  jig_wall = 3.0;   // G4 auf Kammermass +1 mm zugeschnitten (fuellt die Kammer, kein Spalt oben/seitlich)
 
 $fn = 100;
 
@@ -110,6 +111,8 @@ xs_in = (einlass_typ == "magnet") ? fl : in_tube_len;   // Laenge von Flansch bz
 total_len = xs_in + in_cone + RL + out_cone + socket_depth;
 echo(str("Filterkasten: Rahmen ", RL, " x ", box_w + 2*frame_t, " x ", box_h, " mm | Gesamtlaenge montiert ca. ", total_len,
          " mm (Original 151) | Kammer innen ", inner_w, " x ", inner_h));
+
+lid_dam_x0 = sp_in + 0.5 + c_d_max + 0.4;   // Damm beginnt 0,4 mm hinter der Rueckseite der dicksten Kassette (Lagenzahl egal)
 
 // ---------------- Hilfsmodule ----------------
 module quader_zentriert(x, w, h, dx = 0.01) {   // duenne Scheibe im Querschnitt (Breite w in y, Hoehe h in z), Mitte auf der Achse
@@ -285,14 +288,15 @@ module lid() {
             // Lippe: Ring + zwei Querrippen (drueckt das Vlies an, schliesst die Kammer)
             lippenring(-box_wall, 0.1);
             for (y = [yc - 30, yc + 30]) translate([lx0, y - lid_rib/2, -box_wall]) cube([lx1 - lx0, lid_rib, box_wall + 0.1]);
+            // Damm hinter der Kassette: sperrt den Raum ueber der Kassette (Spalt oben, Deckelhohlraum) gegen Vorbeistroemen; Unterkante 0,3 mm ueber der Kassettenoberkante
+            translate([lid_dam_x0, box_wall + 0.3, -(box_wall + cart_head - 0.3)])
+                cube([lid_dam_t, inner_w - 0.6, box_wall + cart_head - 0.3 + lid_t - lid_plate + 0.1]);
             // Scharnierknuckle
             hull() {
                 translate([10.5, box_w, 0]) cube([17, frame_t/2, lid_t]);
                 translate([10.5, box_w + frame_t/2, 0]) rotate([0, 90, 0]) cylinder(d = frame_t, h = 17);
             }
         }
-        // Tasche fuer die Griffasche der Kassette (Rippen weggenommen, Deckplatte bleibt)
-        translate([lx0 + lid_rib, yc - cart_tab_w/2 - 3, -box_wall - 1]) cube([lx1 - lx0 - 2*lid_rib, cart_tab_w + 6, lid_t - lid_plate + box_wall + 1]);
         translate([-1, box_w + frame_t/2, 0]) rotate([0, 90, 0]) cylinder(d = 4.5, h = RL + 2);
         // Aussparungen fuer die Rahmen-Knuckles (x = 0 ... 10 und RL-10 ... RL)
         for (x0 = [-1, RL - 10.25]) translate([x0, box_w + frame_t/2, 0]) rotate([0, 90, 0]) cylinder(d = frame_t + 0.8, h = 11.25, $fn = 60);

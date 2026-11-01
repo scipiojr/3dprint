@@ -8,7 +8,8 @@ ZIEL="${1:-filterkasten}"; [[ $# -gt 0 ]] && shift
 mkdir -p "$ZIEL"
 TEILE=(
   "filterkasten_rahmen.stl|rahmen"
-  "filterkasten_einlass_magnet.stl|einlass"
+  "filterkasten_einlass_stutzen.stl|einlass|einlass_typ=\"stutzen\""
+  "filterkasten_einlass_magnet.stl|einlass|einlass_typ=\"magnet\""
   "filterkasten_auslass_ventilator.stl|auslass"
   "filterkasten_deckel.stl|lid"
   "filterkasten_kassette.stl|cartridge"
@@ -16,8 +17,9 @@ TEILE=(
   "filterkasten_lehre_klemmleiste.stl|jig_clamp"
 )
 export_eins() {
-  local datei="$1" teil="$2"; shift 2
-  openscad -o "$ZIEL/$datei" -D "auswahl=\"$teil\"" "$@" abluft_filterkasten.scad 2>&1 | grep -E "ERROR|WARNING" || true
+  local datei="$1" teil="$2" extra="$3"; shift 3
+  local ex=(); [[ -n "$extra" ]] && ex=(-D "$extra")
+  openscad -o "$ZIEL/$datei" -D "auswahl=\"$teil\"" "${ex[@]}" "$@" abluft_filterkasten.scad 2>&1 | grep -E "ERROR|WARNING" || true
   python3 - "$ZIEL/$datei" <<'PY' || true
 import sys, trimesh
 m = trimesh.load(sys.argv[1]); m.export(sys.argv[1])   # Binaer-STL
@@ -26,8 +28,8 @@ PY
 }
 n=0
 for e in "${TEILE[@]}"; do
-  IFS='|' read -r datei teil <<<"$e"
-  export_eins "$datei" "$teil" "$@" &
+  IFS='|' read -r datei teil extra <<<"$e"
+  export_eins "$datei" "$teil" "$extra" "$@" &
   n=$((n+1)); (( n % 2 == 0 )) && wait
 done
 wait

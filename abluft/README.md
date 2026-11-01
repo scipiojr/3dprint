@@ -238,14 +238,15 @@ Kompakter Filterkasten zwischen dem 100er Schlauch und dem Ventilator: Einschub-
 | Teil (STL in `filterkasten/`) | Inhalt | Druckpose |
 |---|---|---|
 | `filterkasten_rahmen.stl` | Kammer mit Anschlagrahmen, Stützgitter (diagonale Stege), Deckelkragen, Scharnier, Verschluss-Löcher, M3-Löcher für die Zapfen | wie gebaut (Deckelseite oben), 64 × 195 × 166 mm |
-| `filterkasten_einlass_magnet.stl` | **100er Magnetflansch des Systems** (passt auf Schlauchanschluss und auf den Ventilator-Adapter) → Trichter → Zapfen mit Kassettenanschlag | Magnetfläche auf dem Bett, 156 × 168 × 68 mm |
+| `filterkasten_einlass_stutzen.stl` | **Standard:** glatter Stutzen ø100 außen (20 mm lang, 2 mm Wand, Schlauch wird aufgeschoben) → Trichter → Zapfen mit Kassettenanschlag | Stutzenende auf dem Bett, 156 × 168 × 80 mm |
+| `filterkasten_einlass_magnet.stl` | Variante: **100er Magnetflansch des Systems** (passt auf Schlauchanschluss und Ventilator-Adapter) statt Stutzen (`einlass_typ = "magnet"`) | Magnetfläche auf dem Bett, 156 × 168 × 68 mm |
 | `filterkasten_auslass_ventilator.stl` | Trichter → **Ventilator-Muffe** (146,4 mm, O-Ring-Nut und Schraublöcher aus `abluft_ventilator_adapter.scad`) → Zapfen | Muffenmündung auf dem Bett, 156 × 168 × 81 mm |
 | `filterkasten_deckel.stl` | Klappdeckel, hohl (Deckplatte + Rippenraster, Vollrand an Scharnier/Verschluss) mit Lippe | Außenseite unten |
 | `filterkasten_kassette.stl`, `filterkasten_lehre.stl`, `filterkasten_lehre_klemmleiste.stl` | Kassette und Schneidlehre für das Vlies, unverändert | |
 
 - **Zusammenbau:** Einlass und Auslass haben je einen 10 mm langen Steckzapfen (0,25 mm Spiel je Seite), der in den Rahmen geschoben wird. Je vier M3-Schrauben (selbstschneidend, Kernloch im Zapfen) fixieren sie; die Fuge mit Dichtband oder einer Raupe Silikon abdichten. Der Kassettenanschlag sitzt am Ende des Einlass-Zapfens. Das Vlies liegt auf dem Stützgitter im Rahmen.
-- **Ablauf:** Schlauch (100er Magnetflansch) → Einlass → Kassette → G4-Vlies → Gitter → Auslass → Ventilator. Mit `einlass_typ = "stutzen"` gibt es statt des Magnetflanschs wieder den glatten ø100-Stutzen.
-- **Montiert:** 193 × 195 × 172 mm (das Original war 151 mm lang, die Trichter sind für den stützfreien Druck länger geworden).
+- **Ablauf:** Schlauch (100er Magnetflansch) → Einlass → Kassette → G4-Vlies → Gitter → Auslass → Ventilator. Standard ist der glatte ø100-Stutzen aus dem Briefing; mit `einlass_typ = "magnet"` gibt es stattdessen den Magnetflansch.
+- **Maße:** Innenmaß der Kammer 168 × 157 mm (passt zur Kassette 166 × 151); das Außenmaß ist durch dünnere Wände kleiner als im Original (176 × 165), das war so gewünscht. Montiert 205 × 195 × 172 mm (mit Stutzen) (das Original war 151 mm lang, die Trichter sind für den stützfreien Druck länger geworden).
 - **Gemeinsame Bausteine:** Muffe über `fan_muffe_schnitte()` und die `fan_*`/`socket_*`-Parameter der Ventilator-Datei, Magnetflansch über `mag_flange()` der Basis. Parameter des Kastens (Kammermaße, Wandstärken, Zapfen, Trichterlängen, Deckel) stehen in `abluft_filterkasten.scad`. Export: `werkzeuge/export_filterkasten.sh`, Prüfung: `werkzeuge/pruefung_filterkasten.py`.
 
 **Druckzeit (Schätzung mit Slic3r 1.3, 0,4er Düse, 0,28 mm, 3 Umrisse, 15 % Füllung, `werkzeuge/druckzeit.sh`, nur zum Vergleich):**

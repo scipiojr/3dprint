@@ -20,8 +20,8 @@
 
 /* [Export und Ansicht] */
 auswahl = "assembly"; // ["assembly", "rahmen", "einlass", "auslass", "lid", "cartridge", "jig", "jig_clamp"]
-// Einlass: "magnet" = 100er Magnetflansch des Systems, "stutzen" = glatter Rohrstutzen wie im Original
-einlass_typ = "magnet"; // ["magnet", "stutzen"]
+// Einlass: "stutzen" = glatter ø100-Stutzen (20 mm lang, 2 mm Wand, Schlauch wird aufgeschoben), "magnet" = 100er Magnetflansch des Systems
+einlass_typ = "stutzen"; // ["stutzen", "magnet"]
 
 /* [Hidden] */
 include <abluft_ventilator_adapter.scad>   // bringt abluft_system.scad (Basis) und die fan_*/socket_*-Parameter mit
@@ -60,8 +60,8 @@ join_screw_z     = [38, 118];   // Hoehen der Verbindungsschrauben (je an beiden
 
 /* [Einlass Stutzen-Variante] */
 in_pipe_id   = 100.0;  // Aussendurchmesser des glatten Stutzens (einlass_typ = "stutzen")
-in_tube_len  = 20.0;
-in_tube_wall = 2.0;
+in_tube_len  = 20.0;   // Stutzenlaenge
+in_tube_wall = 2.0;   // Stutzenwand (Innendurchmesser 96)
 
 /* [Kassette] */
 c_w = 166.0;  c_h = 151.0;  c_d = 12.0;  c_wall = 2.0;  c_lip = 5.0;
@@ -92,7 +92,8 @@ sp_iw = sp_ow - 2*sp_wall;    sp_ih = sp_oh - 2*sp_wall;      // Innenmasse = Ka
 win_w = c_w - 2*(c_wall + c_lip);   win_h = c_h - 2*(c_wall + c_lip);   // Fenster der Kassette = Anschlagoeffnung
 win_z0 = box_wall + c_wall + c_lip;                                      // Kassette liegt auf dem Boden
 
-total_len = fl + in_cone + RL + out_cone + socket_depth;
+xs_in = (einlass_typ == "magnet") ? fl : in_tube_len;   // Laenge von Flansch bzw. Stutzen bis zum Trichter
+total_len = xs_in + in_cone + RL + out_cone + socket_depth;
 echo(str("Filterkasten: Rahmen ", RL, " x ", box_w + 2*frame_t, " x ", box_h, " mm | Gesamtlaenge montiert ca. ", total_len,
          " mm (Original 151) | Kammer innen ", inner_w, " x ", inner_h));
 
@@ -164,7 +165,8 @@ module rahmen() {
 // ==========================================
 // 2. EINLASS  (lokal: Magnetflaeche bei x = 0 zeigt nach -x, Trichter, Zapfen ab x = xe)
 // ==========================================
-xe_in = fl + in_cone;     // grosses Ende des Trichters
+xe_in = xs_in + in_cone;
+bore_in = (einlass_typ == "magnet") ? stub_bore_d : in_pipe_id - 2*in_tube_wall;   // lichte Weite am Einlass (Stutzen: 96)     // grosses Ende des Trichters
 module einlass() {
     difference() {
         union() {
@@ -173,20 +175,20 @@ module einlass() {
                 translate([0, yc, zc]) rotate([0, 90, 0])
                     mag_flange(fl, n_mag_110, R110, lobe110, body110_r, 90, gr110, groove_depth_mag, stub_bore_r, 0, 0, false, 0, 0, pr110);
             } else {
-                translate([-in_tube_len, yc, zc]) rotate([0, 90, 0]) cylinder(d = in_pipe_id, h = in_tube_len + fl + 0.1);
+                translate([0, yc, zc]) rotate([0, 90, 0]) cylinder(d = in_pipe_id, h = in_tube_len + 0.1);
             }
             // Trichter aussen
             hull() {
-                translate([fl - 0.01, yc, zc]) rotate([0, 90, 0]) cylinder(d = stub_bore_d + 2*cone_wall, h = 0.01);
+                translate([xs_in - 0.01, yc, zc]) rotate([0, 90, 0]) cylinder(d = (einlass_typ == "magnet") ? stub_bore_d + 2*cone_wall : in_pipe_id, h = 0.01);
                 translate([xe_in, yc - sp_ow/2, box_wall + sp_gap]) cube([0.01, sp_ow, sp_oh]);   // aussen = Zapfen-Aussenmass (Trichterwand = sp_wall)
             }
             // Zapfen: Rohr + Anschlagrahmen (letzte "ledge" mm)
             translate([xe_in - 0.01, yc - sp_ow/2, box_wall + sp_gap]) cube([sp_in + 0.01, sp_ow, sp_oh]);
         }
         // Kanal: Bohrung -> Trichter -> Zapfeninnenraum
-        translate([-in_tube_len - 1, yc, zc]) rotate([0, 90, 0]) cylinder(d = stub_bore_d, h = in_tube_len + fl + 1.02, $fn = 240);
+        translate([-1, yc, zc]) rotate([0, 90, 0]) cylinder(d = bore_in, h = xs_in + 1.02, $fn = 240);
         hull() {
-            translate([fl, yc, zc]) rotate([0, 90, 0]) cylinder(d = stub_bore_d, h = 0.01, $fn = 240);
+            translate([xs_in, yc, zc]) rotate([0, 90, 0]) cylinder(d = bore_in, h = 0.01, $fn = 240);
             translate([xe_in, yc - sp_iw/2, box_wall + sp_gap + sp_wall]) cube([0.01, sp_iw, sp_ih]);
         }
         translate([xe_in - 0.02, yc - sp_iw/2, box_wall + sp_gap + sp_wall]) cube([sp_in - ledge + 0.02, sp_iw, sp_ih]);

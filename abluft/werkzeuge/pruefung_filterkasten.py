@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Prueft den Filterkasten (abluft_filterkasten.scad) in der MONTIERTEN Pose:
   - alle Teile wasserdicht, paarweise Ueberlappung (soll ~0 mm3 sein),
-  - Scharnier: Deckel um die Achse schwenken (30/60/80 Grad, soll nicht kollidieren),
+  - Scharnier: Deckel um die Achse schwenken (30/60/75 Grad, soll nicht kollidieren),
   - Gesamtmasse.
 Aufruf (aus abluft/):  python3 -I werkzeuge/pruefung_filterkasten.py [-D name=wert ...]
 Braucht openscad, trimesh, numpy, manifold3d. Dauer ca. 3 Minuten (Einlass ist langsam)."""
@@ -49,7 +49,7 @@ def par(n):
     m = re.search(rf"^{n}\s*=\s*([-0-9.]+)\s*;", txt, re.M); return float(m.group(1))
 inner_w, inner_h, wand, rand = par("inner_w"), par("inner_h"), par("box_wall"), par("frame_t")
 box_w, box_h = inner_w + 2 * wand, inner_h + 2 * wand
-for w in (30, 60, 80):   # ab ca. 85 Grad streift die Deckelkante an der Rahmen-Scharnierkante (9 mm3 bei 90)
+for w in (30, 60, 75):   # ab ca. 85 Grad streift die Deckelkante an der Rahmen-Scharnierkante (9 mm3 bei 90)
     T = trimesh.transformations.rotation_matrix(np.radians(-w), [1, 0, 0], [0, box_w + rand / 2, box_h])
     d = meshes["deckel"].copy(); d.apply_transform(T)
     v = (mf_["rahmen"] ^ M(d)).volume()

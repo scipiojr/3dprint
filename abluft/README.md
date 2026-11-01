@@ -26,6 +26,7 @@ Abluft-Anschluss für einen Laser-Cutter: Eine 5 mm dicke Plexiglasscheibe häng
 | `abluft_verjuengung.scad` | Verjüngung 150 → 100/110 (`part` = funnel, oring150_face) |
 | `abluft_ventilator_adapter.scad` | Ventilator-Muffe mit 100er Magnetflansch (`part` = adapter140, oring_fan, oring110) |
 | `abluft_magnetring.scad` | freie Magnetringe/Deckel zum Anbau an eigene Rohre, Filterkästen usw. (`part` = ring150, ring100, deckel150, deckel100) |
+| `abluft_filterkasten.scad` | Filterkasten (G4-Vlies + Kassette) zwischen 100er Schlauch und Ventilator: Rahmen, Einlass, Auslass, Deckel, Kassette, Schneidlehre → `filterkasten/` |
 | `magnetring_150.stl`, `magnetring_100.stl` | Magnetringe in Standardmaßen (Dicke 8, ohne Schraublöcher) |
 | `durchfuehrung_innen.stl` | Innenscheibe mit Zentrierbund und Gewinderohr (Raumseite) |
 | `durchfuehrung_aussen.stl` | Halteplatte mit Innengewinde (Dachseite), mit Bohrungen für zwei M4-Sicherungsschrauben |
@@ -229,3 +230,34 @@ Variante des Doppelbogens für den Einbau unter einer waagerechten Arbeitsplatte
 - **Übergangskegel:** Am oberen Rohrende verjüngt sich die Bohrung auf 15 mm Länge von Ø100 auf Ø90 (`wk_kegel_l`).
 - Teile (alle wasserdicht, passen in 240×240×250): Teil 1 191 × 157 × 109, Teil 2 109 × 203 × 145, Teil 3 153 × 153 × 23, Teil 4 153 × 153 × 5 mm. Export: `werkzeuge/export_dn110_arbeitsplatte.sh` → `dn110_arbeitsplatte/`.
 - Annahmen: Plattendicke 30 mm, Biegung nach links (`wk_links`). Offen: Standard-Rohrbogen statt Teil 1 (Schenkellänge fehlt); Polung von Ring/Deckel nur nach Regel, nicht erprobt.
+
+## Filterkasten (`abluft_filterkasten.scad`)
+
+Kompakter Filterkasten zwischen dem 100er Schlauch und dem Ventilator: Einschub-Kassette (166 × 151 × 12 mm) plus G4-Vlies (23 mm) in einer Kammer von 168 × 157 mm, Klappdeckel mit Scharnier und GH-4001-Verschluss. Die ursprüngliche Datei (ein Gehäuse, ca. 510 cm³, nur mit sehr vielen Stützen druckbar, ca. 1,5 Tage) wurde für das System umgebaut und für den Druck zerlegt:
+
+| Teil (STL in `filterkasten/`) | Inhalt | Druckpose |
+|---|---|---|
+| `filterkasten_rahmen.stl` | Kammer mit Anschlagrahmen, Stützgitter (diagonale Stege), Deckelkragen, Scharnier, Verschluss-Löcher, M3-Löcher für die Zapfen | wie gebaut (Deckelseite oben), 64 × 195 × 166 mm |
+| `filterkasten_einlass_magnet.stl` | **100er Magnetflansch des Systems** (passt auf Schlauchanschluss und auf den Ventilator-Adapter) → Trichter → Zapfen mit Kassettenanschlag | Magnetfläche auf dem Bett, 156 × 168 × 68 mm |
+| `filterkasten_auslass_ventilator.stl` | Trichter → **Ventilator-Muffe** (146,4 mm, O-Ring-Nut und Schraublöcher aus `abluft_ventilator_adapter.scad`) → Zapfen | Muffenmündung auf dem Bett, 156 × 168 × 81 mm |
+| `filterkasten_deckel.stl` | Klappdeckel, hohl (Deckplatte + Rippenraster, Vollrand an Scharnier/Verschluss) mit Lippe | Außenseite unten |
+| `filterkasten_kassette.stl`, `filterkasten_lehre.stl`, `filterkasten_lehre_klemmleiste.stl` | Kassette und Schneidlehre für das Vlies, unverändert | |
+
+- **Zusammenbau:** Einlass und Auslass haben je einen 10 mm langen Steckzapfen (0,25 mm Spiel je Seite), der in den Rahmen geschoben wird. Je vier M3-Schrauben (selbstschneidend, Kernloch im Zapfen) fixieren sie; die Fuge mit Dichtband oder einer Raupe Silikon abdichten. Der Kassettenanschlag sitzt am Ende des Einlass-Zapfens. Das Vlies liegt auf dem Stützgitter im Rahmen.
+- **Ablauf:** Schlauch (100er Magnetflansch) → Einlass → Kassette → G4-Vlies → Gitter → Auslass → Ventilator. Mit `einlass_typ = "stutzen"` gibt es statt des Magnetflanschs wieder den glatten ø100-Stutzen.
+- **Montiert:** 193 × 195 × 172 mm (das Original war 151 mm lang, die Trichter sind für den stützfreien Druck länger geworden).
+- **Gemeinsame Bausteine:** Muffe über `fan_muffe_schnitte()` und die `fan_*`/`socket_*`-Parameter der Ventilator-Datei, Magnetflansch über `mag_flange()` der Basis. Parameter des Kastens (Kammermaße, Wandstärken, Zapfen, Trichterlängen, Deckel) stehen in `abluft_filterkasten.scad`. Export: `werkzeuge/export_filterkasten.sh`, Prüfung: `werkzeuge/pruefung_filterkasten.py`.
+
+**Druckzeit (Schätzung mit Slic3r 1.3, 0,4er Düse, 0,28 mm, 3 Umrisse, 15 % Füllung, `werkzeuge/druckzeit.sh`, nur zum Vergleich):**
+
+| | Original (ohne Stützen gerechnet) | neu |
+|---|---|---|
+| Gehäuse | 22,8 h (387 cm³) | Rahmen 7,4 h + Einlass 6,2 h + Auslass 6,1 h = 19,7 h (327 cm³) |
+| Deckel | 3,0 h | 3,7 h (60 cm³) |
+| Summe | 25,8 h **plus Stützen** (große Überhänge an Trichtern, Rundteilen und Kragen; so kommt die gemeldete Zeit von 1,5 Tagen zustande) | 23,4 h **ohne Stützen**, drei kleinere Drucke statt eines |
+| mit 0,6er Düse, 0,4 mm Schicht, 2 Umrisse, 10 % Füllung | | ca. 12,4 h (Einlass besser mit 0,4er Düse drucken wegen der Magnettaschen) |
+
+Wo die Zeit herkommt: Bei einem dünnwandigen Kasten bestimmen Wandfläche × Wandstärke das Material; deshalb sind Wände (Original 4 mm, jetzt 1,6 mm), Trichterwände (2 mm), Gitter (6 mm statt 12 mm tief, diagonale Stege statt Vollplatte) und Deckel (hohl statt 12 mm Voll) reduziert. Die Trichter sind so lang, dass ihre Ecken höchstens ca. 50° von der Senkrechten geneigt sind (Einlass 50 mm, Auslass 35 mm); Brücken über Hohlräume sind höchstens 3–10 mm breit.
+
+**Nicht erprobt:** Steifigkeit der 1,6-mm-Wände, Dichtheit der Steckfugen, Passung der Zapfen (0,25 mm Spiel), Scharnier (öffnet ohne Kollision bis ca. 80°), Verschluss GH-4001, Druckqualität der Rautengitter-Stege und der 50°-Trichterecken. Strömung: Trichter sind kurz und die Kammer ist flach (Druckverlust des Vlies/Kassette bestimmt ohnehin).
+

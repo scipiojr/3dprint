@@ -26,6 +26,25 @@ fan_flange_groove = true;   // Dichtungsnut auf dem 110er-Magnetflansch des Adap
 echo(str("Ventilator-Adapter: Muffe ID=", fan_socket_d, " Tiefe=", socket_depth, " Wand=", socket_wall, "  Schulter=", (fan_socket_d - fan_bore_d)/2, "  Hoehe gesamt=", flange110_t + ad_cone_len + socket_depth));
 echo(str("O-Ring Muffe: Schnur ", fan_oring_d, "  Mittenradius=", fan_socket_d / 2 + fan_groove_depth - fan_oring_d / 2, " -> ID=", fan_socket_d + 2 * fan_groove_depth - 2 * fan_oring_d, " AD=", fan_socket_d + 2 * fan_groove_depth, "  Nut: Restwand=", socket_wall - fan_groove_depth));
 
+// Muffen-Schnitte (O-Ring-Nut + Schraubloecher) fuer eine Muffe mit Muendung bei z = zt und Achse +z.
+// Wird vom Ventilator-Adapter und vom Filterkasten benutzt (fuer neue Ventilator-Anschluesse wiederverwenden).
+module fan_muffe_schnitte(zt) {
+    rs_i = fan_socket_d / 2;
+    // O-Ring-Nut in der Muffenwand, Dach unter 45 Grad (ohne Stuetzen druckbar)
+    if (fan_groove) {
+            fw = fan_oring_d + 0.2;
+            zg = zt - fan_groove_from_mouth;
+            rotate_extrude($fn = 240)
+                polygon([[rs_i - 0.2, zg - fw/2], [rs_i + fan_groove_depth, zg - fw/2],
+                         [rs_i + fan_groove_depth, zg + fw/2 - fan_groove_depth], [rs_i - 0.2, zg + fw/2 + 0.2]]);
+    }
+    if (fan_screw_n > 0)
+        for (j = [0 : fan_screw_n - 1])
+            rotate(fan_screw_angle0 + j * 360 / fan_screw_n)
+                translate([rs_i - 1, 0, zt - fan_screw_from_mouth]) rotate([0, 90, 0])
+                    cylinder(d = fan_screw_d, h = socket_wall + 2, $fn = 32);
+}
+
 // Ventilator-Adapter: Magnetflansch (110er Muster) unten auf dem Druckbett, Trichter, Muffe oben
 module part_adapter140() {
     T  = flange110_t;
@@ -41,19 +60,7 @@ module part_adapter140() {
                 polygon([[stub_bore_r, T], [stub_bore_r + ad_cone_wall0, T], [rs_o, zc], [rs_o, zt],
                          [rs_i + socket_chamfer, zt], [rs_i, zt - socket_chamfer], [rs_i, zc], [rb, zc]]);
         }
-        // O-Ring-Nut in der Muffenwand, Dach unter 45 Grad (ohne Stuetzen druckbar)
-        if (fan_groove) {
-            fw = fan_oring_d + 0.2;
-            zg = zt - fan_groove_from_mouth;
-            rotate_extrude($fn = 240)
-                polygon([[rs_i - 0.2, zg - fw/2], [rs_i + fan_groove_depth, zg - fw/2],
-                         [rs_i + fan_groove_depth, zg + fw/2 - fan_groove_depth], [rs_i - 0.2, zg + fw/2 + 0.2]]);
-        }
-        if (fan_screw_n > 0)
-            for (j = [0 : fan_screw_n - 1])
-                rotate(fan_screw_angle0 + j * 360 / fan_screw_n)
-                    translate([rs_i - 1, 0, zt - fan_screw_from_mouth]) rotate([0, 90, 0])
-                        cylinder(d = fan_screw_d, h = socket_wall + 2, $fn = 32);
+        fan_muffe_schnitte(zt);
     }
 }
 

@@ -21,6 +21,7 @@ Arbeitsanweisung und Projektstand für KI-Agenten. Sprache mit der Nutzerin: **D
 | `abluft_durchfuehrung.scad` | `inner`, `nut`, `oring150_plexi`, `assembly` | 150er Durchführung durch das Plexiglas |
 | `abluft_verjuengung.scad` | `funnel`, `oring150_face`, `assembly` | Magnetflansch 150 + Trichter + 110er-Ende (`end110` = magnet/stub/pipe) |
 | `abluft_ventilator_adapter.scad` | `adapter140`, `oring_fan`, `oring110` | Muffe für Ventilator → 100er Magnetflansch; mit einem `ring100` (oder dem Muster aus `mag_flange`) kann jedes Rohr/jeder Filterkasten angeschlossen werden |
+| `abluft_filterkasten.scad` | `auswahl` = assembly, rahmen, einlass, auslass, lid, cartridge, jig, jig_clamp | Filterkasten (siehe Abschnitt unten), include der Ventilator-Datei |
 | `abluft_magnetring.scad` | `ring150`, `ring100`, `deckel150`, `deckel100` | freie Magnetringe (Dicke, Bohrung, Nut, optionale Schraublöcher) zum Anbau an eigene Teile |
 | `abluft_fuss`, `_dn110_winkel`, `_dn110_arbeitsplatte`, `_fensterkanal`, `_ausstroemer_direkt`, `_schraubkappe`, `_ausmesshilfe` | siehe Abschnitte unten | abhängige Konstruktionen (nutzen die Basis; `part="keiner"` darin ist harmlos) |
 
@@ -107,6 +108,18 @@ Ein 110-mm-Abluftschlauch (Laser-Cutter, heiße Rauchluft) soll über magnetisch
 ### Geprüft (Rechenmodell, `werkzeuge/pruefung.py`)
 
 Alle STL wasserdicht; keine Überlappung Innenscheibe/Plexiglas/Halteplatte; Gewinde frei bei ca. 50° Drehspiel (0,56 mm axial); Verjüngung und Referenzadapter (150 auf Halteplatte und unter Innenscheibe, 110 auf Flansch) ohne Überlappung; Ring- und Taschenradien stimmen mit der Referenz überein. Mit abweichenden Dicken (`disc_t = 15`, `nut_t = 18`) wurden nur die Kontrollausgaben (3,6 Gänge) geprüft, nicht der volle Export.
+
+### Filterkasten (`abluft_filterkasten.scad`, Stand 01.11.2026)
+
+- Aus der Nutzer-Datei `abluft_filterkasten.scad` (ein Gehäuse, ca. 1,5 Tage Druck) entstanden. Bindet `abluft_ventilator_adapter.scad` ein (bringt Basis + `fan_*`-Parameter; `part="keiner"` danach). **Aufteilung:** `rahmen` (Kammer, Anschlagrahmen, Gitter, Kragen, Scharnier, Verschluss), `einlass` (100er Magnetflansch des Systems oder Stutzen → Trichter → Zapfen mit Kassettenanschlag), `auslass` (Trichter → Muffe → Zapfen), `lid` (hohl), `cartridge`, `jig`, `jig_clamp`. Steckverbindung Zapfen/Rahmen mit 0,25 mm Spiel und je 4 × M3 (Löcher im Rahmen 3,4, Kernloch im Zapfen 2,5).
+- **Druckposen** sind in `auswahl` eingebaut: Rahmen wie gebaut; Einlass `rotate([0,-90,0])` (Magnetfläche unten); Auslass `rotate([0,90,0])` (Muffenmündung unten, O-Ring-Nut ist nur 1,8 mm tief, die waagerechte Nutdecke überbrückt das); Deckel um 180° gedreht (Außenseite unten, Taschen nach oben offen).
+- **Optimierungsgrund:** Slic3r-Läufe (`werkzeuge/druckzeit.sh`, nur Vergleich): altes Gehäuse 22,8 h ohne Stützen (387 cm³) + Deckel 3,0 h; die Stützen kommen obendrauf. Neu 23,4 h ohne Stützen, mit 0,6er Düse ca. 12 h. **Ehrlich:** Die reine Geometrie spart nur etwa 10 % Material gegenüber dem Original (längere Trichter und Zapfen kosten wieder), der große Gewinn ist der Wegfall der Stützen und die Zerlegung; der zweite große Hebel sind Slicer-Einstellungen (Düse, Schichthöhe, Umrisse).
+- **Entscheidungen:** `box_wall` 1,6 (Original 4), `cone_wall` 2,0, `sp_wall` 2,4, `grid_t` 6 mit diagonalen Stegen (`grid_rib` 1,6, `grid_pitch` 18) statt 12 mm tiefer Rautenplatte, Deckel hohl (`lid_plate` 2,4, Rippen 1,6, Pitch 60). Kammerinnenmaß bleibt 168 × 157 (Kassette 166 × 151). Trichter-Außenmaß am großen Ende = Zapfen-Außenmaß (Trichterwand dort `sp_wall`), dadurch 2,2 mm Stufe zum Rahmen.
+- **Scharnier-Korrektur:** In der Originaldatei kollidierten Rahmen-Knuckles mit der Deckelplatte, und der Deckel-Knuckle lag im Kragen. Jetzt endet die Deckelplatte an der Scharnierachse, beide Seiten haben Aussparungen (Durchmesser `frame_t + 0,8`); öffnet kollisionsfrei bis ca. 80° (bei 90° 9 mm³).
+- **Gemeinsame Bausteine:** In `abluft_ventilator_adapter.scad` gibt es jetzt `fan_muffe_schnitte(zt)` (O-Ring-Nut + Schraublöcher einer Muffe mit Mündung bei z = zt). Alle Ventilator-Anschlüsse sollen sie benutzen.
+- **Falle (Wasserdichtigkeit):** Schneidzylinder, die in einen `mag_flange`-Flansch eingreifen, müssen dieselbe Facettenzahl (`$fn=240`) wie die Bohrung des Flanschs haben, sonst entstehen Nullvolumen-Splitter (`is_watertight` = False trotz "Simple: yes").
+- **Werkzeuge:** `export_filterkasten.sh` (7 STL nach `filterkasten/`), `pruefung_filterkasten.py` (Überlappung in montierter Pose, Scharnierschwenk), `ueberhang.py` (Überhang/Brücken je STL in Druckpose), `druckzeit.sh` (Slic3r-Schätzung; `apt install slic3r`). Wichtig bei Slic3r-Schätzungen: `--small-perimeter-speed` und `--gap-fill-speed` setzen, sonst dominieren die Standardwerte (15–20 mm/s) bei vielen kleinen Löchern.
+- **Offen:** Steifigkeit der 1,6-mm-Wände, Dichtheit der Steckfugen (Dichtband/Silikon vorgesehen, keine Dichtung modelliert), Verschluss GH-4001 (Lochlage aus der Originaldatei übernommen), Lage/Anzahl der M3-Schrauben, Vergleich der Druckzeit mit der tatsächlichen Nutzer-Slicer-Einstellung. Der Lauf "altes Gehäuse mit Stützen" in Slic3r war zu langsam (>25 min), Zahl daher nicht vorhanden.
 
 ### Offen / nicht am Druck geprüft
 

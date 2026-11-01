@@ -149,3 +149,5 @@ Alle STL wasserdicht; keine Überlappung Innenscheibe/Plexiglas/Halteplatte; Gew
 - **Arbeitsplatten-Variante:** `abluft_dn110_arbeitsplatte.scad` setzt Parameter VOR dem `include` (dp_*) und überschreibt `wk_*` danach (Werte hängen nur von dp_* ab, die vor dem include stehen). Teil 2: eine durchgehende Bohrung und 0,3/1 mm Überlappung an Bogenfugen, sonst 4-Flächen-Kanten (nicht wasserdicht).
 - **Kegel/Ring flach:** `wk_kegel_l` im Doppelbogen (Bohrung ri → stub_bore_r am Rohrende); Arbeitsplatten-Variante: wk_v = (dp_ring_aufl − dp_lippe) − dp_zc − Rc. Standard-Rohrbogen statt Teil 1 ist angeboten, aber nicht gebaut (Bogenmaße fehlen).
 - **Versenkt + Deckel:** dp_flaeche_h (Magnetflaeche relativ zur Plattenoberseite) muss VOR dem include stehen (Auswertung an der ersten Zuweisung!). wk_ring_rund/wk_deckel_t im Doppelbogen; Teil 4 = Deckel.
+
+- Filterkasten Auslass: Der aeussere Startkreis des Trichters (`fan_socket_d + 2`) ueberlappt die Muffenwand, sonst blieb zwischen Trichter und 140er-Muffe eine offene Schulter (r 72 bis 73,2 mm). Der Auslass ist jetzt ein geschlossener Koerper.

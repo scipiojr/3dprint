@@ -211,7 +211,7 @@ module auslass() {
         union() {
             hull() {
                 translate([0, yc - sp_ow/2, box_wall + sp_gap]) cube([0.01, sp_ow, sp_oh]);
-                translate([xm - 0.01, yc, zc]) rotate([0, 90, 0]) cylinder(d = fan_bore_d + 2*cone_wall, h = 0.01);
+                translate([xm - 0.01, yc, zc]) rotate([0, 90, 0]) cylinder(d = fan_socket_d + 2, h = 0.01);   // ueberlappt Muffenwand (Innenradius +1), schliesst die Schulter
             }
             translate([xm - 0.01, yc, zc]) rotate([0, 90, 0]) cylinder(r = rs_o, h = socket_depth + 0.01);
             translate([-sp_out, yc - sp_ow/2, box_wall + sp_gap]) cube([sp_out + 0.01, sp_ow, sp_oh]);

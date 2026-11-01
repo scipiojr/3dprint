@@ -73,7 +73,7 @@ Alle Teile in der gezeigten Pose drucken (nicht drehen), KEINE Stuetzen, kein Br
  Teile: 1 Rahmen, 2 Einlass (Stutzen), 3 Auslass (Ventilator-Muffe), 4 Deckel, 5 Kassette,
  6 Schneidlehre + 7 Klemmleiste (fuer das Metallgitter), 8 O-Ring Muffe aus TPU (separater Druck, anderes Filament).
  Mit 0,6-mm-Duese, 0,4 mm Schicht, 2 Umrisse, 10 % Fuellung ca. halbe Druckzeit (Einlass Magnetvariante besser mit 0,4).
- Montage: Einlass und Auslass in den Rahmen stecken, je 4 x M3 (selbstschneidend) einschrauben, Fuge abdichten;
+ Montage: Einlass und Auslass in den Rahmen einrasten (Rastwulst/-nut, 0,55 mm Eingriff), dann Fuge verkleben bzw. abdichten;
  Scharnierstift 4 mm; zwei Kniehebelverschluesse GH-4001 (Sacklöcher 2,5 mm).
 """
 

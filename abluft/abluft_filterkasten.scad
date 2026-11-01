@@ -3,7 +3,7 @@
 //  OpenSCAD 2021.01 oder neuer.   Baut auf dem Abluft-System auf (Basis + Ventilator-Datei).
 //
 //  Statt eines 510-cm3-Gehaeuses mit sehr vielen Stuetzen (ca. 1,5 Tage) besteht der Kasten jetzt aus
-//  drei stuetzfrei druckbaren Gehaeuseteilen, die ineinandergesteckt und mit je 4 M3-Schrauben fixiert werden:
+//  drei stuetzfrei druckbaren Gehaeuseteilen, die ineinandergesteckt, eingerastet (Rastwulst und -nut, keine Schrauben) und verklebt werden:
 //
 //    rahmen    Filterrahmen: Kammer fuer Kassette + G4-Vlies, Stuetzgitter, Deckelkragen, Scharnier, Verschluss
 //    einlass   Einlass: 100er Magnetflansch des Systems (passt auf Schlauchanschluss / Ventilator-Adapter)
@@ -69,9 +69,12 @@ sp_gap    = 0.25;   // Spiel je Seite zwischen Zapfen und Rahmeninnenseite
 ledge     = 3;      // Dicke des Kassettenanschlags am Einlass-Zapfen
 in_cone   = 50;     // axiale Laenge des Einlass-Trichters (stuetzfrei druckbar: Ecken ca. 50 Grad von der Senkrechten)
 out_cone  = 35;     // axiale Laenge des Auslass-Trichters (stuetzfrei: max. ca. 50 Grad)
-join_screw_d     = 3.4;    // Durchgangsloch M3 im Rahmen
-join_pilot_d     = 2.5;    // Kernloch M3 (selbstschneidend) im Zapfen
-join_screw_z     = [38, 118];   // Hoehen der Verbindungsschrauben (je an beiden Seitenwaenden)
+// Einrastverbindung Zapfen/Rahmen (keine Schrauben, keine Durchbrueche: luftdicht, danach verkleben)
+snap_h  = 0.8;     // Hoehe der Rastwulst im Rahmen (Zapfen liegt sp_gap = 0,25 mm von der Wand: Eingriff = snap_h - sp_gap)
+snap_l1 = 2.4;     // lange Einlaufschraege (ca. 18 Grad), Druckrichtung: stuetzfrei
+snap_l2 = 0.8;     // steile Rueckseite (45 Grad): haelt, im Zapfen als Nutdach ebenfalls stuetzfrei
+snap_x  = 2.0;     // Abstand der Wulst-Vorderkante vom Rahmenende
+snap_c  = 0.15;    // Spiel zwischen Wulst und Nut
 
 /* [Einlass Stutzen-Variante] */
 in_pipe_id   = 100.0;  // Aussendurchmesser des glatten Stutzens (einlass_typ = "stutzen")
@@ -117,6 +120,17 @@ module quader_unten(x, w, h, dx = 0.01) {       // Scheibe, Unterkante z = 0 (Ka
     translate([x, yc - w/2, 0]) cube([dx, w, h]);
 }
 
+// Rastwulst (positiv) bzw. Nut (negativ, mit Spiel d) auf drei Seiten (links, rechts, Boden; die Decke bleibt frei, dort waere ein Wulst nur mit Stuetzen druckbar).
+// xa = Beginn der langen Schraege, sg = +1 (Schraege steigt zu +x) oder -1; Profil in (x, Hoehe ueber der Rahmeninnenwand)
+module snap_ring(xa, sg, d = 0) {
+    pts = [[0, 0], [snap_l1, snap_h], [snap_l1 + snap_l2, 0]];
+    module prof() offset(delta = d) polygon([for (p = pts) [xa + sg * p[0], p[1]]]);
+    z0 = box_wall;  zl = inner_h;
+    translate([0, box_wall, z0 - 0.1]) linear_extrude(height = zl + 0.1) prof();                       // linke Wand (y = box_wall)
+    translate([0, box_w - box_wall, z0 - 0.1]) linear_extrude(height = zl + 0.1) mirror([0, 1]) prof();   // rechte Wand
+    translate([0, box_w - box_wall + 0.1, z0]) rotate([90, 0, 0]) linear_extrude(height = inner_w + 0.2) prof();   // Boden
+}
+
 // ==========================================
 // 1. RAHMEN  (x = 0 ... RL, Boden z = 0, Deckelseite oben)
 // ==========================================
@@ -149,15 +163,15 @@ module rahmen() {
         for (ix = [-1, 1]) for (iz = [-1, 1])
             translate([RL/2 + ix * latch_hole_x/2, -frame_t - 0.1, box_h - 12 + iz * latch_hole_z/2])
                 rotate([-90, 0, 0]) cylinder(d = latch_hole_dia, h = latch_hole_depth + 0.1);
-        // Schraubloecher fuer die Zapfen (M3), je Seite
-        for (xs = [5, RL - 5]) for (z = join_screw_z)
-            for (y0 = [-1, box_w - box_wall - 0.1]) translate([xs, y0, z]) rotate([-90, 0, 0]) cylinder(d = join_screw_d, h = box_wall + 1.1, $fn = 24);   // nur durch die jeweilige Wand (Sacklochcharakter), keine Durchgangsbohrung durch die Kammer
     }
     // Anschlagrahmen zwischen Kassette und G4 (U-Profil: unten und seitlich 5 mm, oben offen)
     difference() {
         translate([sp_in + slot_cartridge, box_wall - 0.1, box_wall - 0.1]) cube([slot_divider, inner_w + 0.2, inner_h + 0.1]);
         translate([sp_in + slot_cartridge - 0.1, box_wall + 5, box_wall + 5]) cube([slot_divider + 0.2, inner_w - 10, inner_h]);
     }
+    // Rastwuelste fuer die Zapfen von Einlass und Auslass
+    snap_ring(snap_x, 1);
+    snap_ring(RL - snap_x, -1);
     // Stuetzgitter fuer das G4-Vlies: diagonale Stege (45 Grad, ohne Stuetzen druckbar), nur so tief wie noetig
     intersection() {
         translate([grid_x, box_wall - 0.1, box_wall - 0.1]) cube([grid_t, inner_w + 0.2, inner_h + 0.1]);
@@ -206,9 +220,8 @@ module einlass() {
         translate([xe_in - 0.02, yc - sp_iw/2, box_wall + sp_gap + sp_wall]) cube([sp_in - ledge + 0.02, sp_iw, sp_ih]);
         // Fenster im Anschlagrahmen
         translate([xe_in + sp_in - ledge - 0.01, yc - win_w/2, win_z0]) cube([ledge + 0.1, win_w, win_h]);
-        // M3-Kernloecher im Zapfen
-        for (z = join_screw_z)
-            translate([xe_in + 5, -1, z]) rotate([-90, 0, 0]) cylinder(d = join_pilot_d, h = box_w + 2, $fn = 24);
+        // Rastnut im Zapfen (Rahmen-x = lokal - xe_in)
+        translate([xe_in, 0, 0]) snap_ring(snap_x, 1, snap_c);
     }
 }
 
@@ -223,7 +236,7 @@ module auslass() {
         union() {
             hull() {
                 translate([0, yc - sp_ow/2, box_wall + sp_gap]) cube([0.01, sp_ow, sp_oh]);
-                translate([xm - 0.01, yc, zc]) rotate([0, 90, 0]) cylinder(d = fan_socket_d + 2, h = 0.01);   // ueberlappt Muffenwand (Innenradius +1), schliesst die Schulter
+                translate([xm - 0.01, yc, zc]) rotate([0, 90, 0]) cylinder(d = 2*rs_o, h = 0.01);   // Aussenkontur laeuft tangential in den Muffenzylinder (keine Stufe aussen)
             }
             translate([xm - 0.01, yc, zc]) rotate([0, 90, 0]) cylinder(r = rs_o, h = socket_depth + 0.01);
             translate([-sp_out, yc - sp_ow/2, box_wall + sp_gap]) cube([sp_out + 0.01, sp_ow, sp_oh]);
@@ -235,13 +248,15 @@ module auslass() {
             translate([xm, yc, zc]) rotate([0, 90, 0]) cylinder(d = fan_bore_d, h = 0.01);
         }
         // Muffe innen + Einfuehrfase, O-Ring-Nut, Schraubloecher (gemeinsam mit dem Ventilator-Adapter)
-        translate([xm - 0.01, yc, zc]) rotate([0, 90, 0]) cylinder(d = fan_socket_d, h = socket_depth + 0.02);
+        // Schulter als 45-Grad-Kegel (statt ebener Stufe): glatter Uebergang ø fan_bore_d -> Muffe, ohne Bruecke druckbar
+        ss = (fan_socket_d - fan_bore_d) / 2;
+        translate([xm - 0.01, yc, zc]) rotate([0, 90, 0]) cylinder(d1 = fan_bore_d, d2 = fan_socket_d, h = ss + 0.01);
+        translate([xm + ss - 0.01, yc, zc]) rotate([0, 90, 0]) cylinder(d = fan_socket_d, h = socket_depth - ss + 0.02);
         translate([xt - socket_chamfer, yc, zc]) rotate([0, 90, 0])
             cylinder(d1 = fan_socket_d, d2 = fan_socket_d + 2*socket_chamfer + 0.1, h = socket_chamfer + 0.1);
         translate([xt, yc, zc]) rotate([0, 90, 0]) fan_muffe_schnitte(0);
-        // M3-Kernloecher im Zapfen
-        for (z = join_screw_z)
-            translate([-5, -1, z]) rotate([-90, 0, 0]) cylinder(d = join_pilot_d, h = box_w + 2, $fn = 24);
+        // Rastnut im Zapfen (Rahmen-x = lokal + RL)
+        translate([-RL, 0, 0]) snap_ring(RL - snap_x, -1, snap_c);
     }
 }
 

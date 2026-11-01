@@ -161,3 +161,5 @@ Alle STL wasserdicht; keine Überlappung Innenscheibe/Plexiglas/Halteplatte; Gew
 - Lagenzahl: `filter_lagen` (Standard 1) bestimmt nur c_d der Kassette; Kammer/Rahmen nutzen `filter_lagen_max` (3, Fach 16 mm). Kassette sitzt gitterseitig am Anschlagrahmen (x-Offset `c_d_max - c_d`). Mehr Lagen = nur Kassette neu drucken. `pruefung_filterkasten.py filter_lagen=3` testet eine Variante.
 
 - Zapfenverbindung: keine Schrauben mehr (luftdicht, Nutzerwunsch). Umlaufender Rastwulst im Rahmen (`snap_*`, links/rechts/Boden, Decke ohne wegen Ueberhang), Nut im Zapfen mit Spiel `snap_c`; `snap_ring()` erzeugt beides. Pruefung: Rahmen/Einlass und Rahmen/Auslass ueberlappungsfrei. Haltekraft nicht erprobt, Fuge wird verklebt. `join_screw_*` entfernt.
+
+- Deckel: Rippenraster (lid_pitch) entfernt (3,6 cm3, kein Nutzen: Steifigkeit kommt vom Lippenring, den zwei Querrippen und dem Vollrand). Falls der Deckel in der Praxis durchbiegt: Querrippe in der Mitte ergaenzen.

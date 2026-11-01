@@ -85,7 +85,6 @@ in_tube_wall = 2.0;   // Stutzenwand (Innendurchmesser 96)
 lid_t      = 12;     // Gesamtdicke (Hoehe der Auflage, Scharnier- und Verschlusshoehe)
 lid_plate  = 2.4;      // Deckplatte (Aussenseite)
 lid_rib    = 1.6;    // Rippen-/Wandstaerke
-lid_pitch  = 60;     // Rippenabstand
 lid_rim_x  = 6;      // umlaufender Vollrand in x
 
 /* [Befestigung GH-4001 Verschluss] */
@@ -279,8 +278,6 @@ module lid() {
                 // Taschen von der Innenseite (z = 0) her: Deckplatte lid_plate bleibt, Rippenraster + Lippenring bleiben stehen
                 difference() {
                     translate([lid_rim_x, 0, -1]) cube([RL - 2*lid_rim_x, box_w, lid_t - lid_plate + 1]);
-                    for (x = [lid_rim_x + lid_pitch/2 : lid_pitch : RL - lid_rim_x - 1]) translate([x - lid_rib/2, -1, -2]) cube([lid_rib, box_w + 2, lid_t + 4]);
-                    for (y = [lid_pitch/2 : lid_pitch : box_w - 1]) translate([-1, y - lid_rib/2, -2]) cube([RL + 2, lid_rib, lid_t + 4]);
                     lippenring(-2, lid_t + 2);
                     for (y = [yc - 30, yc + 30]) translate([lx0, y - lid_rib/2, -2]) cube([lx1 - lx0, lid_rib, lid_t + 4]);
                 }

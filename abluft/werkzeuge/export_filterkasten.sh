@@ -15,6 +15,7 @@ TEILE=(
   "filterkasten_kassette.stl|cartridge|filter_lagen=1"
   "filterkasten_kassette_2lagen.stl|cartridge|filter_lagen=2"
   "filterkasten_kassette_3lagen.stl|cartridge|filter_lagen=3"
+  "filterkasten_fuesse.stl|fuesse"
   "filterkasten_lehre.stl|jig"
   "filterkasten_lehre_klemmleiste.stl|jig_clamp"
 )

@@ -19,7 +19,7 @@
 // =====================================================================
 
 /* [Export und Ansicht] */
-auswahl = "assembly"; // ["assembly", "rahmen", "einlass", "auslass", "lid", "cartridge", "jig", "jig_clamp"]
+auswahl = "assembly"; // ["assembly", "rahmen", "einlass", "auslass", "lid", "cartridge", "jig", "jig_clamp", "fuesse"]
 // Einlass: "stutzen" = glatter ø100-Stutzen (20 mm lang, 2 mm Wand, Schlauch wird aufgeschoben), "magnet" = 100er Magnetflansch des Systems
 einlass_typ = "stutzen"; // ["stutzen", "magnet"]
 
@@ -47,6 +47,9 @@ inner_w   = c_w + 0.6;  // Innenbreite der Kammer (Kassette + 0,3 mm Spiel je Se
 inner_h   = c_h + cart_head;  // Innenhoehe der Kammer (Kassette + kleiner Spalt oben, verbleibender Umgehungsspalt)
 box_wall  = 1.6;    // Wandstaerke Rahmen (Original 4 mm; Druckzeit ist fast proportional zur Wandstaerke)
 frame_t   = 12;     // Kragen (Deckelauflage) seitlich ueber die Wand hinaus
+foot_h    = 10;     // optionale Fuesschen unter dem Rahmen (Hoehe in mm, 0 = ohne); eigene Teile, werden untergeklebt (am Rahmen haengend waere der Boden eine 10-mm-Bruecke)
+foot_size = 24;     // Kantenlaenge je Fuss (4 Stueck, jeweils in den Ecken)
+foot_inset = 6;     // Abstand der Fuesse vom Rand
 collar_h  = 20;     // Hoehe des Kragens unter der Deckelauflage
 box_w     = inner_w + 2*box_wall;
 box_h     = inner_h + 2*box_wall;
@@ -322,6 +325,19 @@ module lid() {
     }
 }
 
+// Fuesschen: kleines Quader mit leichter Fase unten, flach druckbar; 4 Stueck (Positionen foot_inset/foot_size)
+module fuss() {
+    c = min(1.5, foot_h / 4);
+    hull() {
+        translate([c, c, 0]) cube([foot_size - 2*c, foot_size - 2*c, 0.01]);
+        translate([0, 0, c]) cube([foot_size, foot_size, foot_h - c]);
+    }
+}
+module fuss_positionen() {
+    for (fx = [foot_inset, RL - foot_inset - foot_size], fy = [foot_inset, box_w - foot_inset - foot_size])
+        translate([fx, fy, -foot_h]) children();
+}
+
 // ==========================================
 // 5. KASSETTE, 6. LEHRE (unveraendert)
 // ==========================================
@@ -376,10 +392,12 @@ if (auswahl == "einlass") translate([box_h, 0, 0]) rotate([0, -90, 0]) einlass()
 if (auswahl == "auslass") translate([0, 0, out_cone + socket_depth]) rotate([0, 90, 0]) auslass();
 if (auswahl == "lid") translate([0, box_w + frame_t, lid_t]) rotate([180, 0, 0]) lid();
 if (auswahl == "cartridge") translate([0, 0, c_d]) rotate([0, 90, 0]) cartridge();
+if (auswahl == "fuesse") for (i = [0 : 3]) translate([i * (foot_size + 6), 0, 0]) fuss();
 if (auswahl == "jig") jig();
 if (auswahl == "jig_clamp") jig_clamp();
 if (auswahl == "assembly") {
     color("steelblue") rahmen();
+    if (foot_h > 0) color("dimgray") fuss_positionen() fuss();
     color("seagreen") translate([-xe_in, 0, 0]) einlass();
     color("orange") translate([RL, 0, 0]) auslass();
     color("lightgray") translate([0, 0, box_h + 10]) lid();

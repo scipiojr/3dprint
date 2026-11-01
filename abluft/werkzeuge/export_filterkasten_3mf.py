@@ -17,9 +17,10 @@ TEILE = [
     ("filterkasten/filterkasten_auslass_ventilator.stl", "3 Auslass Ventilator-Muffe", "PETG"),
     ("filterkasten/filterkasten_deckel.stl", "4 Deckel", "PETG"),
     ("filterkasten/filterkasten_kassette.stl", "5 Kassette", "PETG"),
-    ("filterkasten/filterkasten_lehre.stl", "6 Schneidlehre", "PETG"),
-    ("filterkasten/filterkasten_lehre_klemmleiste.stl", "7 Klemmleiste", "PETG"),
-    ("dichtung_ventilator_muffe_tpu.stl", "8 O-Ring Muffe - TPU, separat drucken", "TPU"),
+    ("filterkasten/filterkasten_fuesse.stl", "6 Fuesse 4x (optional, unterkleben)", "PETG"),
+    ("filterkasten/filterkasten_lehre.stl", "7 Schneidlehre", "PETG"),
+    ("filterkasten/filterkasten_lehre_klemmleiste.stl", "8 Klemmleiste", "PETG"),
+    ("dichtung_ventilator_muffe_tpu.stl", "9 O-Ring Muffe - TPU, separat drucken", "TPU"),
 ]
 ABSTAND = 280          # Teile liegen je eine Druckplatte auseinander (im Slicer auf Platten verteilen)
 SPALTEN = 3

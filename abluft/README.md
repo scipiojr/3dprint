@@ -251,6 +251,8 @@ Kompakter Filterkasten zwischen dem 100er Schlauch und dem Ventilator: Einschub-
 - **Maße:** Innenmaß der Kammer 168 × 157 mm (passt zur Kassette 166 × 151); das Außenmaß ist durch dünnere Wände kleiner als im Original (176 × 165), das war so gewünscht. Montiert 205 × 195 × 172 mm (mit Stutzen) (das Original war 151 mm lang, die Trichter sind für den stützfreien Druck länger geworden).
 - **Gemeinsame Bausteine:** Muffe über `fan_muffe_schnitte()` und die `fan_*`/`socket_*`-Parameter der Ventilator-Datei, Magnetflansch über `mag_flange()` der Basis. Parameter des Kastens (Kammermaße, Wandstärken, Zapfen, Trichterlängen, Deckel) stehen in `abluft_filterkasten.scad`. Export: `werkzeuge/export_filterkasten.sh`, Prüfung: `werkzeuge/pruefung_filterkasten.py`.
 
+**Dateien für den Filterkasten:** `filterkasten/filterkasten_alle.3mf` enthält alles in Druckpose (Rahmen, Einlass Stutzen, Auslass Ventilator-Muffe, Deckel, Kassette, Schneidlehre, Klemmleiste, O-Ring Muffe aus TPU) mit den empfohlenen PETG-Einstellungen (0,4er Düse, 0,28 mm, 3 Umrisse, 15 % Gyroid, 240/80 °C, ohne Stützen); die Teile liegen je eine Druckplatte auseinander und werden im Slicer auf Platten verteilt. Der TPU-Ring ist ein separater Druck mit anderem Filament. Erzeugt mit `werkzeuge/export_filterkasten_3mf.py`. Dazu Hardware: 8 × M3 selbstschneidend, Scharnierstift ø4, 2 × GH-4001.
+
 **Druckzeit (Schätzung mit Slic3r 1.3, 0,4er Düse, 0,28 mm, 3 Umrisse, 15 % Füllung, `werkzeuge/druckzeit.sh`, nur zum Vergleich):**
 
 | | Original (ohne Stützen gerechnet) | neu |

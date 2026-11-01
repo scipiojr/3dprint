@@ -12,7 +12,9 @@ TEILE=(
   "filterkasten_einlass_magnet.stl|einlass|einlass_typ=\"magnet\""
   "filterkasten_auslass_ventilator.stl|auslass"
   "filterkasten_deckel.stl|lid"
-  "filterkasten_kassette.stl|cartridge"
+  "filterkasten_kassette.stl|cartridge|filter_lagen=1"
+  "filterkasten_kassette_2lagen.stl|cartridge|filter_lagen=2"
+  "filterkasten_kassette_3lagen.stl|cartridge|filter_lagen=3"
   "filterkasten_lehre.stl|jig"
   "filterkasten_lehre_klemmleiste.stl|jig_clamp"
 )

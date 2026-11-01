@@ -19,7 +19,7 @@ POSEN = {
     "einlass": "translate([-xe_in, 0, 0]) einlass()",
     "auslass": "translate([RL, 0, 0]) auslass()",
     "deckel": "translate([0, 0, box_h]) lid()",
-    "kassette": "translate([sp_in + 0.5, (box_w - c_w) / 2, box_wall]) cartridge()",
+    "kassette": "translate([sp_in + 0.5 + (c_d_max - c_d), (box_w - c_w) / 2, box_wall]) cartridge()",
 }
 M = lambda m: mf.Manifold(mf.Mesh(vert_properties=np.array(m.vertices, dtype=np.float32), tri_verts=np.array(m.faces, dtype=np.uint32)))
 

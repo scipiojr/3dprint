@@ -30,12 +30,15 @@ part = "keiner";          // Ausgabe der eingebundenen Dateien aus (muss nach de
 /* [Funkenfilter und Kassette] */
 // Funkenfilter: vhbw Metallfettfilter (Bauknecht 481948048232), 452 x 160 x 3,5 mm, in 3 Streifen geschnitten und gestapelt
 filter_l = 452;  filter_w = 160;  filter_t = 3.5;   // Maße des Metallfilters
-filter_n = 3;                                        // Streifen = Lagen im Stapel (nur 2 Schnitte, Breite 160 bleibt ungeschnitten)
+filter_n = 3;                                        // Streifen, in die der Filter geschnitten wird (452/3 = 150,7; Breite 160 bleibt ungeschnitten)
+filter_lagen = 1;                                    // Lagen im Stapel (1..filter_lagen_max): nur die Kassette neu drucken, wenn das geaendert wird
+filter_lagen_max = 3;                                // Kammer ist fuer so viele Lagen ausgelegt (aendern erfordert neuen Rahmen)
 c_wall = 2.0;  c_lip = 5.0;  cart_grid_t = 4;
 strip_l = filter_l / filter_n;                       // Streifenlaenge 150,7
 c_w = filter_w + 2*c_wall + 2;                       // 166: Filterbreite + Waende + 1 mm Spiel je Seite
 c_h = ceil(strip_l + 2*c_wall + 1.3);                // 156: Streifenlaenge + Waende + Spiel
-c_d = filter_n*filter_t + 0.5 + cart_grid_t;         // 15: Stapel + Spiel + Gitter
+c_d = filter_lagen*filter_t + 0.5 + cart_grid_t;     // 8 bei 1 Lage: Stapel + Spiel + Gitter
+c_d_max = filter_lagen_max*filter_t + 0.5 + cart_grid_t;   // 15: bestimmt das Kassettenfach
 cart_head = 1.5;   // Luft ueber der Kassette (Spalt, durch den Luft an der Kassette vorbei kann: moeglichst klein)
 cart_tab_h = 10;  cart_tab_t = 6;  cart_tab_w = 40;   // Griffasche zum Herausziehen (ragt nach oben in die Deckeltasche)
 
@@ -48,7 +51,7 @@ collar_h  = 20;     // Hoehe des Kragens unter der Deckelauflage
 box_w     = inner_w + 2*box_wall;
 box_h     = inner_h + 2*box_wall;
 
-slot_cartridge = c_d + 1;   // Fach Kassette
+slot_cartridge = c_d_max + 1;   // Fach Kassette
 slot_divider   = 2;    // Anschlagrahmen zwischen Kassette und G4
 slot_g4        = 23;   // Fach G4-Vlies
 filter_slot    = slot_cartridge + slot_divider + slot_g4;
@@ -347,5 +350,5 @@ if (auswahl == "assembly") {
     color("seagreen") translate([-xe_in, 0, 0]) einlass();
     color("orange") translate([RL, 0, 0]) auslass();
     color("lightgray") translate([0, 0, box_h + 10]) lid();
-    color("khaki") translate([sp_in + 0.5, (box_w - c_w)/2, box_wall]) cartridge();
+    color("khaki") translate([sp_in + 0.5 + (c_d_max - c_d), (box_w - c_w)/2, box_wall]) cartridge();
 }

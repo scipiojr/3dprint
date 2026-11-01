@@ -85,8 +85,10 @@ in_tube_wall = 2.0;   // Stutzenwand (Innendurchmesser 96)
 lid_t      = 12;     // Gesamtdicke (Hoehe der Auflage, Scharnier- und Verschlusshoehe)
 lid_plate  = 2.4;      // Deckplatte (Aussenseite)
 lid_rib    = 1.6;    // Rippen-/Wandstaerke
-lid_rim_x  = 6;      // umlaufender Vollrand in x
-lid_dam_t  = 1.6;    // Dicke des Damms hinter der Kassette
+lid_rim_x  = 9;      // umlaufender Vollrand in x
+lid_dam_t  = 1.6;
+seal_d     = 3;      // Dichtschnur (EPDM-Schaum-Rundschnur) Durchmesser: 3 oder 5 mm
+seal_in    = 1.2;    // Lage der Dichtung hinten (y) ab Rahmen-Aussenwand    // Dicke des Damms hinter der Kassette
 
 /* [Befestigung GH-4001 Verschluss] */
 latch_hole_x = 15;  latch_hole_z = 15;  latch_hole_dia = 2.5;  latch_hole_depth = 10;
@@ -112,6 +114,8 @@ total_len = xs_in + in_cone + RL + out_cone + socket_depth;
 echo(str("Filterkasten: Rahmen ", RL, " x ", box_w + 2*frame_t, " x ", box_h, " mm | Gesamtlaenge montiert ca. ", total_len,
          " mm (Original 151) | Kammer innen ", inner_w, " x ", inner_h));
 
+hinge_y = box_w + 9;     // Scharnierachse: nach aussen versetzt, damit hinten Platz fuer die Dichtschnur bleibt
+hinge_z = 6;             // Achse liegt hinge_z ueber der Auflageebene (kein Ausschnitt im Rahmen noetig, Auflageflaeche bleibt eben)
 lid_dam_x0 = sp_in + 0.5 + c_d_max + 0.4;   // Damm beginnt 0,4 mm hinter der Rueckseite der dicksten Kassette (Lagenzahl egal)
 
 // ---------------- Hilfsmodule ----------------
@@ -150,17 +154,16 @@ module rahmen() {
             // Scharnier-Knuckles
             for (x0 = [0, RL - 10])
                 hull() {
-                    translate([x0, box_w, box_h - 0.1]) cube([10, frame_t, 0.1]);
-                    translate([x0, box_w + frame_t/2, box_h]) rotate([0, 90, 0]) cylinder(d = frame_t, h = 10);
+                    translate([x0, box_w + 5.5, box_h - 0.1]) cube([10, frame_t - 5.5, 0.1]);
+                    translate([x0, hinge_y, box_h + hinge_z]) rotate([0, 90, 0]) cylinder(d = frame_t, h = 10);
                 }
         }
         // Kammer durchgehend
         translate([-1, box_wall, box_wall]) cube([RL + 2, inner_w, inner_h]);
         // Deckeloeffnung ueber beiden Faechern (Kassette wird von oben eingesteckt)
         translate([sp_in, box_wall, box_h - box_wall - 1]) cube([filter_slot, inner_w, box_wall + collar_h]);
-        // Scharnierbohrung und Aussparung fuer den Deckel-Knuckle (Deckel: x = 10,5 ... 27,5)
-        translate([-1, box_w + frame_t/2, box_h]) rotate([0, 90, 0]) cylinder(d = 4.5, h = RL + 2);
-        translate([10, box_w + frame_t/2, box_h]) rotate([0, 90, 0]) cylinder(d = frame_t + 0.8, h = 18, $fn = 60);
+        // Scharnierbohrung (Deckel-Knuckle x = 10,5 ... 27,5 liegt ueber der Ebene, kein Ausschnitt noetig)
+        translate([-1, hinge_y, box_h + hinge_z]) rotate([0, 90, 0]) cylinder(d = 4.5, h = RL + 2);
         // Verschluss-Sacklöcher (Seite -y)
         for (ix = [-1, 1]) for (iz = [-1, 1])
             translate([RL/2 + ix * latch_hole_x/2, -frame_t - 0.1, box_h - 12 + iz * latch_hole_z/2])
@@ -265,6 +268,15 @@ module auslass() {
 // ==========================================
 // 4. KLAPPDECKEL  (Auflageebene z = 0, Platte z = 0..lid_t, Lippe z < 0)
 // ==========================================
+
+// Dichtungsnut (Unterseite des Deckels, offen nach oben beim Druck): abgerundetes Rechteck um die Oeffnung
+module seal_groove() {
+    gw = seal_d * 1.3;  gd = seal_d * 0.55;  r = 6;
+    x0 = lid_rim_x / 2;  x1 = RL - lid_rim_x / 2;  y0 = -frame_t / 2;  y1 = box_w + seal_in;
+    module bahn() offset(r = r) offset(delta = -r) translate([x0, y0]) square([x1 - x0, y1 - y0]);   // Mittellinie der Schnur
+    translate([0, 0, -1]) linear_extrude(height = gd + 1)
+        difference() { offset(delta = gw/2) bahn(); offset(delta = -gw/2) bahn(); }
+}
 module lid() {
     lx0 = sp_in + 0.5;  lx1 = sp_in + filter_slot - 0.5;           // Lippe ueber den Faechern
     ly0 = box_wall + 0.5;  ly1 = box_w - box_wall - 0.5;
@@ -293,13 +305,18 @@ module lid() {
                 cube([lid_dam_t, inner_w - 0.6, box_wall + cart_head - 0.3 + lid_t - lid_plate + 0.1]);
             // Scharnierknuckle
             hull() {
-                translate([10.5, box_w, 0]) cube([17, frame_t/2, lid_t]);
-                translate([10.5, box_w + frame_t/2, 0]) rotate([0, 90, 0]) cylinder(d = frame_t, h = 17);
+                translate([10.5, box_w, 0]) cube([17, hinge_y - box_w, lid_t]);
+                translate([10.5, hinge_y, hinge_z]) rotate([0, 90, 0]) cylinder(d = frame_t, h = 17);
             }
         }
-        translate([-1, box_w + frame_t/2, 0]) rotate([0, 90, 0]) cylinder(d = 4.5, h = RL + 2);
+        translate([-1, hinge_y, hinge_z]) rotate([0, 90, 0]) cylinder(d = 4.5, h = RL + 2);
         // Aussparungen fuer die Rahmen-Knuckles (x = 0 ... 10 und RL-10 ... RL)
-        for (x0 = [-1, RL - 10.25]) translate([x0, box_w + frame_t/2, 0]) rotate([0, 90, 0]) cylinder(d = frame_t + 0.8, h = 11.25, $fn = 60);
+        for (x0 = [-1, RL - 10.25]) hull() {
+            translate([x0, box_w + 5.5 - 0.4, -1]) cube([11.25, frame_t - 5.5 + 0.8, 1.01]);
+            translate([x0, hinge_y, hinge_z]) rotate([0, 90, 0]) cylinder(d = frame_t + 0.8, h = 11.25, $fn = 60);
+        }
+        // Nut fuer die Dichtschnur (Rundschnur), umlaufend um die Kammeroeffnung in der Auflageflaeche des Deckels
+        seal_groove();
         for (ix = [-1, 1]) translate([RL/2 + ix * latch_hole_x/2, -frame_t - 0.1, 6])
             rotate([-90, 0, 0]) cylinder(d = latch_hole_dia, h = latch_hole_depth + 0.1);
     }

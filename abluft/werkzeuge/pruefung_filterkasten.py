@@ -53,7 +53,7 @@ inner_w = par("filter_w") + 2 * par("c_wall") + 2 + 0.6      # = c_w + 0.6
 inner_h = math.ceil(par("filter_l") / par("filter_n") + 2 * par("c_wall") + 1.3) + par("cart_head")   # = c_h + cart_head
 box_w, box_h = inner_w + 2 * wand, inner_h + 2 * wand
 for w in (30, 60, 75):   # ab ca. 85 Grad streift die Deckelkante an der Rahmen-Scharnierkante (9 mm3 bei 90)
-    T = trimesh.transformations.rotation_matrix(np.radians(-w), [1, 0, 0], [0, box_w + rand / 2, box_h])
+    T = trimesh.transformations.rotation_matrix(np.radians(-w), [1, 0, 0], [0, box_w + 9, box_h + 6])
     d = meshes["deckel"].copy(); d.apply_transform(T)
     v = (mf_["rahmen"] ^ M(d)).volume()
     print(f"Scharnier {w:3d} Grad: Kollision {v:.1f} mm3"); fehler += abs(v) > 0.5

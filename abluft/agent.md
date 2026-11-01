@@ -152,4 +152,4 @@ Alle STL wasserdicht; keine Überlappung Innenscheibe/Plexiglas/Halteplatte; Gew
 
 - Filterkasten Auslass: Der aeussere Startkreis des Trichters (`fan_socket_d + 2`) ueberlappt die Muffenwand, sonst blieb zwischen Trichter und 140er-Muffe eine offene Schulter (r 72 bis 73,2 mm). Der Auslass ist jetzt ein geschlossener Koerper.
 
-- Kassette: Kreuz (3 mm Stege) und Griffsteg (T, 40x2 mm) entfernt, weil sie als Brücke bzw. freistehende Rippe nicht sauber druckbar waren. Das Vlies stuetzt das Gitter im Rahmen. Falls ein Griff gewuenscht ist: als Lasche mit max. 45 Grad Schraege ausserhalb des Rahmens ergaenzen.
+- Kassette: geschlossener Rahmen (Wand 2 mm rundum, 5 mm Rand auf der Gitterseite) mit 4 mm tiefem Diagonalgitter (`grid_rib`, `grid_pitch`, `cart_grid_t`), das das Vlies traegt. Druckpose: Gitterseite auf dem Bett, damit alle Stege aufliegen (keine Bruecken, keine Ueberhaenge). Das fruehere Kreuz und der T-Griffsteg sind entfallen. Kein Griff vorhanden.

@@ -10,7 +10,7 @@
 //              -> Trichter -> Steckzapfen mit Kassettenanschlag
 //    auslass   Auslass: Trichter -> Ventilator-Muffe (146,4 mm, O-Ring-Nut, Schraublöcher wie Ventilator-Adapter)
 //    lid       Klappdeckel: hohl (Boden + Rippen) statt 12 mm Vollmaterial; liegt zum Druck auf der Aussenseite
-//    cartridge Filterkassette (Rahmen mit Schlitz, ohne Kreuz und Griffsteg)      jig, jig_clamp   Schneidlehre fuer das Vlies (unveraendert)
+//    cartridge Filterkassette (geschlossener Rahmen mit Traeger-Diagonalgitter)      jig, jig_clamp   Schneidlehre fuer das Vlies (unveraendert)
 //
 //  Druckpose: alle Teile liegen so, dass sie ohne Stuetzen druckbar sind (siehe README/agent.md):
 //    rahmen: wie gebaut (Deckelseite oben) | einlass: Magnetflaeche auf dem Bett | auslass: Muffenmuendung auf dem Bett
@@ -64,7 +64,7 @@ in_tube_len  = 20.0;   // Stutzenlaenge
 in_tube_wall = 2.0;   // Stutzenwand (Innendurchmesser 96)
 
 /* [Kassette] */
-c_w = 166.0;  c_h = 151.0;  c_d = 12.0;  c_wall = 2.0;  c_lip = 5.0;
+c_w = 166.0;  c_h = 151.0;  c_d = 12.0;  c_wall = 2.0;  c_lip = 5.0;  cart_grid_t = 4;
 
 /* [Deckel] */
 lid_t      = 12;     // Gesamtdicke (Hoehe der Auflage, Scharnier- und Verschlusshoehe)
@@ -279,13 +279,22 @@ module lid() {
 // 5. KASSETTE, 6. LEHRE (unveraendert)
 // ==========================================
 module cartridge() {
-    // reiner Rahmen mit Schlitz: kein Kreuz, kein Griffsteg (nicht druckbar; das Stuetzgitter im Rahmen haelt das Vlies)
-    union() {
-        difference() {
-            cube([c_d, c_w, c_h]);
-            translate([c_wall, c_wall, c_wall]) cube([c_d - 2*c_wall, c_w - 2*c_wall, c_h + 1]);
-            translate([-1, c_wall + c_lip, c_wall + c_lip]) cube([c_d + 2, c_w - 2*(c_wall + c_lip), c_h]);
-        }
+    // geschlossener Rahmen (Wand c_wall rundum), offen zum Einlegen des Vlieses (x = 0),
+    // auf der Rueckseite (x = c_d) ein Rand c_lip und ein Diagonalgitter, das das Vlies traegt.
+    // Druckpose: Gitterseite auf dem Bett -> Stege liegen auf, keine Bruecken.
+    grid_d = cart_grid_t;
+    wy0 = c_wall + c_lip;  wz0 = c_wall + c_lip;
+    ww = c_w - 2*wy0;  wh = c_h - 2*wz0;
+    difference() {
+        cube([c_d, c_w, c_h]);
+        translate([-1, c_wall, c_wall]) cube([c_d + 1 - grid_d, c_w - 2*c_wall, c_h - 2*c_wall]);   // Vliestasche
+        translate([c_d - grid_d - 1, wy0, wz0]) cube([grid_d + 2, ww, wh]);                         // Fenster
+    }
+    intersection() {
+        translate([c_d - grid_d, wy0 - 0.1, wz0 - 0.1]) cube([grid_d, ww + 0.2, wh + 0.2]);
+        union() for (sgn = [-1, 1]) for (k = [-20 : 20])
+            translate([c_d - grid_d/2, c_w/2, c_h/2 + k * grid_pitch * sqrt(2)])
+                rotate([sgn * 45, 0, 0]) cube([grid_d, 3*c_w, grid_rib], center = true);
     }
 }
 module jig() {
@@ -313,7 +322,7 @@ if (auswahl == "rahmen") rahmen();
 if (auswahl == "einlass") translate([box_h, 0, 0]) rotate([0, -90, 0]) einlass();
 if (auswahl == "auslass") translate([0, 0, out_cone + socket_depth]) rotate([0, 90, 0]) auslass();
 if (auswahl == "lid") translate([0, box_w + frame_t, lid_t]) rotate([180, 0, 0]) lid();
-if (auswahl == "cartridge") rotate([0, -90, 0]) cartridge();
+if (auswahl == "cartridge") translate([0, 0, c_d]) rotate([0, 90, 0]) cartridge();
 if (auswahl == "jig") jig();
 if (auswahl == "jig_clamp") jig_clamp();
 if (auswahl == "assembly") {

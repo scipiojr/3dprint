@@ -10,7 +10,7 @@
 //              -> Trichter -> Steckzapfen mit Kassettenanschlag
 //    auslass   Auslass: Trichter -> Ventilator-Muffe (146,4 mm, O-Ring-Nut, Schraublöcher wie Ventilator-Adapter)
 //    lid       Klappdeckel: hohl (Boden + Rippen) statt 12 mm Vollmaterial; liegt zum Druck auf der Aussenseite
-//    cartridge Filterkassette (geschlossener Rahmen mit Traeger-Diagonalgitter)      jig, jig_clamp   Schneidlehre fuer das Vlies (unveraendert)
+//    cartridge Filterkassette (geschlossener Rahmen mit Traeger-Diagonalgitter und Griffasche)      jig, jig_clamp   Schneidlehre fuer das Vlies (unveraendert)
 //
 //  Druckpose: alle Teile liegen so, dass sie ohne Stuetzen druckbar sind (siehe README/agent.md):
 //    rahmen: wie gebaut (Deckelseite oben) | einlass: Magnetflaeche auf dem Bett | auslass: Muffenmuendung auf dem Bett
@@ -65,6 +65,7 @@ in_tube_wall = 2.0;   // Stutzenwand (Innendurchmesser 96)
 
 /* [Kassette] */
 c_w = 166.0;  c_h = 151.0;  c_d = 12.0;  c_wall = 2.0;  c_lip = 5.0;  cart_grid_t = 4;
+cart_tab_h = 14;  cart_tab_t = 6;  cart_tab_w = 40;   // Griffasche zum Herausziehen (ragt nach oben in die Deckeltasche)
 
 /* [Deckel] */
 lid_t      = 12;     // Gesamtdicke (Hoehe der Auflage, Scharnier- und Verschlusshoehe)
@@ -267,6 +268,8 @@ module lid() {
                 translate([10.5, box_w + frame_t/2, 0]) rotate([0, 90, 0]) cylinder(d = frame_t, h = 17);
             }
         }
+        // Tasche fuer die Griffasche der Kassette (Rippen weggenommen, Deckplatte bleibt)
+        translate([lx0 + lid_rib, yc - cart_tab_w/2 - 3, -box_wall - 1]) cube([lx1 - lx0 - 2*lid_rib, cart_tab_w + 6, lid_t - lid_plate + box_wall + 1]);
         translate([-1, box_w + frame_t/2, 0]) rotate([0, 90, 0]) cylinder(d = 4.5, h = RL + 2);
         // Aussparungen fuer die Rahmen-Knuckles (x = 0 ... 10 und RL-10 ... RL)
         for (x0 = [-1, RL - 10.25]) translate([x0, box_w + frame_t/2, 0]) rotate([0, 90, 0]) cylinder(d = frame_t + 0.8, h = 11.25, $fn = 60);
@@ -289,6 +292,12 @@ module cartridge() {
         cube([c_d, c_w, c_h]);
         translate([-1, c_wall, c_wall]) cube([c_d + 1 - grid_d, c_w - 2*c_wall, c_h - 2*c_wall]);   // Vliestasche
         translate([c_d - grid_d - 1, wy0, wz0]) cube([grid_d + 2, ww, wh]);                         // Fenster
+    }
+    // Griffasche oben: liegt in Druckpose flach auf dem Bett (x = c_d - cart_tab_t ... c_d), Fingerloch als Langloch
+    difference() {
+        translate([c_d - cart_tab_t, c_w/2 - cart_tab_w/2, c_h - c_wall]) cube([cart_tab_t, cart_tab_w, cart_tab_h + c_wall]);
+        translate([c_d - cart_tab_t - 1, c_w/2, c_h + cart_tab_h/2 + 1]) hull() for (dy = [-9, 9])
+            translate([0, dy, 0]) rotate([0, 90, 0]) cylinder(d = 7, h = cart_tab_t + 2, $fn = 40);
     }
     intersection() {
         translate([c_d - grid_d, wy0 - 0.1, wz0 - 0.1]) cube([grid_d, ww + 0.2, wh + 0.2]);

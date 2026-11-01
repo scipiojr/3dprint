@@ -233,6 +233,8 @@ Variante des Doppelbogens für den Einbau unter einer waagerechten Arbeitsplatte
 
 ## Filterkasten (`abluft_filterkasten.scad`)
 
+![Filterkasten montiert: Längsschnitt, Draufsicht-Schnitt, Querschnitt](bilder/filterkasten.png)
+
 Kompakter Filterkasten zwischen dem 100er Schlauch und dem Ventilator: Einschub-Kassette (166 × 151 × 12 mm) plus G4-Vlies (23 mm) in einer Kammer von 168 × 157 mm, Klappdeckel mit Scharnier und GH-4001-Verschluss. Die ursprüngliche Datei (ein Gehäuse, ca. 510 cm³, nur mit sehr vielen Stützen druckbar, ca. 1,5 Tage) wurde für das System umgebaut und für den Druck zerlegt:
 
 | Teil (STL in `filterkasten/`) | Inhalt | Druckpose |

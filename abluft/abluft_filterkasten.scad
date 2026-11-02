@@ -87,7 +87,7 @@ in_tube_len  = 20.0;   // Stutzenlaenge
 in_tube_wall = 2.0;   // Stutzenwand (Innendurchmesser 96)
 
 /* [Deckel] */
-lid_t      = 12;     // Gesamtdicke (Hoehe der Auflage, Scharnier- und Verschlusshoehe)
+lid_t      = 18.5;   // Gesamtdicke (Stirnflaeche traegt den Einhaengehaken 17,8 mm voll; vorher 12)
 lid_plate  = 2.4;      // Deckplatte (Aussenseite)
 lid_rib    = 1.6;    // Rippen-/Wandstaerke
 lid_rim_x  = 9;      // umlaufender Vollrand in x
@@ -112,13 +112,14 @@ lt_pivot_above = 3;     // Schwenkachse liegt so weit unter der oberen Blechkant
 // Einhaengehaken (am Deckel): Blech 24 breit, 17,8 hoch inkl. umgebogener Fangleiste unten; Loecher ø6,4 im Abstand 14 oben im Blech
 lt_keep_w = 24;  lt_keep_h = 17.8;  lt_keep_dx = 14;
 lt_keep_hole_top = 5.5; // Lochmitte unter der Oberkante des Hakens
-lt_keep_top = 11.5;     // Oberkante des Hakens ueber der Trennebene (Deckel ist lid_t = 12 hoch: buendig minus 0,5)
+lt_keep_top = lid_t - 0.5;   // Oberkante des Hakens ueber der Trennebene (Haken liegt komplett auf der Stirnflaeche des Deckels, unten 0,2 mm ueber der Trennebene)
 lt_lip_h = 4;           // Fangleiste: Auflage des Hakenbuegels ueber der Unterkante des Hakens
 lt_reach = 30;          // geschlossen: Abstand Fangleiste (Buegel) -> Schwenkachse. ANNAHME: Haken ist verstellbar (max. 59,5 mm lang), hier nachmessen/einstellen
 lt_plate_hole_d = 6.4;
 // Schrauben in die Kunststoffteile: Kernloch fuer selbstschneidende 5-mm-Schrauben (Blechloch 6,4 laesst Kopf/Scheibe zu)
 lt_pilot_d = 4.2;  lt_pilot_depth = 10;   // Tiefe < Polsterdicke 12 (sonst Durchbruch in die Kammer)
 lt_pad_w = 24;          // Breite des Verschlusspolsters am Rahmen (Kragen wird dort nach unten verlaengert, 45 Grad darunter)
+lt_block_w = 32;  lt_block_d = 14;   // Deckel: massiver Block um die Schrauben des Einhaengehakens (Breite in x, Tiefe in y ab der Stirnflaeche)
 lt_ghost = false;       // Beschlaege als Platzhalter in "assembly" anzeigen (Kontrolle der Lage)
 
 /* [Schneidlehre] */
@@ -343,6 +344,8 @@ module lid() {
             // Damm hinter der Kassette: sperrt den Raum ueber der Kassette (Spalt oben, Deckelhohlraum) gegen Vorbeistroemen; Unterkante 0,3 mm ueber der Kassettenoberkante
             translate([lid_dam_x0, box_wall + 0.3, -(ceil_t + cart_head - 0.3)])
                 cube([lid_dam_t, inner_w - 0.6, ceil_t + cart_head - 0.3 + lid_t - lid_plate + 0.1]);
+            // massiver Block um die Verschlussschrauben (sonst Rippenraster/Hohlraum)
+            translate([RL/2 - lt_block_w/2, -frame_t, 0]) cube([lt_block_w, frame_t + lt_block_d, lid_t]);
             // Scharnierknuckle
             hull() {
                 translate([10.5, box_w, 0]) cube([17, hinge_y - box_w, lid_t]);

@@ -169,3 +169,8 @@ Alle STL wasserdicht; keine Überlappung Innenscheibe/Plexiglas/Halteplatte; Gew
 - Deckeldichtung: Rundschnur-Nut (`seal_groove()`, `seal_d` 3 oder 5, `seal_in`) in der Deckelunterseite, Mittellinie abgerundetes Rechteck x = lid_rim_x/2 ... RL - lid_rim_x/2, y = -frame_t/2 ... box_w + seal_in. Dafuer Scharnier umgebaut: Achse `hinge_y` = box_w + 9, `hinge_z` = 6 ueber der Auflageebene, Rahmen-Knuckles als Tuerme ab y = box_w + 5,5 (hull zur Achse), Rahmen-Ausschnitt fuer den Deckel-Knuckle entfaellt, `lid_rim_x` = 9 (Rand fuer die Nut). pruefung_filterkasten.py dreht um (box_w + 9, box_h + 6). Korrektur: cart_head ist 1,5 (nicht 0,6), Kammer 157,5 hoch.
 
 - Fuesschen: `foot_h` (10, 0 = aus), `foot_size`, `foot_inset`; Teil `fuesse` (4 Stueck auf einer Platte), nur in der Assembly gezeigt, nicht am Rahmen (Bruecke beim Druck). Rahmen bleibt unveraendert, z=0 ist die Unterseite des Rahmens ohne Fuesse.
+
+## Offene Punkte fuer den naechsten Chat (Stand 2. Nov.)
+- **TPU-Dichtungen zu hoch (Nutzer-Rueckmeldung):** O-Ringe Ø4 (`oring_d`) in Nuten mit `groove_depth_mag` = 1,3 und `groove_w` = 4,2 stehen 2,7 mm ueber (bei zwei Nuten 35 % Quetschung, 95A TPU zu steif). Entscheidung offen: (1) `groove_depth_mag` auf ca. 1,8 bis 1,9 und `groove_w` auf ca. 4,8, oder (2) `oring_d` = 3 mit angepasster Nut, oder (3) weicheres TPU. Danach `export_alle.sh` und alle `dichtung_*_tpu.stl` neu. Nachfragen, welche Dichtung (100er, 110er, alle) betroffen ist.
+- Deckelschnur Ø3/Ø5 (`seal_d`), Fuesschen (`foot_h`), Rastverbindung, Innendamm: alles nur geometrisch geprueft, nichts gedruckt.
+- Kleinkram aus frueheren Staenden: `bohrloch.png` neu zeichnen, Standard-Rohrbogen statt Teil 1, Tag `abluft-v1` (Push 403), Verschlusslochpaar unten am Schraegenrand.

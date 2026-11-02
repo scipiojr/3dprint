@@ -45,7 +45,7 @@ cart_tab_h = 10;  cart_tab_t = 6;  cart_tab_w = 40;   // Griffasche zum Herauszi
 /* [Kammer] */
 inner_w   = c_w + 0.6;  // Innenbreite der Kammer (Kassette + 0,3 mm Spiel je Seite: Spalt neben der Kassette moeglichst klein)
 inner_h   = c_h + cart_head;  // Innenhoehe der Kammer (Kassette + kleiner Spalt oben, verbleibender Umgehungsspalt)
-roof_extra = 2;     // Decke ueber den Zapfen um so viel dicker als box_wall (nach OBEN: Deckelauflage steigt; nach unten ist durch die Zapfen kein Platz)
+roof_extra = 0;     // Decke ueber den Zapfen um so viel dicker als box_wall (nach OBEN: Deckelauflage steigt; nach unten ist durch die Zapfen kein Platz)
 box_wall  = 1.6;    // Wandstaerke Rahmen (Original 4 mm; Druckzeit ist fast proportional zur Wandstaerke)
 frame_t   = 12;     // Kragen (Deckelauflage) seitlich ueber die Wand hinaus
 foot_h    = 10;     // optionale Fuesschen unter dem Rahmen (Hoehe in mm, 0 = ohne); eigene Teile, werden untergeklebt (am Rahmen haengend waere der Boden eine 10-mm-Bruecke)

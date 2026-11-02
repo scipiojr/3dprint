@@ -91,7 +91,8 @@ lid_t      = 18.5;   // Gesamtdicke (Stirnflaeche traegt den Einhaengehaken 17,8
 lid_plate  = 2.4;      // Deckplatte (Aussenseite)
 lid_rib    = 1.6;    // Rippen-/Wandstaerke
 lid_rim_x  = 9;      // umlaufender Vollrand in x
-lid_dam_t  = 1.6;
+lid_dam_t  = 2.0;    // Dicke des Damms in x (Auflage fuer das Schaumband; mehr Platz gibt es nicht: Kassettenlasche davor, Anschlagrahmen dahinter)
+dam_foam   = 2;      // Schaumband (selbstklebend, EPDM/PE, 2 mm breit x 2 mm dick) auf der Dammunterkante: dichtet gegen die Kassettenoberkante, Pressung ca. 40 %
 seal_d     = 3;      // Dichtschnur (EPDM-Schaum-Rundschnur) Durchmesser: 3 oder 5 mm
 seal_in    = 1.2;    // Lage der Dichtung hinten (y) ab Rahmen-Aussenwand    // Dicke des Damms hinter der Kassette
 
@@ -350,8 +351,8 @@ module lid() {
             lippenring(-ceil_t, 0.1);
             for (y = [yc - 30, yc + 30]) translate([lx0, y - lid_rib/2, -ceil_t]) cube([lx1 - lx0, lid_rib, ceil_t + 0.1]);
             // Damm hinter der Kassette: sperrt den Raum ueber der Kassette (Spalt oben, Deckelhohlraum) gegen Vorbeistroemen; Unterkante 0,3 mm ueber der Kassettenoberkante
-            translate([lid_dam_x0, box_wall + 0.3, -(ceil_t + cart_head - 0.3)])
-                cube([lid_dam_t, inner_w - 0.6, ceil_t + cart_head - 0.3 + lid_t - lid_plate + 0.1]);
+            translate([lid_dam_x0, box_wall + 0.3, -(ceil_t + cart_head - 0.6*dam_foam)])
+                cube([lid_dam_t, inner_w - 0.6, ceil_t + cart_head - 0.6*dam_foam + lid_t - lid_plate + 0.1]);
             // massiver Block um die Verschlussschrauben (sonst Rippenraster/Hohlraum)
             translate([RL/2 - lt_block_w/2, -frame_t, 0]) cube([lt_block_w, frame_t + lt_block_d, lid_t]);
             // Scharnierglieder des Deckels (zwischen den Rahmengliedern)

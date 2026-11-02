@@ -150,6 +150,14 @@ echo(str("Filterkasten: Rahmen ", RL, " x ", box_w + 2*frame_t, " x ", box_h, " 
          " mm (Original 151) | Kammer innen ", inner_w, " x ", inner_h));
 
 hinge_y = box_w + 9;     // Scharnierachse: nach aussen versetzt, damit hinten Platz fuer die Dichtschnur bleibt
+// Scharnierglieder abwechselnd ueber die ganze Laenge ohne Luecke (Spalt kn_gap): Rahmen | Deckel | Rahmen (Mitte) | Deckel | Rahmen
+kn_end = 10;  kn_mid = 10;  kn_gap = 0.5;
+kn_lid_l = (RL - 2*kn_end - 4*kn_gap - kn_mid) / 2;                     // Laenge je Deckelglied
+kn_lid1 = [kn_end + kn_gap, kn_end + kn_gap + kn_lid_l];                // [x0, x1]
+kn_mid0 = kn_lid1[1] + kn_gap;                                          // Rahmen-Mittelglied beginnt hier
+kn_lid2 = [kn_mid0 + kn_mid + kn_gap, RL - kn_end - kn_gap];
+kn_frame = [[0, kn_end], [kn_mid0, kn_mid0 + kn_mid], [RL - kn_end, RL]];   // Rahmenglieder [x0, x1]
+kn_lid   = [kn_lid1, kn_lid2];
 hinge_z = 6;             // Achse liegt hinge_z ueber der Auflageebene (kein Ausschnitt im Rahmen noetig, Auflageflaeche bleibt eben)
 lid_dam_x0 = sp_in + 0.5 + c_d_max + 0.4;   // Damm beginnt 0,4 mm hinter der Rueckseite der dicksten Kassette (Lagenzahl egal)
 
@@ -189,11 +197,11 @@ module rahmen() {
             // Polster fuer das Befestigungsblech des Verschlusses: senkrechte Flaeche weiter nach unten, darunter 45 Grad zurueck (stuetzfrei)
             translate([RL/2 - lt_pad_w/2, 0, 0]) rotate([90, 0, 90]) linear_extrude(height = lt_pad_w)
                 polygon([[-frame_t, box_h - 5], [-frame_t, lt_pad_bot], [0, lt_pad_bot - frame_t], [3, lt_pad_bot - frame_t], [3, box_h - 5]]);
-            // Scharnier-Knuckles
-            for (x0 = [0, RL - 10])
+            // Scharnier-Knuckles (Rahmenglieder: Enden und Mitte)
+            for (k = kn_frame)
                 hull() {
-                    translate([x0, box_w + 5.5, box_h - 0.1]) cube([10, frame_t - 5.5, 0.1]);
-                    translate([x0, hinge_y, box_h + hinge_z]) rotate([0, 90, 0]) cylinder(d = frame_t, h = 10);
+                    translate([k[0], box_w + 5.5, box_h - 0.1]) cube([k[1] - k[0], frame_t - 5.5, 0.1]);
+                    translate([k[0], hinge_y, box_h + hinge_z]) rotate([0, 90, 0]) cylinder(d = frame_t, h = k[1] - k[0]);
                 }
         }
         // Kammer durchgehend
@@ -203,7 +211,7 @@ module rahmen() {
         // Decke abgetrennt: Kammer ueber die ganze Laenge oben offen, Falz (roof_lap je Seite) fuer die Deckenplatte, buendig mit der Deckelauflage
         if (decke_getrennt)
             translate([-1, box_wall - roof_lap, box_h - roof_t]) cube([RL + 2, inner_w + 2*roof_lap, roof_t + 1]);
-        // Scharnierbohrung (Deckel-Knuckle x = 10,5 ... 27,5 liegt ueber der Ebene, kein Ausschnitt noetig)
+        // Scharnierbohrung (Deckelglieder liegen ueber der Ebene, kein Ausschnitt noetig)
         translate([-1, hinge_y, box_h + hinge_z]) rotate([0, 90, 0]) cylinder(d = 4.5, h = RL + 2);
         // Verschluss: 2 Kernlocher fuer das Befestigungsblech (senkrecht, Abstand lt_base_dy), Mitte RL/2, Seite -y
         for (iz = [-1, 1])
@@ -346,17 +354,18 @@ module lid() {
                 cube([lid_dam_t, inner_w - 0.6, ceil_t + cart_head - 0.3 + lid_t - lid_plate + 0.1]);
             // massiver Block um die Verschlussschrauben (sonst Rippenraster/Hohlraum)
             translate([RL/2 - lt_block_w/2, -frame_t, 0]) cube([lt_block_w, frame_t + lt_block_d, lid_t]);
-            // Scharnierknuckle
-            hull() {
-                translate([10.5, box_w, 0]) cube([17, hinge_y - box_w, lid_t]);
-                translate([10.5, hinge_y, hinge_z]) rotate([0, 90, 0]) cylinder(d = frame_t, h = 17);
-            }
+            // Scharnierglieder des Deckels (zwischen den Rahmengliedern)
+            for (k = kn_lid)
+                hull() {
+                    translate([k[0], box_w, 0]) cube([k[1] - k[0], hinge_y - box_w, lid_t]);
+                    translate([k[0], hinge_y, hinge_z]) rotate([0, 90, 0]) cylinder(d = frame_t, h = k[1] - k[0]);
+                }
         }
         translate([-1, hinge_y, hinge_z]) rotate([0, 90, 0]) cylinder(d = 4.5, h = RL + 2);
-        // Aussparungen fuer die Rahmen-Knuckles (x = 0 ... 10 und RL-10 ... RL)
-        for (x0 = [-1, RL - 10.25]) hull() {
-            translate([x0, box_w + 5.5 - 0.4, -1]) cube([11.25, frame_t - 5.5 + 0.8, 1.01]);
-            translate([x0, hinge_y, hinge_z]) rotate([0, 90, 0]) cylinder(d = frame_t + 0.8, h = 11.25, $fn = 60);
+        // Aussparungen fuer die Rahmenglieder (Enden und Mitte, je 0,25 mm Spiel in x)
+        for (k = kn_frame) let (xa = (k[0] <= 0) ? -1 : k[0] - 0.25, xb = (k[1] >= RL) ? RL + 1 : k[1] + 0.25) hull() {
+            translate([xa, box_w + 5.5 - 0.4, -1]) cube([xb - xa, frame_t - 5.5 + 0.8, 1.01]);
+            translate([xa, hinge_y, hinge_z]) rotate([0, 90, 0]) cylinder(d = frame_t + 0.8, h = xb - xa, $fn = 60);
         }
         // Nut fuer die Dichtschnur (Rundschnur), umlaufend um die Kammeroeffnung in der Auflageflaeche des Deckels
         seal_groove();

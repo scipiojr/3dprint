@@ -15,6 +15,7 @@ TEILE = [
     ("filterkasten/filterkasten_rahmen.stl", "1 Rahmen", "PETG"),
     ("filterkasten/filterkasten_einlass_stutzen.stl", "2 Einlass Stutzen d100", "PETG"),
     ("filterkasten/filterkasten_auslass_ventilator.stl", "3 Auslass Ventilator-Muffe", "PETG"),
+    ("filterkasten/filterkasten_decke.stl", "3b Decke (in den Falz des Rahmens kleben)", "PETG"),
     ("filterkasten/filterkasten_deckel.stl", "4 Deckel", "PETG"),
     ("filterkasten/filterkasten_kassette.stl", "5 Kassette", "PETG"),
     ("filterkasten/filterkasten_fuesse.stl", "6 Fuesse 4x (optional, unterkleben)", "PETG"),
@@ -75,7 +76,7 @@ Alle Teile in der gezeigten Pose drucken (nicht drehen), KEINE Stuetzen, kein Br
  6 Schneidlehre + 7 Klemmleiste (fuer das Metallgitter), 8 O-Ring Muffe aus TPU (separater Druck, anderes Filament).
  Mit 0,6-mm-Duese, 0,4 mm Schicht, 2 Umrisse, 10 % Fuellung ca. halbe Druckzeit (Einlass Magnetvariante besser mit 0,4).
  Montage: Einlass und Auslass in den Rahmen einrasten (Rastwulst/-nut, 0,55 mm Eingriff), dann Fuge verkleben bzw. abdichten;
- Scharnierstift 4 mm; zwei Kniehebelverschluesse GH-4001 (Sacklöcher 2,5 mm).
+ Scharnierstift 4 mm; zwei Kniehebelverschluesse GH-4001 (Kernloecher 4,2 mm, Blechloecher 6,4 mm, 5-mm-Schrauben).
 """
 
 objs = []

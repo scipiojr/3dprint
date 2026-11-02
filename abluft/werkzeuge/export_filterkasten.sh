@@ -2,6 +2,7 @@
 # Exportiert alle Teile des Filterkastens (abluft_filterkasten.scad) in Druckpose nach ./filterkasten/
 # Aufruf (aus dem Ordner abluft/):   werkzeuge/export_filterkasten.sh [zielordner] [-D name=wert ...]
 # Dauer mit OpenSCAD 2021.01: Einlass ca. 1,5 min, Rest je unter 30 s.
+# Einzelne Teile: Umgebungsvariable NUR="rahmen decke lid" (Namen wie in der Spalte "auswahl"); Einlass/Auslass sind gedruckt und bleiben dann unangetastet.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 ZIEL="${1:-filterkasten}"; [[ $# -gt 0 ]] && shift
@@ -11,6 +12,7 @@ TEILE=(
   "filterkasten_einlass_stutzen.stl|einlass|einlass_typ=\"stutzen\""
   "filterkasten_einlass_magnet.stl|einlass|einlass_typ=\"magnet\""
   "filterkasten_auslass_ventilator.stl|auslass"
+  "filterkasten_decke.stl|decke"
   "filterkasten_deckel.stl|lid"
   "filterkasten_kassette.stl|cartridge|filter_lagen=1"
   "filterkasten_kassette_2lagen.stl|cartridge|filter_lagen=2"
@@ -32,6 +34,7 @@ PY
 n=0
 for e in "${TEILE[@]}"; do
   IFS='|' read -r datei teil extra <<<"$e"
+  if [[ -n "${NUR:-}" && " $NUR " != *" $teil "* ]]; then continue; fi
   export_eins "$datei" "$teil" "$extra" "$@" &
   n=$((n+1)); (( n % 2 == 0 )) && wait
 done

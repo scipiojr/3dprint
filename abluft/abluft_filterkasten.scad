@@ -19,7 +19,7 @@
 // =====================================================================
 
 /* [Export und Ansicht] */
-auswahl = "assembly"; // ["assembly", "rahmen", "einlass", "auslass", "lid", "cartridge", "jig", "jig_clamp", "fuesse"]
+auswahl = "assembly"; // ["assembly", "rahmen", "decke", "einlass", "auslass", "lid", "cartridge", "jig", "jig_clamp", "fuesse"]
 // Einlass: "stutzen" = glatter ø100-Stutzen (20 mm lang, 2 mm Wand, Schlauch wird aufgeschoben), "magnet" = 100er Magnetflansch des Systems
 einlass_typ = "stutzen"; // ["stutzen", "magnet"]
 
@@ -93,8 +93,31 @@ lid_dam_t  = 1.6;
 seal_d     = 3;      // Dichtschnur (EPDM-Schaum-Rundschnur) Durchmesser: 3 oder 5 mm
 seal_in    = 1.2;    // Lage der Dichtung hinten (y) ab Rahmen-Aussenwand    // Dicke des Damms hinter der Kassette
 
-/* [Befestigung GH-4001 Verschluss] */
-latch_hole_x = 15;  latch_hole_z = 15;  latch_hole_dia = 2.5;  latch_hole_depth = 10;
+/* [Decke (getrennt gedruckt)] */
+// true: Die Decke ueber den Zapfen (x = 0..sp_in und x = sp_in+filter_slot..RL) ist ein eigenes, flach gedrucktes Teil ("decke"),
+//       das in einen Falz am Kragen geklebt wird. Der Rahmen hat dann keine Bruecke mehr (vorher 166 mm Spannweite ueber dem Einlass-Zapfen).
+// false: alte Einteiler-Variante (Decke am Rahmen, nur mit Stuetzen druckbar)
+decke_getrennt = true;
+roof_lap = 3;     // Auflage der Deckenplatte seitlich der Kammer auf dem Kragen (Falzbreite je Seite)
+roof_fit = 0.2;   // Spiel der Platte im Falz (je Seite, Klebespalt)
+
+/* [Verschluss GH-4001, gemessene Beschlaege] */
+// Hebelverschluss: Befestigungsblech 30,6 x 15,6 mm, Loecher (ø6,4) in einer Reihe in Laengsrichtung, Abstand 17,5; das Blech liegt
+// SENKRECHT, die Schwenkachse des Hebels am oberen Ende (Richtung Deckel), der Haken zeigt nach oben. Beim Schliessen zieht der Hebel nach unten.
+lt_base_h = 30.6;  lt_base_w = 15.6;  lt_base_dy = 17.5;
+lt_base_hole1 = 7;      // Abstand des oberen Lochs von der oberen Blechkante (Schwenkseite)
+lt_pivot_above = 3;     // Schwenkachse liegt so weit unter der oberen Blechkante
+// Einhaengehaken (am Deckel): Blech 24 breit, 17,8 hoch inkl. umgebogener Fangleiste unten; Loecher ø6,4 im Abstand 14 oben im Blech
+lt_keep_w = 24;  lt_keep_h = 17.8;  lt_keep_dx = 14;
+lt_keep_hole_top = 5.5; // Lochmitte unter der Oberkante des Hakens
+lt_keep_top = 11.5;     // Oberkante des Hakens ueber der Trennebene (Deckel ist lid_t = 12 hoch: buendig minus 0,5)
+lt_lip_h = 4;           // Fangleiste: Auflage des Hakenbuegels ueber der Unterkante des Hakens
+lt_reach = 30;          // geschlossen: Abstand Fangleiste (Buegel) -> Schwenkachse. ANNAHME: Haken ist verstellbar (max. 59,5 mm lang), hier nachmessen/einstellen
+lt_plate_hole_d = 6.4;
+// Schrauben in die Kunststoffteile: Kernloch fuer selbstschneidende 5-mm-Schrauben (Blechloch 6,4 laesst Kopf/Scheibe zu)
+lt_pilot_d = 4.2;  lt_pilot_depth = 10;   // Tiefe < Polsterdicke 12 (sonst Durchbruch in die Kammer)
+lt_pad_w = 24;          // Breite des Verschlusspolsters am Rahmen (Kragen wird dort nach unten verlaengert, 45 Grad darunter)
+lt_ghost = false;       // Beschlaege als Platzhalter in "assembly" anzeigen (Kontrolle der Lage)
 
 /* [Schneidlehre] */
 target_w = inner_h + 1;  mat_h = inner_w + 1;  mat_t = 3.5;  jig_wall = 3.0;   // G4 auf Kammermass +1 mm zugeschnitten (fuellt die Kammer, kein Spalt oben/seitlich)
@@ -112,6 +135,12 @@ sp_iw = sp_ow - 2*sp_wall;    sp_ih = sp_oh - 2*sp_wall;      // Innenmasse = Ka
 win_w = c_w - 2*(c_wall + c_lip);   win_h = c_h - 2*(c_wall + c_lip);   // Fenster der Kassette = Anschlagoeffnung
 win_z0 = box_wall + c_wall + c_lip;                                      // Kassette liegt auf dem Boden
 
+roof_t = box_wall;                             // Dicke der Deckenplatte (buendig mit der Deckelauflage)
+lt_keep_z   = lt_keep_top - lt_keep_hole_top;                 // Lochmitte des Einhaengehakens ueber der Trennebene (Deckel-lokal)
+lt_engage_z = box_h + lt_keep_top - lt_keep_h + lt_lip_h;       // Hoehe der Fangleiste (Rahmen-Koordinaten)
+lt_base_top = lt_engage_z - lt_reach + lt_pivot_above;          // Oberkante Befestigungsblech am Rahmen
+lt_base_zc  = lt_base_top - lt_base_hole1 - lt_base_dy / 2;     // Mitte der beiden Loecher
+lt_pad_bot  = lt_base_top - lt_base_h - 1.5;                    // Unterkante der senkrechten Polsterflaeche (dann 45 Grad zurueck zur Wand)
 xs_in = (einlass_typ == "magnet") ? fl : in_tube_len;   // Laenge von Flansch bzw. Stutzen bis zum Trichter
 total_len = xs_in + in_cone + RL + out_cone + socket_depth;
 echo(str("Filterkasten: Rahmen ", RL, " x ", box_w + 2*frame_t, " x ", box_h, " mm | Gesamtlaenge montiert ca. ", total_len,
@@ -154,6 +183,9 @@ module rahmen() {
                 translate([0, 0, hb - frame_t]) cube([RL, box_w, 0.1]);
                 translate([0, -frame_t, hb]) cube([RL, box_w + 2*frame_t, collar_h]);
             }
+            // Polster fuer das Befestigungsblech des Verschlusses: senkrechte Flaeche weiter nach unten, darunter 45 Grad zurueck (stuetzfrei)
+            translate([RL/2 - lt_pad_w/2, 0, 0]) rotate([90, 0, 90]) linear_extrude(height = lt_pad_w)
+                polygon([[-frame_t, box_h - 5], [-frame_t, lt_pad_bot], [0, lt_pad_bot - frame_t], [3, lt_pad_bot - frame_t], [3, box_h - 5]]);
             // Scharnier-Knuckles
             for (x0 = [0, RL - 10])
                 hull() {
@@ -165,12 +197,15 @@ module rahmen() {
         translate([-1, box_wall, box_wall]) cube([RL + 2, inner_w, inner_h]);
         // Deckeloeffnung ueber beiden Faechern (Kassette wird von oben eingesteckt)
         translate([sp_in, box_wall, box_h - box_wall - 1]) cube([filter_slot, inner_w, box_wall + collar_h]);
+        // Decke abgetrennt: Kammer ueber die ganze Laenge oben offen, Falz (roof_lap je Seite) fuer die Deckenplatte, buendig mit der Deckelauflage
+        if (decke_getrennt)
+            translate([-1, box_wall - roof_lap, box_h - roof_t]) cube([RL + 2, inner_w + 2*roof_lap, roof_t + 1]);
         // Scharnierbohrung (Deckel-Knuckle x = 10,5 ... 27,5 liegt ueber der Ebene, kein Ausschnitt noetig)
         translate([-1, hinge_y, box_h + hinge_z]) rotate([0, 90, 0]) cylinder(d = 4.5, h = RL + 2);
-        // Verschluss-Sacklöcher (Seite -y)
-        for (ix = [-1, 1]) for (iz = [-1, 1])
-            translate([RL/2 + ix * latch_hole_x/2, -frame_t - 0.1, box_h - 12 + iz * latch_hole_z/2])
-                rotate([-90, 0, 0]) cylinder(d = latch_hole_dia, h = latch_hole_depth + 0.1);
+        // Verschluss: 2 Kernlocher fuer das Befestigungsblech (senkrecht, Abstand lt_base_dy), Mitte RL/2, Seite -y
+        for (iz = [-1, 1])
+            translate([RL/2, -frame_t - 0.1, lt_base_zc + iz * lt_base_dy/2])
+                rotate([-90, 0, 0]) cylinder(d = lt_pilot_d, h = lt_pilot_depth + 0.1, $fn = 40);
     }
     // Anschlagrahmen zwischen Kassette und G4 (U-Profil: unten und seitlich 5 mm, oben offen)
     difference() {
@@ -320,8 +355,31 @@ module lid() {
         }
         // Nut fuer die Dichtschnur (Rundschnur), umlaufend um die Kammeroeffnung in der Auflageflaeche des Deckels
         seal_groove();
-        for (ix = [-1, 1]) translate([RL/2 + ix * latch_hole_x/2, -frame_t - 0.1, 6])
-            rotate([-90, 0, 0]) cylinder(d = latch_hole_dia, h = latch_hole_depth + 0.1);
+        // Verschluss: 2 Kernlocher fuer den Einhaengehaken (waagerecht, Abstand lt_keep_dx), Mitte RL/2
+        for (ix = [-1, 1]) translate([RL/2 + ix * lt_keep_dx/2, -frame_t - 0.1, lt_keep_z])
+            rotate([-90, 0, 0]) cylinder(d = lt_pilot_d, h = lt_pilot_depth + 0.1, $fn = 40);
+    }
+}
+
+// ==========================================
+// 3b. DECKE  (Deckenplatte ueber den Zapfen, flach gedruckt: z = 0 ... roof_t, Einbau bei z = box_h - roof_t)
+// ==========================================
+// Sitzt im Falz des Rahmens (roof_lap je Seite auf dem Kragen) und liegt oben auf den Gitterstegen. Fenster = Deckeloeffnung.
+module decke() {
+    y0 = box_wall - roof_lap + roof_fit;   y1 = box_w - box_wall + roof_lap - roof_fit;
+    difference() {
+        translate([0, y0, 0]) cube([RL, y1 - y0, roof_t]);
+        translate([sp_in, box_wall, -1]) cube([filter_slot, inner_w, roof_t + 2]);
+    }
+}
+
+// Platzhalter der Beschlaege (nur zur Kontrolle der Lage in "assembly")
+module beschlaege_ghost() {
+    color("silver", 0.6) {
+        // Befestigungsblech am Rahmen (liegt auf der Kragen-/Polsterflaeche y = -frame_t)
+        translate([RL/2 - lt_base_w/2, -frame_t - 1.5, lt_base_top - lt_base_h]) cube([lt_base_w, 1.5, lt_base_h]);
+        // Einhaengehaken am Deckel (Deckel in Einbaulage: Trennebene z = box_h)
+        translate([RL/2 - lt_keep_w/2, -frame_t - 1.5, box_h + lt_keep_top - lt_keep_h]) cube([lt_keep_w, 1.5, lt_keep_h]);
     }
 }
 
@@ -390,6 +448,7 @@ module jig_clamp() {
 if (auswahl == "rahmen") rahmen();
 if (auswahl == "einlass") translate([box_h, 0, 0]) rotate([0, -90, 0]) einlass();
 if (auswahl == "auslass") translate([0, 0, out_cone + socket_depth]) rotate([0, 90, 0]) auslass();
+if (auswahl == "decke") decke();
 if (auswahl == "lid") translate([0, box_w + frame_t, lid_t]) rotate([180, 0, 0]) lid();
 if (auswahl == "cartridge") translate([0, 0, c_d]) rotate([0, 90, 0]) cartridge();
 if (auswahl == "fuesse") for (i = [0 : 3]) translate([i * (foot_size + 6), 0, 0]) fuss();
@@ -397,6 +456,8 @@ if (auswahl == "jig") jig();
 if (auswahl == "jig_clamp") jig_clamp();
 if (auswahl == "assembly") {
     color("steelblue") rahmen();
+    if (decke_getrennt) color("tomato") translate([0, 0, box_h - roof_t]) decke();
+    if (lt_ghost) beschlaege_ghost();
     if (foot_h > 0) color("dimgray") fuss_positionen() fuss();
     color("seagreen") translate([-xe_in, 0, 0]) einlass();
     color("orange") translate([RL, 0, 0]) auslass();

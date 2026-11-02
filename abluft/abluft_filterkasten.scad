@@ -45,6 +45,7 @@ cart_tab_h = 10;  cart_tab_t = 6;  cart_tab_w = 40;   // Griffasche zum Herauszi
 /* [Kammer] */
 inner_w   = c_w + 0.6;  // Innenbreite der Kammer (Kassette + 0,3 mm Spiel je Seite: Spalt neben der Kassette moeglichst klein)
 inner_h   = c_h + cart_head;  // Innenhoehe der Kammer (Kassette + kleiner Spalt oben, verbleibender Umgehungsspalt)
+roof_extra = 2;     // Decke ueber den Zapfen um so viel dicker als box_wall (nach OBEN: Deckelauflage steigt; nach unten ist durch die Zapfen kein Platz)
 box_wall  = 1.6;    // Wandstaerke Rahmen (Original 4 mm; Druckzeit ist fast proportional zur Wandstaerke)
 frame_t   = 12;     // Kragen (Deckelauflage) seitlich ueber die Wand hinaus
 foot_h    = 10;     // optionale Fuesschen unter dem Rahmen (Hoehe in mm, 0 = ohne); eigene Teile, werden untergeklebt (am Rahmen haengend waere der Boden eine 10-mm-Bruecke)
@@ -52,7 +53,8 @@ foot_size = 24;     // Kantenlaenge je Fuss (4 Stueck, jeweils in den Ecken)
 foot_inset = 6;     // Abstand der Fuesse vom Rand
 collar_h  = 20;     // Hoehe des Kragens unter der Deckelauflage
 box_w     = inner_w + 2*box_wall;
-box_h     = inner_h + 2*box_wall;
+ceil_t    = box_wall + roof_extra;   // Dicke der Decke (Kammerdecke bis Deckelauflage)
+box_h     = inner_h + box_wall + ceil_t;
 
 slot_cartridge = c_d_max + 3;   // Kassette + 0,5 mm vorn + 2,5 mm Platz fuer den Deckeldamm hinter der Kassette   // Fach Kassette
 slot_divider   = 2;    // Anschlagrahmen zwischen Kassette und G4
@@ -94,10 +96,10 @@ seal_d     = 3;      // Dichtschnur (EPDM-Schaum-Rundschnur) Durchmesser: 3 oder
 seal_in    = 1.2;    // Lage der Dichtung hinten (y) ab Rahmen-Aussenwand    // Dicke des Damms hinter der Kassette
 
 /* [Decke (getrennt gedruckt)] */
-// true: Die Decke ueber den Zapfen (x = 0..sp_in und x = sp_in+filter_slot..RL) ist ein eigenes, flach gedrucktes Teil ("decke"),
+// true (Variante): Die Decke ueber den Zapfen (x = 0..sp_in und x = sp_in+filter_slot..RL) ist ein eigenes, flach gedrucktes Teil ("decke"),
 //       das in einen Falz am Kragen geklebt wird. Der Rahmen hat dann keine Bruecke mehr (vorher 166 mm Spannweite ueber dem Einlass-Zapfen).
-// false: alte Einteiler-Variante (Decke am Rahmen, nur mit Stuetzen druckbar)
-decke_getrennt = true;
+// false (Standard): Decke am Rahmen, ueber dem Einlass-Zapfen eine Bruecke (nur mit Stuetzen druckbar), dafuer um roof_extra dicker
+decke_getrennt = false;
 roof_lap = 3;     // Auflage der Deckenplatte seitlich der Kammer auf dem Kragen (Falzbreite je Seite)
 roof_fit = 0.2;   // Spiel der Platte im Falz (je Seite, Klebespalt)
 
@@ -127,7 +129,7 @@ $fn = 100;
 // ---------------- abgeleitete Werte ----------------
 hb   = box_h - collar_h;                       // Hoehe des Hauptkoerpers, darueber der Kragen
 RL   = sp_in + filter_slot + grid_t + sp_out;  // Laenge des Rahmens
-yc   = box_w / 2;   zc = box_h / 2;            // Achse des Luftkanals
+yc   = box_w / 2;   zc = box_wall + inner_h / 2;            // Achse des Luftkanals
 fl   = flange110_t;                            // Dicke des 100er Magnetflanschs
 // Zapfen
 sp_ow = inner_w - 2*sp_gap;   sp_oh = inner_h - 2*sp_gap;     // Aussenmasse
@@ -135,7 +137,7 @@ sp_iw = sp_ow - 2*sp_wall;    sp_ih = sp_oh - 2*sp_wall;      // Innenmasse = Ka
 win_w = c_w - 2*(c_wall + c_lip);   win_h = c_h - 2*(c_wall + c_lip);   // Fenster der Kassette = Anschlagoeffnung
 win_z0 = box_wall + c_wall + c_lip;                                      // Kassette liegt auf dem Boden
 
-roof_t = box_wall;                             // Dicke der Deckenplatte (buendig mit der Deckelauflage)
+roof_t = ceil_t;                               // Dicke der Deckenplatte (buendig mit der Deckelauflage)
 lt_keep_z   = lt_keep_top - lt_keep_hole_top;                 // Lochmitte des Einhaengehakens ueber der Trennebene (Deckel-lokal)
 lt_engage_z = box_h + lt_keep_top - lt_keep_h + lt_lip_h;       // Hoehe der Fangleiste (Rahmen-Koordinaten)
 lt_base_top = lt_engage_z - lt_reach + lt_pivot_above;          // Oberkante Befestigungsblech am Rahmen
@@ -196,7 +198,7 @@ module rahmen() {
         // Kammer durchgehend
         translate([-1, box_wall, box_wall]) cube([RL + 2, inner_w, inner_h]);
         // Deckeloeffnung ueber beiden Faechern (Kassette wird von oben eingesteckt)
-        translate([sp_in, box_wall, box_h - box_wall - 1]) cube([filter_slot, inner_w, box_wall + collar_h]);
+        translate([sp_in, box_wall, box_h - ceil_t - 1]) cube([filter_slot, inner_w, ceil_t + collar_h]);
         // Decke abgetrennt: Kammer ueber die ganze Laenge oben offen, Falz (roof_lap je Seite) fuer die Deckenplatte, buendig mit der Deckelauflage
         if (decke_getrennt)
             translate([-1, box_wall - roof_lap, box_h - roof_t]) cube([RL + 2, inner_w + 2*roof_lap, roof_t + 1]);
@@ -336,11 +338,11 @@ module lid() {
                 }
             }
             // Lippe: Ring + zwei Querrippen (drueckt das Vlies an, schliesst die Kammer)
-            lippenring(-box_wall, 0.1);
-            for (y = [yc - 30, yc + 30]) translate([lx0, y - lid_rib/2, -box_wall]) cube([lx1 - lx0, lid_rib, box_wall + 0.1]);
+            lippenring(-ceil_t, 0.1);
+            for (y = [yc - 30, yc + 30]) translate([lx0, y - lid_rib/2, -ceil_t]) cube([lx1 - lx0, lid_rib, ceil_t + 0.1]);
             // Damm hinter der Kassette: sperrt den Raum ueber der Kassette (Spalt oben, Deckelhohlraum) gegen Vorbeistroemen; Unterkante 0,3 mm ueber der Kassettenoberkante
-            translate([lid_dam_x0, box_wall + 0.3, -(box_wall + cart_head - 0.3)])
-                cube([lid_dam_t, inner_w - 0.6, box_wall + cart_head - 0.3 + lid_t - lid_plate + 0.1]);
+            translate([lid_dam_x0, box_wall + 0.3, -(ceil_t + cart_head - 0.3)])
+                cube([lid_dam_t, inner_w - 0.6, ceil_t + cart_head - 0.3 + lid_t - lid_plate + 0.1]);
             // Scharnierknuckle
             hull() {
                 translate([10.5, box_w, 0]) cube([17, hinge_y - box_w, lid_t]);
@@ -446,7 +448,7 @@ module jig_clamp() {
 
 // ---------------- Teile-Selektion (Druckposen) ----------------
 if (auswahl == "rahmen") rahmen();
-if (auswahl == "einlass") translate([box_h, 0, 0]) rotate([0, -90, 0]) einlass();
+if (auswahl == "einlass") translate([inner_h + 2*box_wall, 0, 0]) rotate([0, -90, 0]) einlass();   // Hoehe der Kammer samt Waenden (unabhaengig von roof_extra)
 if (auswahl == "auslass") translate([0, 0, out_cone + socket_depth]) rotate([0, 90, 0]) auslass();
 if (auswahl == "decke") decke();
 if (auswahl == "lid") translate([0, box_w + frame_t, lid_t]) rotate([180, 0, 0]) lid();

@@ -15,7 +15,6 @@ TEILE = [
     ("filterkasten/filterkasten_rahmen.stl", "1 Rahmen", "PETG"),
     ("filterkasten/filterkasten_einlass_stutzen.stl", "2 Einlass Stutzen d100", "PETG"),
     ("filterkasten/filterkasten_auslass_ventilator.stl", "3 Auslass Ventilator-Muffe", "PETG"),
-    ("filterkasten/filterkasten_decke.stl", "3b Decke (in den Falz des Rahmens kleben)", "PETG"),
     ("filterkasten/filterkasten_deckel.stl", "4 Deckel", "PETG"),
     ("filterkasten/filterkasten_kassette.stl", "5 Kassette", "PETG"),
     ("filterkasten/filterkasten_fuesse.stl", "6 Fuesse 4x (optional, unterkleben)", "PETG"),

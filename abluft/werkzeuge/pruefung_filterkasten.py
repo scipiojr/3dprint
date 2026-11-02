@@ -18,7 +18,6 @@ POSEN = {
     "rahmen": "rahmen()",
     "einlass": "translate([-xe_in, 0, 0]) einlass()",
     "auslass": "translate([RL, 0, 0]) auslass()",
-    "decke": "translate([0, 0, box_h - roof_t]) decke()",
     "deckel": "translate([0, 0, box_h]) lid()",
     "kassette": "translate([sp_in + 0.5 + (c_d_max - c_d), (box_w - c_w) / 2, box_wall]) cartridge()",
 }
@@ -26,6 +25,8 @@ M = lambda m: mf.Manifold(mf.Mesh(vert_properties=np.array(m.vertices, dtype=np.
 
 tmp = Path(tempfile.mkdtemp())
 meshes = {}
+if "decke_getrennt=true" in " ".join(extra).replace(" ", ""):
+    POSEN["decke"] = "translate([0, 0, box_h - roof_t]) decke()"
 for name, ausdruck in POSEN.items():
     scad = ORDNER / f"_pose_{name}.scad"          # im abluft-Ordner, damit include <...> gefunden wird
     scad.write_text(f'include <abluft_filterkasten.scad>\nauswahl = "keiner";\n{ausdruck};\n')
@@ -52,7 +53,7 @@ def par(n):
 wand, rand = par("box_wall"), par("frame_t")
 inner_w = par("filter_w") + 2 * par("c_wall") + 2 + 0.6      # = c_w + 0.6
 inner_h = math.ceil(par("filter_l") / par("filter_n") + 2 * par("c_wall") + 1.3) + par("cart_head")   # = c_h + cart_head
-box_w, box_h = inner_w + 2 * wand, inner_h + 2 * wand
+box_w, box_h = inner_w + 2 * wand, inner_h + wand + wand + par("roof_extra")
 for w in (30, 60, 75):   # ab ca. 85 Grad streift die Deckelkante an der Rahmen-Scharnierkante (9 mm3 bei 90)
     T = trimesh.transformations.rotation_matrix(np.radians(-w), [1, 0, 0], [0, box_w + 9, box_h + 6])
     d = meshes["deckel"].copy(); d.apply_transform(T)

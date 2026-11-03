@@ -91,8 +91,7 @@ lid_t      = 18.5;   // Gesamtdicke (Stirnflaeche traegt den Einhaengehaken 17,8
 lid_plate  = 2.4;      // Deckplatte (Aussenseite)
 lid_rib    = 1.6;    // Rippen-/Wandstaerke
 lid_rim_x  = 9;      // umlaufender Vollrand in x
-lid_dam_t  = 2.0;    // Dicke des Damms in x (Auflage fuer das Schaumband; mehr Platz gibt es nicht: Kassettenlasche davor, Anschlagrahmen dahinter)
-dam_foam   = 2;      // Schaumband (selbstklebend, EPDM/PE, 2 mm breit x 2 mm dick) auf der Dammunterkante: dichtet gegen die Kassettenoberkante, Pressung ca. 40 %
+plug_foam  = 1;      // Schaumstoff (selbstklebend, EPDM/PE, 1 mm dick) auf die Stempelunterkante ueber der Kassette, um die Griffasche herum geschnitten; Pressung ca. 40 %
 seal_d     = 3;      // Dichtschnur (EPDM-Schaum-Rundschnur) Durchmesser: 3 oder 5 mm
 seal_in    = 1.2;    // Lage der Dichtung hinten (y) ab Rahmen-Aussenwand    // Dicke des Damms hinter der Kassette
 
@@ -120,7 +119,6 @@ lt_plate_hole_d = 6.4;
 // Schrauben in die Kunststoffteile: Kernloch fuer selbstschneidende 5-mm-Schrauben (Blechloch 6,4 laesst Kopf/Scheibe zu)
 lt_pilot_d = 4.2;  lt_pilot_depth = 10;   // Tiefe < Polsterdicke 12 (sonst Durchbruch in die Kammer)
 lt_pad_w = 24;          // Breite des Verschlusspolsters am Rahmen (Kragen wird dort nach unten verlaengert, 45 Grad darunter)
-lt_block_w = 32;  lt_block_d = 14;   // Deckel: massiver Block um die Schrauben des Einhaengehakens (Breite in x, Tiefe in y ab der Stirnflaeche)
 lt_ghost = false;       // Beschlaege als Platzhalter in "assembly" anzeigen (Kontrolle der Lage)
 
 /* [Schneidlehre] */
@@ -160,7 +158,6 @@ kn_lid2 = [kn_mid0 + kn_mid + kn_gap, RL - kn_end - kn_gap];
 kn_frame = [[0, kn_end], [kn_mid0, kn_mid0 + kn_mid], [RL - kn_end, RL]];   // Rahmenglieder [x0, x1]
 kn_lid   = [kn_lid1, kn_lid2];
 hinge_z = 6;             // Achse liegt hinge_z ueber der Auflageebene (kein Ausschnitt im Rahmen noetig, Auflageflaeche bleibt eben)
-lid_dam_x0 = sp_in + 0.5 + c_d_max + 0.4;   // Damm beginnt 0,4 mm hinter der Rueckseite der dicksten Kassette (Lagenzahl egal)
 
 // ---------------- Hilfsmodule ----------------
 module quader_zentriert(x, w, h, dx = 0.01) {   // duenne Scheibe im Querschnitt (Breite w in y, Hoehe h in z), Mitte auf der Achse
@@ -328,33 +325,20 @@ module seal_groove() {
         difference() { offset(delta = gw/2) bahn(); offset(delta = -gw/2) bahn(); }
 }
 module lid() {
-    lx0 = sp_in + 0.5;  lx1 = sp_in + filter_slot - 0.5;           // Lippe ueber den Faechern
+    // Deckel massiv mit erhabenem Mittelteil ("Stempel") statt Lippenring, Rippen und Damm:
+    //  - ueber der Kassette (x < xc) reicht der Stempel bis knapp ueber die Kassettenoberkante (plug_foam: Schaumstoff-Auflage, ca. 40 % gepresst),
+    //    das fuellt den Spalt cart_head und dichtet breit statt auf einer 2-mm-Kante
+    //  - ueber Anschlagrahmen und Vlies (x >= xc) liegt er auf Hoehe der Kammerdecke und drueckt das Vlies an
+    //  - Vertiefung fuer die Griffasche der Kassette
+    lx0 = sp_in + 0.5;  lx1 = sp_in + filter_slot - 0.5;           // Stempel ueber den Faechern
     ly0 = box_wall + 0.5;  ly1 = box_w - box_wall - 0.5;
-    module lippenring(h0, h1, w = lid_rib)       // Ring um die Lippe, z = h0..h1
-        translate([0, 0, h0]) linear_extrude(height = h1 - h0)
-            difference() {
-                translate([lx0, ly0]) square([lx1 - lx0, ly1 - ly0]);
-                translate([lx0 + w, ly0 + w]) square([lx1 - lx0 - 2*w, ly1 - ly0 - 2*w]);
-            }
+    xc = sp_in + slot_cartridge - 0.1;                              // Stufe Kassette/Vlies: knapp vor dem Anschlagrahmen
+    zc_bot = ceil_t + cart_head - 0.6*plug_foam;                    // Stempelunterkante ueber der Kassette (unter der Auflageebene)
     difference() {
         union() {
-            difference() {
-                translate([0, -frame_t, 0]) cube([RL, box_w + frame_t + frame_t/2, lid_t]);
-                // Taschen von der Innenseite (z = 0) her: Deckplatte lid_plate bleibt, Rippenraster + Lippenring bleiben stehen
-                difference() {
-                    translate([lid_rim_x, 0, -1]) cube([RL - 2*lid_rim_x, box_w, lid_t - lid_plate + 1]);
-                    lippenring(-2, lid_t + 2);
-                    for (y = [yc - 30, yc + 30]) translate([lx0, y - lid_rib/2, -2]) cube([lx1 - lx0, lid_rib, lid_t + 4]);
-                }
-            }
-            // Lippe: Ring + zwei Querrippen (drueckt das Vlies an, schliesst die Kammer)
-            lippenring(-ceil_t, 0.1);
-            for (y = [yc - 30, yc + 30]) translate([lx0, y - lid_rib/2, -ceil_t]) cube([lx1 - lx0, lid_rib, ceil_t + 0.1]);
-            // Damm hinter der Kassette: sperrt den Raum ueber der Kassette (Spalt oben, Deckelhohlraum) gegen Vorbeistroemen; Unterkante 0,3 mm ueber der Kassettenoberkante
-            translate([lid_dam_x0, box_wall + 0.3, -(ceil_t + cart_head - 0.6*dam_foam)])
-                cube([lid_dam_t, inner_w - 0.6, ceil_t + cart_head - 0.6*dam_foam + lid_t - lid_plate + 0.1]);
-            // massiver Block um die Verschlussschrauben (sonst Rippenraster/Hohlraum)
-            translate([RL/2 - lt_block_w/2, -frame_t, 0]) cube([lt_block_w, frame_t + lt_block_d, lid_t]);
+            translate([0, -frame_t, 0]) cube([RL, box_w + frame_t + frame_t/2, lid_t]);
+            translate([lx0, ly0, -zc_bot]) cube([xc - lx0, ly1 - ly0, zc_bot + 0.1]);
+            translate([xc, ly0, -ceil_t]) cube([lx1 - xc, ly1 - ly0, ceil_t + 0.1]);
             // Scharnierglieder des Deckels (zwischen den Rahmengliedern)
             for (k = kn_lid)
                 hull() {
@@ -362,6 +346,9 @@ module lid() {
                     translate([k[0], hinge_y, hinge_z]) rotate([0, 90, 0]) cylinder(d = frame_t, h = k[1] - k[0]);
                 }
         }
+        // Vertiefung fuer die Griffasche der Kassette (liegt hinten, x = Kassettenrueckseite - cart_tab_t ... Rueckseite)
+        translate([sp_in + 0.5 + c_d_max - cart_tab_t - 0.5, yc - cart_tab_w/2 - 0.5, -zc_bot - 1])
+            cube([cart_tab_t + 1, cart_tab_w + 1, 1 + (cart_tab_h + 0.5) - (ceil_t + cart_head) + zc_bot]);
         translate([-1, hinge_y, hinge_z]) rotate([0, 90, 0]) cylinder(d = 4.5, h = RL + 2);
         // Aussparungen fuer die Rahmenglieder (Enden und Mitte, je 0,25 mm Spiel in x)
         for (k = kn_frame) let (xa = (k[0] <= 0) ? -1 : k[0] - 0.25, xb = (k[1] >= RL) ? RL + 1 : k[1] + 0.25) hull() {

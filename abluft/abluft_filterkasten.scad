@@ -19,7 +19,7 @@
 // =====================================================================
 
 /* [Export und Ansicht] */
-auswahl = "assembly"; // ["assembly", "rahmen", "decke", "einlass", "auslass", "lid", "cartridge", "jig", "jig_clamp", "fuesse"]
+auswahl = "assembly"; // ["assembly", "rahmen", "decke", "einlass", "auslass", "lid", "cartridge", "cartridge_front", "jig", "jig_clamp", "fuesse"]
 // Einlass: "stutzen" = glatter ø100-Stutzen (20 mm lang, 2 mm Wand, Schlauch wird aufgeschoben), "magnet" = 100er Magnetflansch des Systems
 einlass_typ = "stutzen"; // ["stutzen", "magnet"]
 
@@ -32,12 +32,15 @@ part = "keiner";          // Ausgabe der eingebundenen Dateien aus (muss nach de
 filter_l = 452;  filter_w = 160;  filter_t = 3.5;   // Maße des Metallfilters
 filter_n = 3;                                        // Streifen, in die der Filter geschnitten wird (452/3 = 150,7; Breite 160 bleibt ungeschnitten)
 filter_lagen = 1;                                    // Lagen im Stapel (1..filter_lagen_max): nur die Kassette neu drucken, wenn das geaendert wird
+kassette_front = true;                               // zweiteilige Kassette: Frontgitter (cartridge_front) klemmt den Filter, einrastbar und loesbar. Nur bis 2 Lagen (3 Lagen + Frontgitter = 18 mm > Fach 15 mm): dann false
+cover_t = 3;  cover_clear = 0.2;                     // Dicke des Frontgitters, Spiel in der Tasche je Seite
+bump_h = 0.4;  notch_d = 0.5;                        // Rastnocken am Frontgitter (Hoehe) und Rastnuten in den Seitenwaenden der Kassette (Tiefe)
 filter_lagen_max = 3;                                // Kammer ist fuer so viele Lagen ausgelegt (aendern erfordert neuen Rahmen)
 c_wall = 2.0;  c_lip = 5.0;  cart_grid_t = 4;
 strip_l = filter_l / filter_n;                       // Streifenlaenge 150,7
 c_w = filter_w + 2*c_wall + 2;                       // 166: Filterbreite + Waende + 1 mm Spiel je Seite
 c_h = ceil(strip_l + 2*c_wall + 1.3);                // 156: Streifenlaenge + Waende + Spiel
-c_d = filter_lagen*filter_t + 0.5 + cart_grid_t;     // 8 bei 1 Lage: Stapel + Spiel + Gitter
+c_d = filter_lagen*filter_t + 0.5 + cart_grid_t + (kassette_front ? cover_t : 0);     // 8 bei 1 Lage: Stapel + Spiel + Gitter
 c_d_max = filter_lagen_max*filter_t + 0.5 + cart_grid_t;   // 15: bestimmt das Kassettenfach
 cart_head = 1.5;   // Luft ueber der Kassette (Spalt, durch den Luft an der Kassette vorbei kann: moeglichst klein)
 cart_tab_h = 10;  cart_tab_t = 6;  cart_tab_w = 40;   // Griffasche zum Herausziehen (ragt nach oben in die Deckeltasche)
@@ -412,6 +415,12 @@ module cartridge() {
         cube([c_d, c_w, c_h]);
         translate([-1, c_wall, c_wall]) cube([c_d + 1 - grid_d, c_w - 2*c_wall, c_h - 2*c_wall]);   // Vliestasche
         translate([c_d - grid_d - 1, wy0, wz0]) cube([grid_d + 2, ww, wh]);                         // Fenster
+        // Rastnuten fuer das Frontgitter in den Seitenwaenden (innen, trapezfoermig, 3 Stueck je Seite)
+        if (kassette_front) for (f = [0.25, 0.5, 0.75], side = [0, 1]) {
+            yi = side ? c_w - c_wall : c_wall;  sg = side ? 1 : -1;     // Innenseite der Wand, Richtung in die Wand hinein
+            translate([0, 0, f * c_h - 4]) linear_extrude(height = 8)
+                polygon([[cover_t/2 - 1.5, yi - sg*0.01], [cover_t/2 + 1.5, yi - sg*0.01], [cover_t/2 + 0.6, yi + sg*notch_d], [cover_t/2 - 0.6, yi + sg*notch_d]]);
+        }
     }
     // Griffasche oben: liegt in Druckpose flach auf dem Bett (x = c_d - cart_tab_t ... c_d), Fingerloch als Langloch
     difference() {
@@ -424,6 +433,33 @@ module cartridge() {
         union() for (sgn = [-1, 1]) for (k = [-20 : 20])
             translate([c_d - grid_d/2, c_w/2, c_h/2 + k * grid_pitch * sqrt(2)])
                 rotate([sgn * 45, 0, 0]) cube([grid_d, 3*c_w, grid_rib], center = true);
+    }
+}
+// Frontgitter der zweiteiligen Kassette: sitzt buendig in der Tasche vor dem Filter (x = 0 ... cover_t), Diagonalgitter wie hinten,
+// 6 Rastnocken (3 je Seite) rasten in die Nuten der Kassettenwaende, 4 Hebelnuten (blind von vorn) zum Herausheben mit Schraubendreher. Druckpose: flach.
+module cartridge_front() {
+    cw = c_w - 2*c_wall - 2*cover_clear;  ch = c_h - 2*c_wall - 2*cover_clear;
+    b = c_lip - cover_clear;                                   // Randbreite wie hinten
+    difference() {
+        union() {
+            difference() {
+                cube([cover_t, cw, ch]);
+                translate([-1, b, b]) cube([cover_t + 2, cw - 2*b, ch - 2*b]);   // Fenster
+            }
+            intersection() {
+                translate([0, b - 0.1, b - 0.1]) cube([cover_t, cw - 2*b + 0.2, ch - 2*b + 0.2]);
+                union() for (sgn = [-1, 1]) for (k = [-20 : 20])
+                    translate([cover_t/2, cw/2, ch/2 + k * grid_pitch * sqrt(2)])
+                        rotate([sgn * 45, 0, 0]) cube([cover_t, 3*cw, grid_rib], center = true);
+            }
+            // Rastnocken auf den beiden Seitenkanten (y = 0 und y = cw), 3 je Seite
+            for (f = [0.25, 0.5, 0.75], side = [0, 1]) let (zp = f * c_h - c_wall - cover_clear, ye = side ? cw : 0, sg = side ? 1 : -1)
+                translate([0, 0, zp - 3]) linear_extrude(height = 6)
+                    polygon([[cover_t/2 - 1.3, ye - sg*0.01], [cover_t/2 + 1.3, ye - sg*0.01], [cover_t/2 + 0.4, ye + sg*bump_h], [cover_t/2 - 0.4, ye + sg*bump_h]]);
+        }
+        // Hebelnuten: 8 mm breit, 2 mm tief (von vorn, x = 0), 1,5 mm in den Rand, nahe den Ecken
+        for (zp = [14, ch - 14], side = [0, 1])
+            translate([-0.01, side ? cw - 1.5 : -0.01, zp - 4]) cube([2.0, 1.51, 8]);
     }
 }
 module jig() {
@@ -452,6 +488,7 @@ if (auswahl == "einlass") translate([inner_h + 2*box_wall, 0, 0]) rotate([0, -90
 if (auswahl == "auslass") translate([0, 0, out_cone + socket_depth]) rotate([0, 90, 0]) auslass();
 if (auswahl == "decke") decke();
 if (auswahl == "lid") translate([0, box_w + frame_t, lid_t]) rotate([180, 0, 0]) lid();
+if (auswahl == "cartridge_front") translate([0, 0, cover_t]) rotate([0, 90, 0]) cartridge_front();   // Druckpose: flach, Gitterseite nach oben
 if (auswahl == "cartridge") translate([0, 0, c_d]) rotate([0, 90, 0]) cartridge();
 if (auswahl == "fuesse") for (i = [0 : 3]) translate([i * (foot_size + 6), 0, 0]) fuss();
 if (auswahl == "jig") jig();
@@ -465,4 +502,5 @@ if (auswahl == "assembly") {
     color("orange") translate([RL, 0, 0]) auslass();
     color("lightgray") translate([0, 0, box_h + 10]) lid();
     color("khaki") translate([sp_in + 0.5 + (c_d_max - c_d), (box_w - c_w)/2, box_wall]) cartridge();
+    if (kassette_front) color("gold") translate([sp_in + 0.5 + (c_d_max - c_d), (box_w - c_w)/2 + c_wall + cover_clear, box_wall + c_wall + cover_clear]) cartridge_front();
 }

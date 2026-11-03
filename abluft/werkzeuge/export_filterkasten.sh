@@ -16,14 +16,15 @@ TEILE=(
   "filterkasten_deckel.stl|lid"
   "filterkasten_kassette.stl|cartridge|filter_lagen=1"
   "filterkasten_kassette_2lagen.stl|cartridge|filter_lagen=2"
-  "filterkasten_kassette_3lagen.stl|cartridge|filter_lagen=3"
+  "filterkasten_kassette_3lagen.stl|cartridge|filter_lagen=3 kassette_front=false"
+  "filterkasten_kassette_front.stl|cartridge_front"
   "filterkasten_fuesse.stl|fuesse"
   "filterkasten_lehre.stl|jig"
   "filterkasten_lehre_klemmleiste.stl|jig_clamp"
 )
 export_eins() {
   local datei="$1" teil="$2" extra="$3"; shift 3
-  local ex=(); [[ -n "$extra" ]] && ex=(-D "$extra")
+  local ex=(); for e in $extra; do ex+=(-D "$e"); done
   openscad -o "$ZIEL/$datei" -D "auswahl=\"$teil\"" "${ex[@]}" "$@" abluft_filterkasten.scad 2>&1 | grep -E "ERROR|WARNING" || true
   python3 - "$ZIEL/$datei" <<'PY' || true
 import sys, trimesh

@@ -27,6 +27,7 @@ Abluft-Anschluss für einen Laser-Cutter: Eine 5 mm dicke Plexiglasscheibe häng
 | `abluft_ventilator_adapter.scad` | Ventilator-Muffe mit 100er Magnetflansch (`part` = adapter140, oring_fan, oring110) |
 | `abluft_magnetring.scad` | freie Magnetringe/Deckel zum Anbau an eigene Rohre, Filterkästen usw. (`part` = ring150, ring100, deckel150, deckel100) |
 | `abluft_filterkasten.scad` | Filterkasten (G4-Vlies + Kassette) zwischen 100er Schlauch und Ventilator: Rahmen, Einlass, Auslass, Deckel, Kassette, Schneidlehre → `filterkasten/` |
+| `abluft_k40_anschluss.scad` | Ersatz für das Abluftblech des OMTech K40+: Platte im Lochbild des Blechs + Bogen nach links zum Filterkasten (Muffe über den ø100-Stutzen oder Magnetflansch) → `k40_anschluss/` |
 | `magnetring_150.stl`, `magnetring_100.stl` | Magnetringe in Standardmaßen (Dicke 8, ohne Schraublöcher) |
 | `durchfuehrung_innen.stl` | Innenscheibe mit Zentrierbund und Gewinderohr (Raumseite) |
 | `durchfuehrung_aussen.stl` | Halteplatte mit Innengewinde (Dachseite), mit Bohrungen für zwei M4-Sicherungsschrauben |
@@ -283,4 +284,18 @@ Kompakter Filterkasten zwischen dem 100er Schlauch und dem Ventilator: Einschub-
 Wo die Zeit herkommt: Bei einem dünnwandigen Kasten bestimmen Wandfläche × Wandstärke das Material; deshalb sind Wände (Original 4 mm, jetzt 1,6 mm), Trichterwände (2 mm), Gitter (6 mm statt 12 mm tief, diagonale Stege statt Vollplatte) und Deckel (hohl statt 12 mm Voll) reduziert. Die Trichter sind so lang, dass ihre Ecken höchstens ca. 50° von der Senkrechten geneigt sind (Einlass 50 mm, Auslass 35 mm); Brücken über Hohlräume sind höchstens 3–10 mm breit.
 
 **Nicht erprobt:** Steifigkeit der 1,6-mm-Wände, Dichtheit der Steckfugen, Passung der Zapfen (0,25 mm Spiel), Scharnier (öffnet ohne Kollision bis ca. 80°), Verschluss GH-4001 (Lage/`lt_reach`, Schrauben in PETG), Falzpassung und Dichtheit der Decke, Druckqualität der Rautengitter-Stege und der 50°-Trichterecken. Strömung: Trichter sind kurz und die Kammer ist flach (Druckverlust des Vlies/Kassette bestimmt ohnehin).
+
+## K40+-Abluftanschluss (`abluft_k40_anschluss.scad`)
+
+![K40-Anschluss: Draufsicht mit Filterkasten, Seitenschnitt](bilder/k40_anschluss.png)
+
+Ersetzt das Abluftblech samt Mini-Lüfter an der Rückwand des OMTech K40+ (der Lüfter entfällt, den Unterdruck macht der Ventilator hinter dem Filterkasten). Ein Druckteil: Platte → Übergang Rechteck → Kreis ø90 → Bogen 90° nach **links** (von hinten auf den Laser gesehen) → Ende.
+
+- **Befestigung:** vier Schlitze 5 × 8 mm im Lochbild des Blechs (145 × 113 mm), M4 an den vorhandenen Gewinden. Platte 160 × 135,5 × 4 mm. Lochbild und Rückwandausschnitt (124 × 121 mm, Öffnung mit 2 mm Rand) stammen aus den STL des MakerWorld-Modells "Vertical Exhaust Fan Housing for OMTech K40" und aus Messungen; **am Laser noch nicht geprüft**.
+- **Ende `muffe` (Standard):** Muffe ID 100,5 über den ø100-Stutzen des Filterkasten-Einlasses (`einlass_typ = "stutzen"`, 20 mm lang), Anschlag am Muffengrund, O-Ring-Nut für eine 3-mm-TPU-Schnur (`k40_anschluss_oring_tpu.stl`). Der Stutzen steckt 10–20 mm tief: **der Kasten kann in der Länge um bis zu 10 mm nachgeben**. Der Konus des Kastens beginnt bei Einstecktiefe 20 / 15 / 10 mm bei x = −60 / −65 / −70 mm (Ausschnittkante links: x = −62).
+- **Ende `magnet`:** 100er Magnetflansch (Einlass mit `einlass_typ = "magnet"`), etwa 8 mm länger, ohne Einstecktoleranz.
+- **Platzbedarf nach links:** `rb` (Biegeradius der Kanalmitte, mindestens 49,4), `x_ax` (Rundachse nach rechts verschoben, Standard 10 mm; maximal ca. 12, sonst ragt der Kanal über die Öffnung). Jeder Millimeter `x_ax` spart einen Millimeter Länge.
+- **Abstand zur Rückwand:** Kastenachse `y_ax` = 113,9 mm (Kastenmitte + Scharnierachse + 20 mm Freiraum). Der Kasten steht um 180° gedreht, **Scharnier zur Rückwand** (der Verschluss bleibt zugänglich); die Scharnierachse liegt 20 mm von der Rückwand, der Deckel öffnet bis 90° (12,5 mm über die Achse hinaus). Kastenkante 14 mm von der Rückwand. Höhe: Achse bei Plattenmitte plus `z_ax`; die Kastenachse liegt 80,35 mm über der Unterkante, mit den 10-mm-Füßchen 90,35 mm über dem Tisch.
+- **Druck:** Platte flach, Rückwandseite unten (`ausgabe = "druck"`); **Stützen unter dem Bogen und der Muffe nötig**. Maße 160 × 135 × 168 mm (Magnetvariante 190 mm hoch). Export: `werkzeuge/export_k40_anschluss.sh` (ca. 1 Minute), Bild: `werkzeuge/bild_k40_anschluss.py`.
+- **Geprüft:** wasserdicht, keine Überlappung mit der montierten Kasten-Baugruppe bei Einstecktiefe 10, 15 und 20 mm (Python/manifold). **Nicht geprüft:** Passung am Laser, Druck, Dichtheit der Muffe, Strömung (enger Bogen, Innenradius ca. 2,6 mm; Verlust größer als bei einem weiten Bogen).
 

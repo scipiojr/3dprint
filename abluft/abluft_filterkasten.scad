@@ -119,8 +119,8 @@ lt_keep_top = lid_t - 0.5;   // Oberkante des Hakens ueber der Trennebene (Haken
 lt_lip_h = 4;           // Fangleiste: Auflage des Hakenbuegels ueber der Unterkante des Hakens
 lt_reach = 30;          // geschlossen: Abstand Fangleiste (Buegel) -> Schwenkachse. ANNAHME: Haken ist verstellbar (max. 59,5 mm lang), hier nachmessen/einstellen
 lt_plate_hole_d = 6.4;
-// Schrauben in die Kunststoffteile: Kernloch fuer selbstschneidende 5-mm-Schrauben (Blechloch 6,4 laesst Kopf/Scheibe zu)
-lt_pilot_d = 4.2;  lt_pilot_depth = 10;   // Tiefe < Polsterdicke 12 (sonst Durchbruch in die Kammer)
+// Schrauben in die Kunststoffteile: M3 (Blechloch 6,4 laesst Kopf/Scheibe zu)
+lt_pilot_d = 2.5;  lt_pilot_depth = 10;   // Kernloch fuer M3 (selbstschneidend in PETG), Tiefe < Polsterdicke 12 (sonst Durchbruch in die Kammer)
 lt_pad_w = 24;          // Breite des Verschlusspolsters am Rahmen (Kragen wird dort nach unten verlaengert, 45 Grad darunter)
 lt_ghost = false;       // Beschlaege als Platzhalter in "assembly" anzeigen (Kontrolle der Lage)
 

@@ -19,7 +19,7 @@
 //  Export:   werkzeuge/export_k40_anschluss.sh
 //
 //  Herkunft der Maße: Lochbild und Ausschnitt aus den STL "VerticalExhaust-K40" (MakerWorld 1289939):
-//  Schlitze 5 x 8, Abstand 145 x 113; Ausschnitt in der Rueckwand ca. 124 x 121. Nicht am Laser geprueft!
+//  Schlitze 5 x 8, Abstand 145 x 113; Ausschnitt in der Rueckwand 124 x 124 (gemessen). Lage/Hoehe am Laser pruefen!
 // =====================================================================
 include <abluft_system.scad>
 part = "keiner";                 // Hauptdatei: keine Ausgabe des Systems (muss nach dem include stehen)
@@ -37,8 +37,8 @@ slot_dz = 113;                   // Schlitzabstand senkrecht
 slot_b = 5;                      // Schlitzbreite (M4)
 slot_l = 8;                      // Schlitzlaenge (senkrecht)
 pocket_w = 124;                  // Ausschnitt in der Rueckwand, Breite
-pocket_h = 121;                  // Ausschnitt in der Rueckwand, Hoehe
-pocket_dz = -0.75;               // Mitte des Ausschnitts relativ zur Plattenmitte (+ = oben)
+pocket_h = 124;                  // Ausschnitt in der Rueckwand, Hoehe (gemessen: 124 x 124)
+pocket_dz = 0;                   // Mitte des Ausschnitts relativ zur Plattenmitte (+ = oben; angenommen mittig zwischen den Schlitzen)
 rand = 2;                        // Abstand Oeffnung zu Ausschnittkante (Auflage der Platte rundum)
 oe_rc = 10;                      // Eckenradius der Oeffnung
 

@@ -36,8 +36,8 @@ slot_dx = 145;                   // Schlitzabstand waagerecht (Mitte zu Mitte)
 slot_dz = 113;                   // Schlitzabstand senkrecht
 slot_b = 5;                      // Schlitzbreite (M4)
 slot_l = 8;                      // Schlitzlaenge (senkrecht)
-kopf_d = 8;                      // Senkung fuer Schraubenkopf bzw. Scheibe (M3: Scheibe ø7); 0 = keine Senkung
-kopf_rest = 1.5;                 // Restdicke der Platte unter dem Kopf (wie das Originalblech): 5 mm Gewinde - 1,5 mm = 3,5 mm im Laser
+kopf_d = 0;                      // optionale Senkung fuer den Schraubenkopf (M4 Linsenkopf ISO 7380: ø8,4 passt); 0 = keine (Standard, mit M4x10 nicht noetig)
+kopf_rest = 1.5;                 // Restdicke der Platte unter dem Kopf, nur bei kopf_d > 0
 pocket_w = 124;                  // Ausschnitt in der Rueckwand, Breite
 pocket_h = 124;                  // Ausschnitt in der Rueckwand, Hoehe (gemessen: 124 x 124)
 pocket_dz = 0;                   // Mitte des Ausschnitts relativ zur Plattenmitte (+ = oben; angenommen mittig zwischen den Schlitzen)

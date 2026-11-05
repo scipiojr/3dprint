@@ -36,6 +36,8 @@ slot_dx = 145;                   // Schlitzabstand waagerecht (Mitte zu Mitte)
 slot_dz = 113;                   // Schlitzabstand senkrecht
 slot_b = 5;                      // Schlitzbreite (M4)
 slot_l = 8;                      // Schlitzlaenge (senkrecht)
+kopf_d = 8;                      // Senkung fuer Schraubenkopf bzw. Scheibe (M3: Scheibe ø7); 0 = keine Senkung
+kopf_rest = 1.5;                 // Restdicke der Platte unter dem Kopf (wie das Originalblech): 5 mm Gewinde - 1,5 mm = 3,5 mm im Laser
 pocket_w = 124;                  // Ausschnitt in der Rueckwand, Breite
 pocket_h = 124;                  // Ausschnitt in der Rueckwand, Hoehe (gemessen: 124 x 124)
 pocket_dz = 0;                   // Mitte des Ausschnitts relativ zur Plattenmitte (+ = oben; angenommen mittig zwischen den Schlitzen)
@@ -130,6 +132,10 @@ module platte() {
         for (sx = [-1, 1], sz = [-1, 1])
             hull() for (dz = [-(slot_l - slot_b)/2, (slot_l - slot_b)/2])
                 translate([sx*slot_dx/2, -1, sz*slot_dz/2 + dz]) rotate([-90, 0, 0]) cylinder(d = slot_b, h = pl_t + 2, $fn = 32);
+        if (kopf_d > 0)
+            for (sx = [-1, 1], sz = [-1, 1])
+                hull() for (dz = [-(slot_l - slot_b)/2, (slot_l - slot_b)/2])
+                    translate([sx*slot_dx/2, kopf_rest, sz*slot_dz/2 + dz]) rotate([-90, 0, 0]) cylinder(d = kopf_d, h = pl_t, $fn = 48);
     }
 }
 

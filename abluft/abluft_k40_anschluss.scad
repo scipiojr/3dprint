@@ -11,6 +11,9 @@
 //    "magnet"  100er Magnetflansch des Systems (Magnetflaeche zeigt nach links), passt auf den Einlass mit
 //              einlass_typ="magnet". Etwa 8 mm laenger als die Muffe, aber ohne Einstecktoleranz.
 //
+//  Ausgangsrichtung (beide Enden): stufenlos einstellbar mit aus_yaw (Waagerechte gegen die x-Achse) und aus_pitch
+//  (Neigung nach oben/unten, Drehung um die y-Achse). 0/0 = 90 Grad nach links, parallel zur Wand.
+//
 //  Koordinaten (montiert): x nach RECHTS (von hinten auf den Laser gesehen), z nach oben, y von der Rueckwand
 //  WEG. Ursprung: Mitte der Platte auf der Rueckwand (Platte y = 0 .. pl_t). Strömung: +y, dann Bogen nach -x.
 //
@@ -44,18 +47,27 @@ pocket_dz = 0;                   // Mitte des Ausschnitts relativ zur Plattenmit
 rand = 2;                        // Abstand Oeffnung zu Ausschnittkante (Auflage der Platte rundum)
 oe_rc = 10;                      // Eckenradius der Oeffnung
 
+/* [Ausgangsrichtung] */
+// aus_yaw: Winkel des Ausgangs in der Waagerechten gegen die x-Achse (Draufsicht). 0 = parallel zur Wand nach links (-x);
+//          + = schraeg von der Wand WEG (kleinerer Bogen, spart Platz in x); - = zur Wand hin (groesserer Bogen)
+aus_yaw = 0;                     // [-45:1:80]
+// aus_pitch: Neigung des Ausgangs nach oben (+) oder unten (-), Drehung um die y-Achse (Betrag max. 70)
+aus_pitch = 0;                   // [-70:1:70]
+
 /* [Luftweg] */
 bore_d = 90;                     // Durchmesser des runden Luftkanals (wie der 100er Magnetflansch)
 wand = 2.4;                      // Wandstaerke des Kanals
 rb = 50;                         // Biegeradius der Kanalmitte (min. bore_d/2 + wand + 2 = 49,4)
 x_ax = 10;                       // Lage der Rundachse in x (+ = nach rechts, spart Laenge nach links; max. ca. 12, sonst ragt der Kanal ueber die Oeffnung)
-z_ax = 0;                        // Hoehe der Rundachse relativ zur Plattenmitte (Hoehe des Kastens: Fuesschen)
+z_ax = 0;                        // Hoehe der Rundachse am Bogenanfang relativ zur Plattenmitte (Hoehe des Kastens: Fuesschen)
 
 /* [Filterkasten (Maße aus abluft_filterkasten.scad)] */
 kasten_w = 169.8;                // box_w
 scharnier_ueber = 9;             // hinge_y - box_w: Scharnierachse ausserhalb der Kastenwand
 scharnier_frei = 20;             // Abstand Scharnierachse zur Laserrueckwand (Deckel offen 90 Grad: 12,5 mm + Reserve)
-// Abstand der Kastenachse von der Rueckwand = Achse bis Scharnierachse + Freiraum:
+// y_ax: Abstand des Bogenendes (Anschlusspunkt, Kastenachse) von der Rueckwand. Standard fuer aus_yaw = 0:
+// Achse bis Scharnierachse + Freiraum. Bei anderen Winkeln liegt der Kasten schraeg: y_ax selbst anpassen und
+// werkzeuge/pruefung_k40_anschluss.py laufen lassen (Abstand zur Rueckwand, Kollision).
 y_ax = kasten_w/2 + scharnier_ueber + scharnier_frei;
 
 /* [Muffe auf den Einlass-Stutzen] */
@@ -78,14 +90,28 @@ M2 = 18;                         // Ringe im Bogen
 a_i = pocket_w/2 - rand;         // halbe Breite der Oeffnung
 b_i = pocket_h/2 - rand;         // halbe Hoehe
 R_i = bore_d/2;
-x_b = x_ax - rb;                 // Ende des Bogens (Anschlag der Muffe / Flaechenmitte Magnetflansch-Rueckseite)
-yb0 = y_ax - rb;                 // Beginn des Bogens
-lt = yb0 - pl_t;                 // Laenge des Uebergangs
 muffe_id = stutzen_d + muffe_spiel;
 muffe_od = muffe_id + 2*muffe_wand;
-x_mund = x_b - muffe_l;          // Muendung der Muffe
-x_flansch = x_b - flange110_t;   // Magnetflaeche (bei ende = "magnet")
-x_ende = ende == "muffe" ? x_mund : x_flansch;
+
+// Richtung: Start +y (aus der Wand), Ende t_out; ebener Bogen vom Radius rb dazwischen
+t0 = [0, 1, 0];
+t_out = [-cos(aus_pitch)*cos(aus_yaw), cos(aus_pitch)*sin(aus_yaw), sin(aus_pitch)];
+beta = acos(max(-1, min(1, t_out[1])));                     // Bogenwinkel (90 bei 0/0)
+sb = sin(beta);
+mm = sb > 1e-4 ? (t_out - t_out[1]*t0)/sb : [-1, 0, 0];     // Einheitsvektor im Bogen, quer zu t0, zum Ausgang hin
+nax = cross(t0, mm);                                        // Drehachse des Bogens
+function rot_ax(ang, v) = v*cos(ang) + cross(nax, v)*sin(ang) + nax*(nax*v)*(1 - cos(ang));
+y0 = y_ax - rb*sb;               // Bogenbeginn (y)
+lt = y0 - pl_t;                  // Laenge des Uebergangs
+p0 = [x_ax, y0, z_ax];
+E = p0 + rb*(sb*t0 + (1 - cos(beta))*mm);                   // Bogenende = Anschlusspunkt (Muffengrund / Flanschrueckseite)
+u_e = rot_ax(beta, [1, 0, 0]);
+v_e = rot_ax(beta, [0, 0, 1]);
+// Waagerechter Bezugsrahmen der Enden (Z = Ausgangsrichtung, x = "oben", y = waagerecht): bei 0/0 wie bisher
+u_h = cross(t_out, [0, 0, 1]) / norm(cross(t_out, [0, 0, 1]));
+v_h = cross(u_h, t_out);
+Mend = [[v_h[0], u_h[0], t_out[0], E[0]], [v_h[1], u_h[1], t_out[1], E[1]], [v_h[2], u_h[2], t_out[2], E[2]], [0, 0, 0, 1]];
+Mb = max(2, ceil(M2*beta/90));
 
 // ---------------- Querschnitt: abgerundetes Rechteck -> Kreis ----------------
 function ss(t) = t*t*(3 - 2*t);
@@ -97,24 +123,22 @@ function rr_r(th, a, b, rc) =
     tx <= ty ? (s*tx <= cy ? tx : tc) : (c*ty <= cx ? ty : tc);
 function secr(th, s, off) = (1 - s)*rr_r(th, a_i + off, b_i + off, oe_rc + off) + s*(R_i + off);
 
-// Stationen: [Mittelpunkt, u-Achse, Verlauf s]
-function stationen(y_start) = concat(
-    [[[0, y_start, pocket_dz], [1, 0, 0], 0]],
+// Stationen: [Mittelpunkt, u-Achse, v-Achse, Verlauf s]; ext = Verlaengerung ueber das Bogenende (in Ausgangsrichtung)
+function stationen(y_start, ext) = concat(
+    [[[0, y_start, pocket_dz], [1, 0, 0], [0, 0, 1], 0]],
     [for (i = [0 : M1]) let(t = i/M1, s = ss(t))
-        [[x_ax*s, pl_t + lt*t, pocket_dz + (z_ax - pocket_dz)*s], [1, 0, 0], s]],
-    [for (j = [1 : M2 - 1]) let(f = j*90/M2)
-        [[x_ax - rb*(1 - cos(f)), yb0 + rb*sin(f), z_ax], [cos(f), sin(f), 0], 1]],
-    [[[x_b, y_ax, z_ax], [0, 1, 0], 1]]
+        [[x_ax*s, pl_t + lt*t, pocket_dz + (z_ax - pocket_dz)*s], [1, 0, 0], [0, 0, 1], s]],
+    [for (j = [1 : Mb - 1]) let(f = j*beta/Mb)
+        [p0 + rb*(sin(f)*t0 + (1 - cos(f))*mm), rot_ax(f, [1, 0, 0]), rot_ax(f, [0, 0, 1]), 1]],
+    [[E, u_e, v_e, 1]],
+    ext > 0 ? [[E + ext*t_out, u_e, v_e, 1]] : []
 );
 
-module sweep(st, off, verl_ende = 0) {
-    st2 = verl_ende > 0
-        ? concat(st, [[[x_b - verl_ende, y_ax, z_ax], [0, 1, 0], 1]])
-        : st;
-    m = len(st2);
+module sweep(st, off) {
+    m = len(st);
     pts = [for (k = [0 : m - 1]) for (j = [0 : NR - 1])
-        let(th = j*360/NR, r = secr(th, st2[k][2], off))
-        st2[k][0] + r*cos(th)*st2[k][1] + [0, 0, r*sin(th)]];
+        let(th = j*360/NR, r = secr(th, st[k][3], off))
+        st[k][0] + r*cos(th)*st[k][1] + r*sin(th)*st[k][2]];
     faces = concat(
         [for (k = [0 : m - 2]) for (j = [0 : NR - 1])
             let(a = k*NR + j, b = k*NR + (j + 1)%NR, c = (k + 1)*NR + (j + 1)%NR, d = (k + 1)*NR + j)
@@ -139,32 +163,31 @@ module platte() {
     }
 }
 
-// ---------------- Enden ----------------
-module muffe_koerper() {
-    translate([x_b + muffe_grund, y_ax, z_ax]) rotate([0, -90, 0]) cylinder(d = muffe_od, h = muffe_l + muffe_grund, $fn = 180);
-}
+// ---------------- Enden (lokaler Rahmen: z = Ausgangsrichtung, Ursprung = Bogenende E) ----------------
+// Der Muffengrund liegt 0,07 mm vor dem letzten Kanalquerschnitt (E): bei schraegen Winkeln waeren beide Ebenen sonst
+// bis auf Rundungsfehler deckungsgleich und es entstuende eine nicht-manifolde Kante.
+mg = 0.07;
+module muffe_koerper() translate([0, 0, -muffe_grund]) cylinder(d = muffe_od, h = muffe_l + muffe_grund + mg, $fn = 180);
 module muffe_bohrung() {
-    translate([x_b + 0.0, y_ax, z_ax]) rotate([0, -90, 0]) translate([0, 0, -0.0]) cylinder(d = muffe_id, h = muffe_l + 1, $fn = 180);
+    translate([0, 0, mg]) cylinder(d = muffe_id, h = muffe_l + 1, $fn = 180);
     if (muffe_nut)
-        translate([x_mund + muffe_nut_von, y_ax, z_ax]) rotate([0, -90, 0])
-            rotate_extrude($fn = 180) translate([muffe_id/2 - 0.1, -(oring_muffe_d + 0.4)/2]) square([muffe_nut_t + 0.1, oring_muffe_d + 0.4]);
+        translate([0, 0, mg + muffe_l - muffe_nut_von]) rotate_extrude($fn = 180)
+            translate([muffe_id/2 - 0.1, -(oring_muffe_d + 0.4)/2]) square([muffe_nut_t + 0.1, oring_muffe_d + 0.4]);
 }
-module magnet_ende() {
-    translate([x_flansch, y_ax, z_ax]) rotate([0, 90, 0])
-        mag_flange(flange110_t, n_mag_110, R110, lobe110, body110_r, 90, gr110, groove_depth_mag, 1, 0, 0, false, 0, 0, pr110);
-}
+// Magnetflansch: Magnetflaeche bei z = flange110_t (zeigt in Ausgangsrichtung), Koerper z = -0,5 .. flange110_t
+module magnet_ende()
+    translate([0, 0, flange110_t]) rotate([0, 180, 0])
+        mag_flange(flange110_t + 0.5, n_mag_110, R110, lobe110, body110_r, 90, gr110, groove_depth_mag, 1, 0, 0, false, 0, 0, pr110);
 
 module anschluss() {
-    st_i = stationen(-1);
-    st_a = stationen(pl_t/2);
     difference() {
         union() {
             platte();
-            sweep(st_a, wand);
-            if (ende == "muffe") muffe_koerper(); else magnet_ende();
+            sweep(stationen(pl_t/2, 1), wand);
+            multmatrix(Mend) { if (ende == "muffe") muffe_koerper(); else magnet_ende(); }
         }
-        sweep(st_i, 0, ende == "muffe" ? 0 : flange110_t + 1);
-        if (ende == "muffe") muffe_bohrung();
+        sweep(stationen(-1, ende == "muffe" ? 1 : flange110_t + 1), 0);
+        if (ende == "muffe") multmatrix(Mend) muffe_bohrung();
     }
 }
 
@@ -175,7 +198,10 @@ if (ausgabe == "druck")          rotate([90, 0, 0]) anschluss();
 else if (ausgabe == "montiert")  anschluss();
 else if (ausgabe == "oring")     oring_muffe();
 
-echo(str("K40-Anschluss: Achse ", y_ax, " mm von der Rueckwand, Bogenende bei x = ", x_b,
-         " (Pocketkante links bei x = ", -pocket_w/2, "), Ende bei x = ", x_ende,
-         ende == "muffe" ? str(", Muffe ", muffe_l, " tief, Kastenkonus beginnt bei Einstecktiefe 20 / 15 / 10 bei x = ", x_b - 20 + 20 - 20, " / ", x_b - 25, " / ", x_b - 30)
-                         : str(", Magnetflaeche bei x = ", x_flansch, ", Kastenkonus bei x = ", x_flansch - 20)));
+ende_r = ende == "muffe" ? muffe_od/2 : 76.5;               // Radius des Endstuecks in der Flanschebene
+echo(str("K40-Anschluss: Bogenwinkel ", round(beta*10)/10, " Grad, Ausgangsrichtung ", t_out, ", Bogenende E = ", E,
+         ", Bogenbeginn y = ", y0, ", Uebergang ", round(lt*10)/10, " mm lang"));
+echo(str("ENDE E=", E, " T=", t_out, " U=", u_h, " V=", v_h));
+if (lt < 5) echo("WARNUNG: Uebergang kuerzer als 5 mm (y_ax zu klein fuer rb/Winkel)");
+if (E[1] - ende_r*sb < pl_t + 2) echo("WARNUNG: Endstueck ragt in die Rueckwand (y_ax vergroessern oder aus_yaw erhoehen)");
+if (abs(aus_pitch) > 70) echo("WARNUNG: aus_pitch ueber 70 Grad nicht unterstuetzt");

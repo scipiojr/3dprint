@@ -106,6 +106,17 @@ decke_getrennt = false;
 roof_lap = 3;     // Auflage der Deckenplatte seitlich der Kammer auf dem Kragen (Falzbreite je Seite)
 roof_fit = 0.2;   // Spiel der Platte im Falz (je Seite, Klebespalt)
 
+/* [Trichter von oben einsetzen] */
+// true: Der Rahmen ist ueber die ganze Laenge oben offen (Trog). Einlass und Auslass werden SENKRECHT von oben eingesetzt und bringen ihr Dachstueck selbst mit:
+//       Dachplatte buendig mit der Deckelauflage, liegt im Falz auf dem Kragen; die Rastwuelste/-nuten der Zapfen laufen senkrecht, die Zapfen gleiten ein.
+//       Das getrennte Teil "decke" entfaellt. false: alter Aufbau (Zapfen von der Seite, Decke am Rahmen).
+von_oben   = true;
+roof_lap_o = 6;       // Falzbreite je Seite: so weit liegt das Dachstueck seitlich ueber der Kammerwand auf dem Kragen
+nf_b = 2;  nf_h = 2;  nf_spiel = 0.15;   // Nut und Feder im Falz: Feder (am Dachstueck) 2 mm breit, 2 mm hoch, Nut mit Spiel (dann verkleben)
+zapfen_flare = 1.2;   // Zapfeninnenseite weitet sich zur Kammer hin um so viel je Seite (verschliffener Uebergang, Wand am Ende dann ca. sp_wall - flare)
+steg_b = 3;           // Versteifungssteg aussen am Kragen (Dreiprofil, 45 Grad oben/unten, stuetzfrei), Ausladung; 0 = aus. Nicht am Verschlusspolster und nicht an den Stirnseiten
+kn_d = 9;             // Durchmesser der Scharnierglieder (vorher frame_t = 12): weniger Masse am Rand gegen Schrumpfverzug
+
 /* [Verschluss GH-4001, gemessene Beschlaege] */
 // Hebelverschluss: Befestigungsblech 30,6 x 15,6 mm, Loecher (ø6,4) in einer Reihe in Laengsrichtung, Abstand 17,5; das Blech liegt
 // SENKRECHT, die Schwenkachse des Hebels am oberen Ende (Richtung Deckel), der Haken zeigt nach oben. Beim Schliessen zieht der Hebel nach unten.
@@ -141,6 +152,15 @@ win_w = c_w - 2*(c_wall + c_lip);   win_h = c_h - 2*(c_wall + c_lip);   // Fenst
 win_z0 = box_wall + c_wall + c_lip;                                      // Kassette liegt auf dem Boden
 
 roof_t = ceil_t;                               // Dicke der Deckenplatte (buendig mit der Deckelauflage)
+// Trichter von oben: Zapfen reichen bis zur Deckelauflage (Dachplatte = Zapfendecke), Innenraum bis zur Kammerdecke
+zz0 = box_wall + sp_gap;
+pz0 = box_h - roof_t;                          // Falzboden / Unterseite der Dachplatte
+rl_o = roof_lap_o;
+sp_oh_v = von_oben ? box_h - zz0 : sp_oh;
+sp_ih_v = von_oben ? pz0 - (zz0 + sp_wall) : sp_ih;
+py0 = box_wall - rl_o + roof_fit;  py1 = box_w - box_wall + rl_o - roof_fit;   // Dachplatte in y
+zy0 = box_wall + sp_gap;  zy1 = zy0 + sp_ow;                                    // Zapfen in y
+grid_x0 = sp_in + filter_slot;                 // Beginn des Gitters = Beginn des Dachstuecks vom Auslass
 lt_keep_z   = lt_keep_top - lt_keep_hole_top;                 // Lochmitte des Einhaengehakens ueber der Trennebene (Deckel-lokal)
 lt_engage_z = box_h + lt_keep_top - lt_keep_h + lt_lip_h;       // Hoehe der Fangleiste (Rahmen-Koordinaten)
 lt_base_top = lt_engage_z - lt_reach + lt_pivot_above;          // Oberkante Befestigungsblech am Rahmen
@@ -181,6 +201,28 @@ module snap_ring(xa, sg, d = 0) {
     translate([0, box_w - box_wall + 0.1, z0]) rotate([90, 0, 0]) linear_extrude(height = inner_w + 0.2) prof();   // Boden
 }
 
+// Dachstueck eines Trichters (Trichter von oben): Platte buendig mit der Deckelauflage im Falz, 45-Grad-Ecken an der Konusseite
+// (dort liegt neben dem Zapfen nichts darunter: stuetzfrei), je eine Feder (nf_b x nf_h) auf jeder Seite fuer die Nut im Falz.
+// xa..xb = x-Bereich in Koordinaten des Trichters; ende_konus = "start" (Konus bei xa, Einlass) oder "ende" (Konus bei xb, Auslass)
+module dach_fp(xa, xb, ende_konus) {
+    d0 = zy0 - py0;  d1 = py1 - zy1;
+    if (ende_konus == "start") polygon([[xa, zy0], [xa + d0, py0], [xb, py0], [xb, py1], [xa + d1, py1], [xa, zy1]]);
+    else polygon([[xa, py0], [xb - d0, py0], [xb, zy0], [xb, zy1], [xb - d1, py1], [xa, py1]]);
+}
+module dach(xa, xb, ende_konus) {
+    translate([0, 0, pz0 + 0.1]) linear_extrude(height = box_h - pz0 - 0.1) dach_fp(xa, xb, ende_konus);
+    for (yg = [box_wall - rl_o/2, box_w - box_wall + rl_o/2]) intersection() {
+        translate([0, 0, pz0 + 0.1 - nf_h]) linear_extrude(height = nf_h + 0.05) dach_fp(xa, xb, ende_konus);
+        translate([xa - 1, yg - nf_b/2, pz0 - 10]) cube([xb - xa + 2, nf_b, 20]);
+    }
+}
+// Falz mit Nut fuer ein Dachstueck im Rahmen, x0..x1 in Rahmenkoordinaten
+module falz(x0, x1) {
+    translate([x0, box_wall - rl_o, pz0]) cube([x1 - x0, inner_w + 2*rl_o, roof_t + 1]);
+    for (yg = [box_wall - rl_o/2, box_w - box_wall + rl_o/2])
+        translate([x0, yg - nf_b/2 - nf_spiel, pz0 - nf_h - 0.3]) cube([x1 - x0, nf_b + 2*nf_spiel, nf_h + 0.4]);
+}
+
 // ==========================================
 // 1. RAHMEN  (x = 0 ... RL, Boden z = 0, Deckelseite oben)
 // ==========================================
@@ -198,16 +240,25 @@ module rahmen() {
             // Polster fuer das Befestigungsblech des Verschlusses: senkrechte Flaeche weiter nach unten, darunter 45 Grad zurueck (stuetzfrei)
             translate([RL/2 - lt_pad_w/2, 0, 0]) rotate([90, 0, 90]) linear_extrude(height = lt_pad_w)
                 polygon([[-frame_t, box_h - 5], [-frame_t, lt_pad_bot], [0, lt_pad_bot - frame_t], [3, lt_pad_bot - frame_t], [3, box_h - 5]]);
+            // Versteifungssteg aussen am Kragen (Dreiprofil: unten und oben 45 Grad), nur an den Laengsseiten, nicht am Verschlusspolster
+            if (steg_b > 0) for (sd = [0, 1], xr = (sd == 0) ? [[0, RL/2 - lt_pad_w/2 - 3], [RL/2 + lt_pad_w/2 + 3, RL]] : [[0, RL]])
+                translate([xr[0], sd == 0 ? -frame_t : box_w + frame_t, hb + collar_h/2]) rotate([90, 0, 90]) linear_extrude(height = xr[1] - xr[0])
+                    polygon(sd == 0 ? [[0.1, -steg_b], [-steg_b, 0], [0.1, steg_b]] : [[-0.1, -steg_b], [steg_b, 0], [-0.1, steg_b]]);
             // Scharnier-Knuckles (Rahmenglieder: Enden und Mitte)
             for (k = kn_frame)
                 hull() {
                     translate([k[0], box_w + 5.5, box_h - 0.1]) cube([k[1] - k[0], frame_t - 5.5, 0.1]);
-                    translate([k[0], hinge_y, box_h + hinge_z]) rotate([0, 90, 0]) cylinder(d = frame_t, h = k[1] - k[0]);
+                    translate([k[0], hinge_y, box_h + hinge_z]) rotate([0, 90, 0]) cylinder(d = kn_d, h = k[1] - k[0]);
                 }
         }
         // Kammer durchgehend
         translate([-1, box_wall, box_wall]) cube([RL + 2, inner_w, inner_h]);
         // Deckeloeffnung ueber beiden Faechern (Kassette wird von oben eingesteckt)
+        if (von_oben) {   // Trog: Kammer ueber die ganze Laenge offen, Falz mit Nut fuer die Dachstuecke von Einlass und Auslass
+            translate([-1, box_wall, box_h - ceil_t - 1]) cube([RL + 2, inner_w, ceil_t + collar_h + 1]);
+            falz(-1, sp_in + 0.2);
+            falz(grid_x0 - 0.2, RL + 1);
+        } else
         translate([sp_in, box_wall, box_h - ceil_t - 1]) cube([filter_slot, inner_w, ceil_t + collar_h]);
         // Decke abgetrennt: Kammer ueber die ganze Laenge oben offen, Falz (roof_lap je Seite) fuer die Deckenplatte, buendig mit der Deckelauflage
         if (decke_getrennt)
@@ -261,18 +312,22 @@ module einlass() {
             // Trichter aussen
             hull() {
                 translate([xs_in - 0.01, yc, zc]) rotate([0, 90, 0]) cylinder(d = (einlass_typ == "magnet") ? stub_bore_d + 2*cone_wall : in_pipe_id, h = 0.01);
-                translate([xe_in, yc - sp_ow/2, box_wall + sp_gap]) cube([0.01, sp_ow, sp_oh]);   // aussen = Zapfen-Aussenmass (Trichterwand = sp_wall)
+                translate([xe_in, yc - sp_ow/2, zz0]) cube([0.01, sp_ow, sp_oh_v]);   // aussen = Zapfen-Aussenmass (Trichterwand = sp_wall)
             }
             // Zapfen: Rohr + Anschlagrahmen (letzte "ledge" mm)
-            translate([xe_in - 0.01, yc - sp_ow/2, box_wall + sp_gap]) cube([sp_in + 0.01, sp_ow, sp_oh]);
+            translate([xe_in - 0.01, yc - sp_ow/2, zz0]) cube([sp_in + 0.01, sp_ow, sp_oh_v]);
+            if (von_oben) dach(xe_in, xe_in + sp_in, "start");
         }
         // Kanal: Bohrung -> Trichter -> Zapfeninnenraum
         translate([-1, yc, zc]) rotate([0, 90, 0]) cylinder(d = bore_in, h = xs_in + 1.02, $fn = 240);
         hull() {
             translate([xs_in, yc, zc]) rotate([0, 90, 0]) cylinder(d = bore_in, h = 0.01, $fn = 240);
-            translate([xe_in, yc - sp_iw/2, box_wall + sp_gap + sp_wall]) cube([0.01, sp_iw, sp_ih]);
+            translate([xe_in, yc - sp_iw/2, zz0 + sp_wall]) cube([0.01, sp_iw, sp_ih_v]);
         }
-        translate([xe_in - 0.02, yc - sp_iw/2, box_wall + sp_gap + sp_wall]) cube([sp_in - ledge + 0.02, sp_iw, sp_ih]);
+        hull() {   // Zapfeninnenraum: weitet sich zur Kammer hin (zapfen_flare je Seite), verschleifter Uebergang
+            translate([xe_in - 0.02, yc - sp_iw/2, zz0 + sp_wall]) cube([0.01, sp_iw, sp_ih_v]);
+            translate([xe_in + sp_in - ledge + 0.01, yc - sp_iw/2 - zapfen_flare, zz0 + sp_wall]) cube([0.01, sp_iw + 2*zapfen_flare, sp_ih_v]);
+        }
         // Fenster im Anschlagrahmen
         translate([xe_in + sp_in - ledge - 0.01, yc - win_w/2, win_z0]) cube([ledge + 0.1, win_w, win_h]);
         // Rastnut im Zapfen (Rahmen-x = lokal - xe_in)
@@ -290,16 +345,20 @@ module auslass() {
     difference() {
         union() {
             hull() {
-                translate([0, yc - sp_ow/2, box_wall + sp_gap]) cube([0.01, sp_ow, sp_oh]);
+                translate([0, yc - sp_ow/2, zz0]) cube([0.01, sp_ow, sp_oh_v]);
                 translate([xm - 0.01, yc, zc]) rotate([0, 90, 0]) cylinder(d = 2*rs_o, h = 0.01);   // Aussenkontur laeuft tangential in den Muffenzylinder (keine Stufe aussen)
             }
             translate([xm - 0.01, yc, zc]) rotate([0, 90, 0]) cylinder(r = rs_o, h = socket_depth + 0.01);
-            translate([-sp_out, yc - sp_ow/2, box_wall + sp_gap]) cube([sp_out + 0.01, sp_ow, sp_oh]);
+            translate([-sp_out, yc - sp_ow/2, zz0]) cube([sp_out + 0.01, sp_ow, sp_oh_v]);
+            if (von_oben) dach(-(sp_out + grid_t), 0, "ende");
         }
         // Kanal: Zapfeninnenraum -> Trichter -> Bohrung ø fan_bore_d
-        translate([-sp_out - 0.01, yc - sp_iw/2, box_wall + sp_gap + sp_wall]) cube([sp_out + 0.02, sp_iw, sp_ih]);
+        hull() {   // Zapfeninnenraum: weitet sich zur Kammer hin (zapfen_flare je Seite)
+            translate([-sp_out - 0.01, yc - sp_iw/2 - zapfen_flare, zz0 + sp_wall]) cube([0.01, sp_iw + 2*zapfen_flare, sp_ih_v]);
+            translate([-0.02, yc - sp_iw/2, zz0 + sp_wall]) cube([0.03, sp_iw, sp_ih_v]);
+        }
         hull() {
-            translate([-0.01, yc - sp_iw/2, box_wall + sp_gap + sp_wall]) cube([0.01, sp_iw, sp_ih]);
+            translate([-0.01, yc - sp_iw/2, zz0 + sp_wall]) cube([0.01, sp_iw, sp_ih_v]);
             translate([xm, yc, zc]) rotate([0, 90, 0]) cylinder(d = fan_bore_d, h = 0.01);
         }
         // Muffe innen + Einfuehrfase, O-Ring-Nut, Schraubloecher (gemeinsam mit dem Ventilator-Adapter)
@@ -346,7 +405,7 @@ module lid() {
             for (k = kn_lid)
                 hull() {
                     translate([k[0], box_w, 0]) cube([k[1] - k[0], hinge_y - box_w, lid_t]);
-                    translate([k[0], hinge_y, hinge_z]) rotate([0, 90, 0]) cylinder(d = frame_t, h = k[1] - k[0]);
+                    translate([k[0], hinge_y, hinge_z]) rotate([0, 90, 0]) cylinder(d = kn_d, h = k[1] - k[0]);
                 }
         }
         // Vertiefung fuer die Griffasche der Kassette (liegt hinten, x = Kassettenrueckseite - cart_tab_t ... Rueckseite)
@@ -356,7 +415,7 @@ module lid() {
         // Aussparungen fuer die Rahmenglieder (Enden und Mitte, je 0,25 mm Spiel in x)
         for (k = kn_frame) let (xa = (k[0] <= 0) ? -1 : k[0] - 0.25, xb = (k[1] >= RL) ? RL + 1 : k[1] + 0.25) hull() {
             translate([xa, box_w + 5.5 - 0.4, -1]) cube([xb - xa, frame_t - 5.5 + 0.8, 1.01]);
-            translate([xa, hinge_y, hinge_z]) rotate([0, 90, 0]) cylinder(d = frame_t + 0.8, h = xb - xa, $fn = 60);
+            translate([xa, hinge_y, hinge_z]) rotate([0, 90, 0]) cylinder(d = kn_d + 0.8, h = xb - xa, $fn = 60);
         }
         // Nut fuer die Dichtschnur (Rundschnur), umlaufend um die Kammeroeffnung in der Auflageflaeche des Deckels
         seal_groove();
@@ -495,7 +554,7 @@ if (auswahl == "jig") jig();
 if (auswahl == "jig_clamp") jig_clamp();
 if (auswahl == "assembly") {
     color("steelblue") rahmen();
-    if (decke_getrennt) color("tomato") translate([0, 0, box_h - roof_t]) decke();
+    if (decke_getrennt && !von_oben) color("tomato") translate([0, 0, box_h - roof_t]) decke();
     if (lt_ghost) beschlaege_ghost();
     if (foot_h > 0) color("dimgray") fuss_positionen() fuss();
     color("seagreen") translate([-xe_in, 0, 0]) einlass();

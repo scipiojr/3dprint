@@ -181,27 +181,36 @@ module magnet_ende()
         mag_flange(flange110_t + 0.5, n_mag_110, R110, lobe110, body110_r, 90, gr110, groove_depth_mag, 1, 0, 0, false, 0, 0, pr110);
 
 // ---------------- Nase: Stuetzrippe von der Platte unter das Bogenende (druckt ohne Stuetzen) ----------------
-// Liegt in der Bogenebene (Rippe in a = Druck-hoch, b = Richtung der Kruemmung), Querschnitt V-foermig: unten nase_d breit,
-// Flanken 45 Grad bis nase_breite. Der Kanal wird danach herausgeschnitten, sichtbar bleibt nur der Teil ausserhalb der Wand.
+// Beginnt an der Platte als schmaler Steg (nase_d), weitet sich mit 45 Grad auf und geht tangential in die Rundung des
+// Endstuecks (Muffe/Flansch) ueber: sie schmiegt sich dort an, wo das Rohr selbst flacher als 45 Grad ueberhaengt.
+// Querschnitt in Bogenebene-Koordinaten (b = Kruemmungsrichtung, a = Druck-hoch, w = quer); Kanal wird danach herausgeschnitten.
 nase = true;                     // Nase an/aus
-nase_d = 6;                      // Breite der Rippe an der Platte
-nase_breite = 50;                // Breite oben (unter dem Bogenende); 45-Grad-Flanken, oben senkrecht
+nase_d = 6;                      // Breite des Stegs an der Platte
 module nase() {
     bk = (ende == "muffe") ? muffe_grund : 0;
     ml = (ende == "muffe") ? muffe_l + mg : flange110_t;
     Rm = (ende == "muffe") ? muffe_od/2 : body110_r;
     Ea = rb*sb;  Eb = rb*(1 - cos(beta));
-    tb = sb;  ta = t_out[1];  n = [ta, -tb];
-    P1 = [Eb - bk*tb + Rm*n[0], Ea - bk*ta + Rm*n[1]];
-    P2 = [Eb + (ml - 0.6)*tb + (Rm - 0.3)*n[0], Ea + (ml - 0.6)*ta + (Rm - 0.3)*n[1]];   // knapp innerhalb der Endflaeche (keine deckungsgleichen Flaechen)
-    a_pl = pl_t/2 - y0;  b0 = Eb - 10;
-    hw = nase_breite/2;  hd = nase_d/2;  hh = hw - hd;            // Hoehe, bis die 45-Grad-Flanke die volle Breite erreicht
-    if (P1[1] > a_pl + 5 && P2[1] > a_pl + 5)
-    multmatrix([[mm[0], t0[0], -nax[0], p0[0]], [mm[1], t0[1], -nax[1], p0[1]], [mm[2], t0[2], -nax[2], p0[2]], [0, 0, 0, 1]])
+    tb = sb;  ta = t_out[1];
+    tbc = max(tb, 0.35);  k = ta/tbc;                    // Neigung der Endachse in der Bogenebene
+    th = atan(tbc);  w_t = Rm*sin(th);  da = Rm/tbc*cos(th);   // Beruehrpunkt, an dem die Rohrflanke 45 Grad erreicht
+    a_pl = pl_t/2 - y0;  hd = nase_d/2;
+    function ring(b) =
+        let(ac = Ea + (b - Eb)*k, at = max(ac - da, a_pl + 1),
+            wpl = max(hd, w_t - (at - a_pl)), w2 = wpl > hd ? wpl + 0.3 : hd,
+            as = min(at - 0.2, wpl > hd ? a_pl + 0.3 : max(a_pl + 0.3, at - (w_t - hd))))
+        [[b, a_pl, -wpl], [b, a_pl, wpl], [b, as, w2], [b, at, w_t], [b, ac, w_t], [b, ac, -w_t], [b, at, -w_t], [b, as, -w2]];
+    ns = 14;  b0s = Eb - 5;  b1s = Eb + ml*tb + Rm*abs(ta) + 5;
+    pts = [for (i = [0:ns]) each ring(b0s + (b1s - b0s)*i/ns)];
+    faces = concat(
+        [for (i = [0:ns-1], j = [0:7]) [i*8 + j, i*8 + (j+1)%8, (i+1)*8 + (j+1)%8, (i+1)*8 + j]],
+        [[for (j = [7:-1:0]) j]], [[for (j = [0:7]) ns*8 + j]]);
+    if (Eb < 20) echo("WARNUNG: Nase entfaellt (Bogen zu flach zur Platte, Bogenwinkel zu klein); Stuetzen im Slicer verwenden");
+    if (Eb >= 20 && ring(Eb)[3][1] > a_pl + 4)
     intersection() {
-        linear_extrude(height = nase_breite + 2, center = true) hull() polygon([[b0, a_pl], [b0, P1[1]], P1, P2, [P2[0], a_pl]]);
-        translate([b0 - 1, 0, 0]) rotate([90, 0, 90]) linear_extrude(height = max(P2[0], P1[0]) - b0 + 2)
-            polygon([[a_pl, -hd], [a_pl, hd], [a_pl + hh, hw], [a_pl + 200, hw], [a_pl + 200, -hw], [a_pl + hh, -hw]]);
+        multmatrix([[mm[0], t0[0], -nax[0], p0[0]], [mm[1], t0[1], -nax[1], p0[1]], [mm[2], t0[2], -nax[2], p0[2]], [0, 0, 0, 1]])
+            polyhedron(pts, faces, convexity = 6);
+        multmatrix(Mend) translate([-250, -250, -bk + 0.3]) cube([500, 500, bk + ml - 0.9]);   // Anfang/Ende knapp innerhalb der Endstueckflaechen
     }
 }
 

@@ -179,12 +179,38 @@ module magnet_ende()
     translate([0, 0, flange110_t]) rotate([0, 180, 0])
         mag_flange(flange110_t + 0.5, n_mag_110, R110, lobe110, body110_r, 90, gr110, groove_depth_mag, 1, 0, 0, false, 0, 0, pr110);
 
+// ---------------- Nase: Stuetzrippe von der Platte unter das Bogenende (druckt ohne Stuetzen) ----------------
+// Liegt in der Bogenebene (Rippe in a = Druck-hoch, b = Richtung der Kruemmung), Querschnitt V-foermig: unten nase_d breit,
+// Flanken 45 Grad bis nase_breite. Der Kanal wird danach herausgeschnitten, sichtbar bleibt nur der Teil ausserhalb der Wand.
+nase = true;                     // Nase an/aus
+nase_d = 6;                      // Breite der Rippe an der Platte
+nase_breite = 50;                // Breite oben (unter dem Bogenende); 45-Grad-Flanken, oben senkrecht
+module nase() {
+    bk = (ende == "muffe") ? muffe_grund : 0;
+    ml = (ende == "muffe") ? muffe_l + mg : flange110_t;
+    Rm = (ende == "muffe") ? muffe_od/2 : body110_r;
+    Ea = rb*sb;  Eb = rb*(1 - cos(beta));
+    tb = sb;  ta = t_out[1];  n = [ta, -tb];
+    P1 = [Eb - bk*tb + Rm*n[0], Ea - bk*ta + Rm*n[1]];
+    P2 = [Eb + (ml - 0.6)*tb + (Rm - 0.3)*n[0], Ea + (ml - 0.6)*ta + (Rm - 0.3)*n[1]];   // knapp innerhalb der Endflaeche (keine deckungsgleichen Flaechen)
+    a_pl = pl_t/2 - y0;  b0 = Eb - 10;
+    hw = nase_breite/2;  hd = nase_d/2;  hh = hw - hd;            // Hoehe, bis die 45-Grad-Flanke die volle Breite erreicht
+    if (P1[1] > a_pl + 5 && P2[1] > a_pl + 5)
+    multmatrix([[mm[0], t0[0], -nax[0], p0[0]], [mm[1], t0[1], -nax[1], p0[1]], [mm[2], t0[2], -nax[2], p0[2]], [0, 0, 0, 1]])
+    intersection() {
+        linear_extrude(height = nase_breite + 2, center = true) hull() polygon([[b0, a_pl], [b0, P1[1]], P1, P2, [P2[0], a_pl]]);
+        translate([b0 - 1, 0, 0]) rotate([90, 0, 90]) linear_extrude(height = max(P2[0], P1[0]) - b0 + 2)
+            polygon([[a_pl, -hd], [a_pl, hd], [a_pl + hh, hw], [a_pl + 200, hw], [a_pl + 200, -hw], [a_pl + hh, -hw]]);
+    }
+}
+
 module anschluss() {
     difference() {
         union() {
             platte();
             sweep(stationen(pl_t/2, 1), wand);
             multmatrix(Mend) { if (ende == "muffe") muffe_koerper(); else magnet_ende(); }
+            if (nase) nase();
         }
         sweep(stationen(-1, ende == "muffe" ? 1 : flange110_t + 1), 0);
         if (ende == "muffe") multmatrix(Mend) muffe_bohrung();

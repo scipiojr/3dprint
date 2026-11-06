@@ -71,8 +71,9 @@ scharnier_frei = 20;             // Abstand Scharnierachse zur Laserrueckwand (D
 y_ax = kasten_w/2 + scharnier_ueber + scharnier_frei;
 
 /* [Muffe auf den Einlass-Stutzen] */
-stutzen_d = 100;                 // Aussendurchmesser des Stutzens (in_pipe_id im Filterkasten)
-muffe_spiel = 1.5;               // Durchmesserspiel
+stutzen_d = 98.7;                // Aussendurchmesser des gedruckten Stutzens am Filterkasten (gemessen; Modell 100)
+muffe_spiel = 0.8;               // gewuenschtes Durchmesserspiel nach dem Druck
+muffe_korr = 3.6;                // Druckkorrektur: die Muffe (Modell-ID 100,5) wurde mit 96,9 mm gemessen, also 3,6 mm zu eng
 muffe_wand = 4;                  // Muffenwand (Platz fuer die O-Ring-Nut)
 muffe_l = 20;                    // Muffentiefe = Laenge des Einlass-Stutzens (in_tube_len im Kasten = 20); tiefer bringt nichts, dahinter beginnt der Konus
 muffe_grund = 3;                 // Dicke des Anschlagrings am Muffengrund
@@ -90,7 +91,7 @@ M2 = 18;                         // Ringe im Bogen
 a_i = pocket_w/2 - rand;         // halbe Breite der Oeffnung
 b_i = pocket_h/2 - rand;         // halbe Hoehe
 R_i = bore_d/2;
-muffe_id = stutzen_d + muffe_spiel;
+muffe_id = stutzen_d + muffe_spiel + muffe_korr;   // Modell-Innendurchmesser 103,1 -> gedruckt ca. 99,5
 muffe_od = muffe_id + 2*muffe_wand;
 
 // Richtung: Start +y (aus der Wand), Ende t_out; ebener Bogen vom Radius rb dazwischen

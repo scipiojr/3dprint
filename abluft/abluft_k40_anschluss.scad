@@ -72,7 +72,7 @@ y_ax = kasten_w/2 + scharnier_ueber + scharnier_frei;
 
 /* [Muffe auf den Einlass-Stutzen] */
 stutzen_d = 100;                 // Aussendurchmesser des Stutzens (in_pipe_id im Filterkasten)
-muffe_spiel = 0.5;               // Durchmesserspiel
+muffe_spiel = 1.5;               // Durchmesserspiel
 muffe_wand = 4;                  // Muffenwand (Platz fuer die O-Ring-Nut)
 muffe_l = 20;                    // Muffentiefe = Laenge des Einlass-Stutzens (in_tube_len im Kasten = 20); tiefer bringt nichts, dahinter beginnt der Konus
 muffe_grund = 3;                 // Dicke des Anschlagrings am Muffengrund

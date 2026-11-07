@@ -11,7 +11,7 @@ for cx in (30.5,89.5):
     for yc in (27,93):
         if False: a.add_patch(Polygon([(cx-3.6,yc-3-2.08),(cx,yc-3-4.16),(cx+3.6,yc-3-2.08),(cx+3.6,yc+3+2.08),(cx,yc+3+4.16),(cx-3.6,yc+3+2.08)],fc='none',ec='gray',ls='--',lw=.8))
         a.add_patch(FancyBboxPatch((cx-3,yc-6),6,12,boxstyle='round,pad=0,rounding_size=3',fc='w',ec='k'))
-for ys,w in ((0,19),(36,19),(65,19),(101,19)):
+for ys,w in ((15,24),(81,24)):
     a.add_patch(Rectangle((90,ys),5,w,fc='#e8b0a0',ec='k',alpha=.8))
     for off in (0,w-4): a.add_patch(Rectangle((20,ys+off),70,4,fc='#e8b0a0',ec='k',alpha=.6,ls=':'))
 def dim(ax_,p,q,txt,off=(0,0),**k): ax_.annotate('',p,q,arrowprops=dict(arrowstyle='<->',lw=.8)); ax_.text((p[0]+q[0])/2+off[0],(p[1]+q[1])/2+off[1],txt,ha='center',va='center',fontsize=8,bbox=dict(fc='w',ec='none',pad=.5))
@@ -19,7 +19,7 @@ dim(a,(0,-8),(120,-8),'120'); dim(a,(0,-16),(95,-16),'95 (dick 5 mm)'); dim(a,(9
 dim(a,(-8,0),(-8,120),'120',(-3,0))
 dim(a,(27.5,128),(92.5,128),'65 außen'); dim(a,(33.5,122),(86.5,122),'53 innen',(0,-0))
 dim(a,(131,33),(131,87),'54'); dim(a,(138,21),(138,33),'12',(0,0)); a.text(145,27,'Langloch\n6 × 12\n(ohne Mutterntasche,\nliegt zwischen den\nTrägerhälften)',fontsize=7)
-dim(a,(-18,0),(-18,19),'Träger 19'); dim(a,(-18,36),(-18,55),'19'); dim(a,(-26,19),(-26,36),'17 Lücke');
+dim(a,(-18,15),(-18,39),'Doppelträger 24 (Rippen 4)'); dim(a,(-26,81),(-26,105),'24');
 a.text(100,-34,'Wandanlage bei X=95 (rot)',color='r',fontsize=8)
 a.set_xlim(-30,160); a.set_ylim(-40,138); a.axis('off')
 # Seitenansicht

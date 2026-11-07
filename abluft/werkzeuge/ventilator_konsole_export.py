@@ -5,7 +5,7 @@ W,L,T,TT,XS=120,120,5,2,95
 sw,pitch,cx0=6,59,60
 SLOT_LEN,GAP=12,54
 YC=[L/2-GAP/2-SLOT_LEN/2,L/2+GAP/2+SLOT_LEN/2]
-LEGS=[(0,19),(36,19),(65,19),(101,19)]
+LEGS=[(15,24),(81,24)]
 LH,LT,R=46,5,9
 NAF,NH=7.2,0   # NH=0: keine Mutterntasche (3.4 = Tasche für M4)
 sd,cd=5.5,10; sz=[-18,-34]

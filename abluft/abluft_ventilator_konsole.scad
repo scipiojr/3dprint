@@ -17,7 +17,7 @@ slot_gap    = 54;          // Abstand der Löcher in Wandrichtung (Innenkante zu
 
 // Stützträger (rechtwinklig, an der Wand abgestützt)
 leg_h   = 46;   // Höhe ab Oberseite Konsole
-legs    = [[0, 19], [36, 19], [65, 19], [101, 19]];  // Träger [y0, Breite]: je zwei Träger beidseits der Mutterntaschen (ANNAHME)
+legs    = [[15, 24], [81, 24]];  // Doppelträger [y0, Breite]: je einer pro Lochbahn, die beiden Rippen liegen beidseits der Langlöcher (ANNAHME)
 leg_t   = 5;    // Stärke des Trägers in X
 leg_r   = 9;   // Rundung der unteren Ecken
 rib_a   = 70;   // Auskragung der Rundung in X (raumseitig ab Träger) – ANNAHME

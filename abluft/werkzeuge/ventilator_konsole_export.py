@@ -61,12 +61,10 @@ for cx in (cx0-pitch/2,cx0+pitch/2):
         from shapely.geometry import MultiPoint
         h=MultiPoint(hx(-(SLOT_LEN-sw)/2)+hx((SLOT_LEN-sw)/2)).convex_hull
         p=trimesh.creation.extrude_polygon(h,NH+0.01); p.apply_translation([0,0,-T-0.01]); m=D(m,p)
-AC,AH=16,5   # Bogendurchbruch: Sehne, Pfeilhoehe
-RA=AC*AC/(8*AH)+AH/2
-for ys,LL in LEGS:   # Wandplatte fuer die Mutter durchtrennen (Kreisabschnitt, bis 5 mm unter der Plattenunterseite)
-    yy=np.linspace(-AC/2,AC/2,81)
-    top=[(y,-T-(np.sqrt(RA*RA-y*y)-(RA-AH))) for y in yy]
-    pg=Polygon(top+[(AC/2,-T),(-AC/2,-T)])
+AC,AS,AK=16,3.4,1.6   # Torbogen: Breite, senkrechte Seiten, Krone (Halbellipse) -> 5 mm hoch
+for ys,LL in LEGS:   # Wandplatte fuer die Mutter durchtrennen (Torbogen, bis 5 mm unter der Plattenunterseite)
+    th=np.linspace(0,np.pi,61)
+    pg=Polygon([(AC/2,-T),(-AC/2,-T)]+[(AC/2*np.cos(t),-T-AS-AK*np.sin(t)) for t in th[::-1]])
     e=trimesh.creation.extrude_polygon(pg,LT+0.2); e.apply_transform(M); e.apply_translation([XS-LT-0.1,ys+LL/2,0]); m=D(m,e)
 m.apply_transform(trimesh.transformations.rotation_matrix(np.pi,[1,0,0])); m.apply_translation([0,L,0])
 m.export('../ventilator_konsole/ventilator_konsole.stl')

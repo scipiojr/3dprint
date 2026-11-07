@@ -25,8 +25,9 @@ rib_t   = 4;    // Stärke der beiden Rippen je Träger
 screw_d = 5.5;  // Wandschrauben
 cs_d    = 10;   // Senkung
 screw_z = [-18, -34];  // Lochhöhen ab Oberseite
-arch_c  = 16;   // Bogendurchbruch in der Wandplatte für die Mutter der wandnahen Löcher: Sehne in Y (= Abstand der Rippen innen)
-arch_h  = 5;    // Pfeilhöhe unter der Plattenunterseite (Wandplatte wird dort ganz durchtrennt)
+arch_c  = 16;   // Torbogen-Durchbruch in der Wandplatte für die Mutter der wandnahen Löcher: Breite in Y (= Abstand der Rippen innen)
+arch_s  = 3.4;  // senkrechte Seiten unter der Plattenunterseite (Mutter 3,2 mm)
+arch_k  = 1.6;  // Krone: Halbellipse darüber -> Gesamthöhe 5 mm; die Wandplatte wird dort ganz durchtrennt
 nut_af  = 7.2;  // M4-Mutter: Schlüsselweite 7 + Spiel (Flächen parallel zur Langlochrichtung, Mutter kann nicht mitdrehen)
 nut_h   = 0;    // Taschentiefe von der Plattenunterseite (0 = keine Tasche; 3,4 = Tasche für M4-Mutter 3,2 mm). Aus: die Löcher liegen frei zwischen den Trägerhälften
 
@@ -40,11 +41,10 @@ module nutpocket() {        // Sechskanttasche, in Langlochrichtung (Y) um den L
     translate([0, dy, 0]) rotate(90) cylinder(r=R, h=nut_h + 0.01, $fn=6);
 }
 
-module arch2d() {           // Kreisabschnitt in (Y,Z): flach an der Plattenunterseite, Bogen nach unten
-  R = arch_c*arch_c/(8*arch_h) + arch_h/2;
+module arch2d() {           // Torbogen in (Y,Z): flach an der Plattenunterseite, senkrechte Seiten, Krone als Halbellipse nach unten
   polygon(concat(
-    [for (a = [-1 : 0.05 : 1]) [a*arch_c/2, -t_thick - (sqrt(R*R - pow(a*arch_c/2, 2)) - (R - arch_h))]],
-    [[arch_c/2, -t_thick], [-arch_c/2, -t_thick]]));
+    [[arch_c/2, -t_thick], [-arch_c/2, -t_thick]],
+    [for (a = [180 : 5 : 360]) [arch_c/2*cos(a), -t_thick - arch_s - arch_k*(-sin(a))]]));
 }
 
 module leg2d(w) {           // Profil in (Y,Z), Trägerbreite w

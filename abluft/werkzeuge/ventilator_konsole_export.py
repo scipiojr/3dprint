@@ -8,7 +8,7 @@ YC=[L/2-GAP/2-SLOT_LEN/2,L/2+GAP/2+SLOT_LEN/2]
 LEGS=[(15,24),(81,24)]
 LH,LT,R=46,5,9
 NAF,NH=7.2,0   # NH=0: keine Mutterntasche (3.4 = Tasche für M4)
-sd,cd=5.5,10; sz=[-18,-34]
+sd,cd=5.5,10; sz=[-22,-35]
 def B(x0,x1,y0_,y1_,z0,z1):
     m=trimesh.creation.box(extents=[x1-x0,y1_-y0_,z1-z0]); m.apply_translation([(x0+x1)/2,(y0_+y1_)/2,(z0+z1)/2]); return m
 def U(a,b): return a.union(b,engine='manifold')
@@ -61,6 +61,8 @@ for cx in (cx0-pitch/2,cx0+pitch/2):
         from shapely.geometry import MultiPoint
         h=MultiPoint(hx(-(SLOT_LEN-sw)/2)+hx((SLOT_LEN-sw)/2)).convex_hull
         p=trimesh.creation.extrude_polygon(h,NH+0.01); p.apply_translation([0,0,-T-0.01]); m=D(m,p)
+for ys,LL in LEGS:   # Wandplatte fuer die Mutter der wandnahen Loecher aussparen
+    yc=ys+LL/2; m=D(m,B(XS-LT-0.01,XS-LT+3.5,yc-7.5,yc+7.5,-T-8,-T))
 m.apply_transform(trimesh.transformations.rotation_matrix(np.pi,[1,0,0])); m.apply_translation([0,L,0])
 m.export('../ventilator_konsole/ventilator_konsole.stl')
 m.export('../ventilator_konsole/ventilator_konsole.3mf')

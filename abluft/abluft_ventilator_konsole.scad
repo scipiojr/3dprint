@@ -24,7 +24,10 @@ rib_a   = 70;   // Auskragung der Rundung in X (raumseitig ab Träger) – ANNAH
 rib_t   = 4;    // Stärke der beiden Rippen je Träger
 screw_d = 5.5;  // Wandschrauben
 cs_d    = 10;   // Senkung
-screw_z = [-18, -34];  // Lochhöhen ab Oberseite
+screw_z = [-22, -35];  // Lochhöhen ab Oberseite (unter der Mutteraussparung)
+notch_h = 8;    // Mutteraussparung in der Wandplatte: Tiefe unter der Plattenunterseite (Mutter 3,2 + Schraubenende)
+notch_x = 3.5;  // Tiefe der Aussparung in X ab Raumseite der Wandplatte (bis 93,5 mm, Mutter reicht bis 93,1)
+notch_y = 15;   // Länge der Aussparung in Y (Mutter 8,3 + Langlochhub 6 + Spiel), mittig zur Lochbahn
 nut_af  = 7.2;  // M4-Mutter: Schlüsselweite 7 + Spiel (Flächen parallel zur Langlochrichtung, Mutter kann nicht mitdrehen)
 nut_h   = 0;    // Taschentiefe von der Plattenunterseite (0 = keine Tasche; 3,4 = Tasche für M4-Mutter 3,2 mm). Aus: die Löcher liegen frei zwischen den Trägerhälften
 
@@ -90,6 +93,8 @@ difference() {
     translate([x_step - 0.01, 0, -t_thin]) cube([plate_w - x_step + 0.01, plate_l, t_thin]);  // dünne Auflage
     for (l = legs) bracket(l[0], l[1]);
   }
+  for (l = legs)                                                                   // Wandplatte für die Mutter der wandnahen Lüfterlöcher aussparen
+    translate([x_step - leg_t - 0.01, l[0] + l[1]/2 - notch_y/2, -t_thick - notch_h]) cube([notch_x + 0.01, notch_y, notch_h]);
   for (cx = [slot_cx - slot_pitch/2, slot_cx + slot_pitch/2])
     for (y = [plate_l/2 - slot_gap/2 - slot_len/2, plate_l/2 + slot_gap/2 + slot_len/2])
       translate([cx, y, 0]) {

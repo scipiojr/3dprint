@@ -28,6 +28,7 @@ Abluft-Anschluss für einen Laser-Cutter: Eine 5 mm dicke Plexiglasscheibe häng
 | `abluft_magnetring.scad` | freie Magnetringe/Deckel zum Anbau an eigene Rohre, Filterkästen usw. (`part` = ring150, ring100, deckel150, deckel100) |
 | `abluft_filterkasten.scad` | Filterkasten (G4-Vlies + Kassette) zwischen 100er Schlauch und Ventilator: Rahmen, Einlass, Auslass, Deckel, Kassette, Schneidlehre → `filterkasten/` |
 | `abluft_k40_anschluss.scad` | Ersatz für das Abluftblech des OMTech K40+: Platte im Lochbild des Blechs + Bogen nach links zum Filterkasten (Muffe über den ø100-Stutzen oder Magnetflansch) → `k40_anschluss/` |
+| `abluft_ventilator_konsole.scad` | Konsole zum Aufsetzen des Ventilators vor der Wand: Platte 120 × 120 mm mit Wandstützen und Auskragung → `ventilator_konsole/` (STL und 3MF) |
 | `magnetring_150.stl`, `magnetring_100.stl` | Magnetringe in Standardmaßen (Dicke 8, ohne Schraublöcher) |
 | `durchfuehrung_innen.stl` | Innenscheibe mit Zentrierbund und Gewinderohr (Raumseite) |
 | `durchfuehrung_aussen.stl` | Halteplatte mit Innengewinde (Dachseite), mit Bohrungen für zwei M4-Sicherungsschrauben |
@@ -302,3 +303,16 @@ Ersetzt das Abluftblech samt Mini-Lüfter an der Rückwand des OMTech K40+ (der 
 - **Abstand zur Rückwand:** Kastenachse `y_ax` = 113,9 mm (Kastenmitte + Scharnierachse + 20 mm Freiraum). Der Kasten steht um 180° gedreht, **Scharnier zur Rückwand** (der Verschluss bleibt zugänglich); die Scharnierachse liegt 20 mm von der Rückwand, der Deckel öffnet bis 90° (12,5 mm über die Achse hinaus). Kastenkante 14 mm von der Rückwand. Höhe: Kastenachse 80,35 mm über der Unterkante, mit den 10-mm-Füßchen 90,35 mm über dem Tisch.
 - **Druck:** Platte flach, Rückwandseite unten (`ausgabe = "druck"`); **Stützen unter dem Bogen und der Muffe nötig**. Export: `werkzeuge/export_k40_anschluss.sh` (ca. 1 Minute; Standardwinkel 0/0, für andere Winkel die `-D` nutzen).
 - **Geprüft:** wasserdicht für alle getesteten Winkel (0/0, 30/0, −20/0, 0/15, 40/−20, 60/45), keine Überlappung mit der montierten Kasten-Baugruppe bei Einstecktiefe 10, 15 und 20 mm (Python/manifold, Standard und 30°). **Nicht geprüft:** Passung am Laser, Druck, Dichtheit der Muffe, Strömung (enger Bogen, Innenradius ca. 2,6 mm; Verlust größer als bei einem weiten Bogen).
+
+## Ventilator-Konsole (`abluft_ventilator_konsole.scad`)
+
+![Ventilator-Konsole: Draufsicht und Seitenansicht (Konstruktionslage, Oberseite = 0)](bilder/ventilator_konsole.png)
+
+Konsole, auf die der Ventilator geschraubt wird und die vor der Wand steht. Ein Druckteil: `ventilator_konsole/ventilator_konsole.stl` und `.3mf` (Druckausrichtung, 120 × 120 × 46 mm).
+
+- **Platte:** 120 × 120 mm; „Breite" ist die Richtung zur Wand. Die ersten 95 mm ab der Raumseite sind 5 mm dick, die letzten 25 mm nur 2 mm. Diese dünne Zunge liegt auf der Wand auf, die Träger stützen sich bei 95 mm gegen die Wandfläche.
+- **Lüfterlöcher:** 4 Langlöcher 6 × 12 mm im Rechteck, in Breitenrichtung außen 65 mm und innen 53 mm auseinander (Mitte–Mitte 59), mittig über die gesamte Breite (60 mm). In Längsrichtung von 32 bis 44 mm ab jeder Kante.
+- **Träger (2 Stück):** rechtwinklig an der Wand, je 30 mm breit, 46 mm hoch ab der Plattenoberseite (`leg_h`), unten R10 gerundet; je 2 Wandschrauben ø5,5 mm (Höhe 18 und 34 mm unter der Oberseite) mit Senkung ø10 auf der Raumseite. Zur Lastabtragung kragen sie als konkave Rundung 70 mm in die Platte hinein aus (`rib_a`): zwei 5-mm-Rippen je Träger an den Außenkanten, Viertelellipse 70 × 41 mm, tangential in die Plattenunterseite auslaufend. Zwischen den Rippen bleibt die Schraube erreichbar.
+- **Druck:** Plattenoberseite (Lüfterseite) liegt flach auf dem Druckbett, Träger und Rippen zeigen nach oben, **ohne Stützen**. Die Wandlöcher und ihre Senkungen sind **tropfenförmig** (Spitze nach oben, 45°). Die Rippenrundung hat Material darunter.
+- **Annahmen (unbestätigt):** Trägerbreite 30 mm und Lage am Plattenrand, Lochhöhen der Wandschrauben, Auskragung 70 mm.
+- **Nicht geprüft:** Die SCAD-Datei wurde nicht mit OpenSCAD gerendert (nicht verfügbar). STL und 3MF stammen aus dem gleichwertigen Python-Modell `werkzeuge/ventilator_konsole_export.py` (trimesh/manifold, wasserdicht, Maße geprüft); Bild mit `werkzeuge/bild_ventilator_konsole.py`. Nicht gedruckt, Festigkeit der Träger in PETG und Passung an der Wand ungeprüft.

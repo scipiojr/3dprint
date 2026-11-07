@@ -7,7 +7,7 @@ SLOT_LEN,GAP=12,54
 YC=[L/2-GAP/2-SLOT_LEN/2,L/2+GAP/2+SLOT_LEN/2]
 LEGS=[(0,19),(36,19),(65,19),(101,19)]
 LH,LT,R=46,5,9
-NAF,NH=7.2,3.4
+NAF,NH=7.2,0   # NH=0: keine Mutterntasche (3.4 = Tasche für M4)
 sd,cd=5.5,10; sz=[-18,-34]
 def B(x0,x1,y0_,y1_,z0,z1):
     m=trimesh.creation.box(extents=[x1-x0,y1_-y0_,z1-z0]); m.apply_translation([(x0+x1)/2,(y0_+y1_)/2,(z0+z1)/2]); return m
@@ -56,6 +56,7 @@ for cx in (cx0-pitch/2,cx0+pitch/2):
         p=Point(cx,yc)
         s=unary_union([Point(cx,yc-(SLOT_LEN-sw)/2).buffer(sw/2),Point(cx,yc+(SLOT_LEN-sw)/2).buffer(sw/2),box(cx-sw/2,yc-(SLOT_LEN-sw)/2,cx+sw/2,yc+(SLOT_LEN-sw)/2)])
         e=trimesh.creation.extrude_polygon(s,T+2); e.apply_translation([0,0,-T-1]); m=D(m,e)
+        if NH<=0: continue
         Rn=NAF/np.sqrt(3); hx=lambda dy:[(cx+Rn*np.cos(np.radians(90+60*k)),yc+dy+Rn*np.sin(np.radians(90+60*k))) for k in range(6)]
         from shapely.geometry import MultiPoint
         h=MultiPoint(hx(-(SLOT_LEN-sw)/2)+hx((SLOT_LEN-sw)/2)).convex_hull

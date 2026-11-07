@@ -26,7 +26,7 @@ screw_d = 5.5;  // Wandschrauben
 cs_d    = 10;   // Senkung
 screw_z = [-18, -34];  // Lochhöhen ab Oberseite
 nut_af  = 7.2;  // M4-Mutter: Schlüsselweite 7 + Spiel (Flächen parallel zur Langlochrichtung, Mutter kann nicht mitdrehen)
-nut_h   = 3.4;  // Taschentiefe von der Plattenunterseite (Mutter 3,2; Rest 1,6 mm bleibt stehen)
+nut_h   = 0;    // Taschentiefe von der Plattenunterseite (0 = keine Tasche; 3,4 = Tasche für M4-Mutter 3,2 mm). Aus: die Löcher liegen frei zwischen den Trägerhälften
 
 module stadium(w, l, h) {   // Langloch, Länge l in Y, Breite w in X
   hull() { translate([0, -(l-w)/2]) cylinder(d=w, h=h); translate([0, (l-w)/2]) cylinder(d=w, h=h); }
@@ -94,7 +94,7 @@ difference() {
     for (y = [plate_l/2 - slot_gap/2 - slot_len/2, plate_l/2 + slot_gap/2 + slot_len/2])
       translate([cx, y, 0]) {
         translate([0, 0, -t_thick - 1]) stadium(slot_w, slot_len, t_thick + 2);
-        translate([0, 0, -t_thick - 0.01]) nutpocket();   // Mutter von der Unterseite (im Druck: oben offen, ohne Stützen)
+        if (nut_h > 0) translate([0, 0, -t_thick - 0.01]) nutpocket();   // Mutter von der Unterseite (im Druck: oben offen, ohne Stützen)
       }
 }
 }

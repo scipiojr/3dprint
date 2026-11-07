@@ -9,6 +9,7 @@ a.add_patch(Rectangle((95,0),25,120,fc='#b9c9dc',ec='k'))
 a.axvline(95,color='r',ls='--',lw=1)
 for cx in (30.5,89.5):
     for yc in (38,82):
+        a.add_patch(Polygon([(cx-3.6,yc-3-2.08),(cx,yc-3-4.16),(cx+3.6,yc-3-2.08),(cx+3.6,yc+3+2.08),(cx,yc+3+4.16),(cx-3.6,yc+3+2.08)],fc='none',ec='gray',ls='--',lw=.8))
         a.add_patch(FancyBboxPatch((cx-3,yc-6),6,12,boxstyle='round,pad=0,rounding_size=3',fc='w',ec='k'))
 for ys in (0,90):
     a.add_patch(Rectangle((90,ys),5,30,fc='#e8b0a0',ec='k',alpha=.8))
@@ -17,7 +18,7 @@ def dim(ax_,p,q,txt,off=(0,0),**k): ax_.annotate('',p,q,arrowprops=dict(arrowsty
 dim(a,(0,-8),(120,-8),'120'); dim(a,(0,-16),(95,-16),'95 (dick 5 mm)'); dim(a,(95,-24),(120,-24),'25 (dünn 2 mm)')
 dim(a,(-8,0),(-8,120),'120',(-3,0))
 dim(a,(27.5,128),(92.5,128),'65 außen'); dim(a,(33.5,122),(86.5,122),'53 innen',(0,-0))
-dim(a,(131,0),(131,32),'32'); dim(a,(138,32),(138,44),'12',(0,0)); a.text(145,38,'Langloch\n6 × 12',fontsize=7)
+dim(a,(131,0),(131,32),'32'); dim(a,(138,32),(138,44),'12',(0,0)); a.text(145,38,'Langloch\n6 × 12\n(gestrichelt: Mutter-\ntasche M4, 3,4 tief,\nSW 7,2, von unten)',fontsize=7)
 dim(a,(-18,0),(-18,30),'Träger 30'); 
 a.text(100,-34,'Wandanlage bei X=95 (rot)',color='r',fontsize=8)
 a.set_xlim(-30,160); a.set_ylim(-40,138); a.axis('off')

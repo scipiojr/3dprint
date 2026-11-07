@@ -25,9 +25,17 @@ rib_t   = 5;    // Stärke der beiden Rippen je Träger
 screw_d = 5.5;  // Wandschrauben
 cs_d    = 10;   // Senkung
 screw_z = [-18, -34];  // Lochhöhen ab Oberseite
+nut_af  = 7.2;  // M4-Mutter: Schlüsselweite 7 + Spiel (Flächen parallel zur Langlochrichtung, Mutter kann nicht mitdrehen)
+nut_h   = 3.4;  // Taschentiefe von der Plattenunterseite (Mutter 3,2; Rest 1,6 mm bleibt stehen)
 
 module stadium(w, l, h) {   // Langloch, Länge l in Y, Breite w in X
   hull() { translate([0, -(l-w)/2]) cylinder(d=w, h=h); translate([0, (l-w)/2]) cylinder(d=w, h=h); }
+}
+
+module nutpocket() {        // Sechskanttasche, in Langlochrichtung (Y) um den Langlochhub verlängert -> Mutter gleitet mit
+  R = nut_af / sqrt(3);
+  hull() for (dy = [-(slot_y1 - slot_y0 - slot_w)/2, (slot_y1 - slot_y0 - slot_w)/2])
+    translate([0, dy, 0]) rotate(90) cylinder(r=R, h=nut_h + 0.01, $fn=6);
 }
 
 module leg2d() {            // Profil in (Y,Z)
@@ -85,7 +93,10 @@ difference() {
   }
   for (cx = [slot_cx - slot_pitch/2, slot_cx + slot_pitch/2])
     for (y = [(slot_y0 + slot_y1)/2, plate_l - (slot_y0 + slot_y1)/2])
-      translate([cx, y, -t_thick - 1]) stadium(slot_w, slot_y1 - slot_y0, t_thick + 2);
+      translate([cx, y, 0]) {
+        translate([0, 0, -t_thick - 1]) stadium(slot_w, slot_y1 - slot_y0, t_thick + 2);
+        translate([0, 0, -t_thick - 0.01]) nutpocket();   // Mutter von der Unterseite (im Druck: oben offen, ohne Stützen)
+      }
 }
 }
 

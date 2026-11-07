@@ -24,10 +24,9 @@ rib_a   = 70;   // Auskragung der Rundung in X (raumseitig ab Träger) – ANNAH
 rib_t   = 4;    // Stärke der beiden Rippen je Träger
 screw_d = 5.5;  // Wandschrauben
 cs_d    = 10;   // Senkung
-screw_z = [-22, -35];  // Lochhöhen ab Oberseite (unter der Mutteraussparung)
-notch_h = 8;    // Mutteraussparung in der Wandplatte: Tiefe unter der Plattenunterseite (Mutter 3,2 + Schraubenende)
-notch_x = 3.5;  // Tiefe der Aussparung in X ab Raumseite der Wandplatte (bis 93,5 mm, Mutter reicht bis 93,1)
-notch_y = 15;   // Länge der Aussparung in Y (Mutter 8,3 + Langlochhub 6 + Spiel), mittig zur Lochbahn
+screw_z = [-18, -34];  // Lochhöhen ab Oberseite
+arch_c  = 16;   // Bogendurchbruch in der Wandplatte für die Mutter der wandnahen Löcher: Sehne in Y (= Abstand der Rippen innen)
+arch_h  = 5;    // Pfeilhöhe unter der Plattenunterseite (Wandplatte wird dort ganz durchtrennt)
 nut_af  = 7.2;  // M4-Mutter: Schlüsselweite 7 + Spiel (Flächen parallel zur Langlochrichtung, Mutter kann nicht mitdrehen)
 nut_h   = 0;    // Taschentiefe von der Plattenunterseite (0 = keine Tasche; 3,4 = Tasche für M4-Mutter 3,2 mm). Aus: die Löcher liegen frei zwischen den Trägerhälften
 
@@ -39,6 +38,13 @@ module nutpocket() {        // Sechskanttasche, in Langlochrichtung (Y) um den L
   R = nut_af / sqrt(3);
   hull() for (dy = [-(slot_len - slot_w)/2, (slot_len - slot_w)/2])
     translate([0, dy, 0]) rotate(90) cylinder(r=R, h=nut_h + 0.01, $fn=6);
+}
+
+module arch2d() {           // Kreisabschnitt in (Y,Z): flach an der Plattenunterseite, Bogen nach unten
+  R = arch_c*arch_c/(8*arch_h) + arch_h/2;
+  polygon(concat(
+    [for (a = [-1 : 0.05 : 1]) [a*arch_c/2, -t_thick - (sqrt(R*R - pow(a*arch_c/2, 2)) - (R - arch_h))]],
+    [[arch_c/2, -t_thick], [-arch_c/2, -t_thick]]));
 }
 
 module leg2d(w) {           // Profil in (Y,Z), Trägerbreite w
@@ -93,8 +99,8 @@ difference() {
     translate([x_step - 0.01, 0, -t_thin]) cube([plate_w - x_step + 0.01, plate_l, t_thin]);  // dünne Auflage
     for (l = legs) bracket(l[0], l[1]);
   }
-  for (l = legs)                                                                   // Wandplatte für die Mutter der wandnahen Lüfterlöcher aussparen
-    translate([x_step - leg_t - 0.01, l[0] + l[1]/2 - notch_y/2, -t_thick - notch_h]) cube([notch_x + 0.01, notch_y, notch_h]);
+  for (l = legs)                                                                   // Bogendurchbruch für die Mutter (Wandplatte ganz durchtrennt, bis 5 mm hoch)
+    translate([x_step - leg_t - 0.1, l[0] + l[1]/2, 0]) rotate([90, 0, 90]) linear_extrude(leg_t + 0.2) arch2d();
   for (cx = [slot_cx - slot_pitch/2, slot_cx + slot_pitch/2])
     for (y = [plate_l/2 - slot_gap/2 - slot_len/2, plate_l/2 + slot_gap/2 + slot_len/2])
       translate([cx, y, 0]) {

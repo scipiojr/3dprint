@@ -1,0 +1,4 @@
+# Abgeleitete Netze des MakerWorld-Originals nicht einchecken (Lizenz)
+*.stl
+*.3mf
+ausgabe/

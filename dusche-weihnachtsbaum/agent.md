@@ -16,16 +16,19 @@ Der 1/2"-Gewindezapfen des Weihnachtsbaum-Duschkopfs wird durch den Stecker der 
 
 ## Entscheidungen
 
-- Griff rund: ø 21,25 auf der alten Achse, unten bei z = −10,625 abgeflacht (7,2 mm), Fase −17 … −15 auf ø 15 zum Hals. Bohrung ø 10 gegen die Originalbohrung um 0,37° verdreht (sonst fallen Ecken zusammen).
-- Geschenke als 2D-Silhouetten (shapely) über die volle Stärke extrudiert. Drei Bauteile in einem Objekt, ohne Überlappung (Schleifen = Bänder − Duschkopf, Kartons − Duschkopf − Schleifen). Filamente: Baum 6, Weiß 14 (Farbe in project_settings auf #FFFFFF gesetzt), Rot 5.
-- Bemalung (paint_color) wird über `face_id` von manifold3d auf die Dreiecke des Ergebnisses übertragen. Benutzte Zustände im Original: 4 (gold), 5 (rot), 6 (grün). Kontrolle: Zählung der Zustände 4 und 5 muss gleich bleiben (50640 / 27934 Teil-Dreiecke).
-
-- Steckergeometrie unverändert aus dem Adapter übernommen, inklusive Schlüsselflächen (stören nicht, liegen beim Druck senkrecht).
-- Schnitt bei x = −97,5 (Original-Netzkoordinaten), Achse y = 0, z = −0,625. Ergebnis wird um den Ursprung zentriert (Verschiebung x + 6,35), Bauteil-Position in der 3MF bleibt 128/128.
-- In der 3MF: Netz ersetzt, Titel ergänzt, Fotos/Vorschaubilder des Originals entfernt, Druckeinstellungen (Stützen an) unverändert.
+- Drucker: **Anycubic mit ACE (4 Filamente)**, Anycubic Slicer Next (Orca-basiert). Die 3MF hat Bambu/Orca-Format (Bauteile in model_settings.config, Bemalung als paint_color), aber kein project_settings.config. Die Bambu-Profile des Originals passen nicht.
+- Filamente: 1 Grün, 2 Rot, 3 Gold, 4 Weiß. Die Bemalung im Original nutzt die Bambu-Slots 4 (Gold), 5 (Rot) und 6 (Grün). `umnummerieren()` schreibt die paint_color-Bäume um. Kontrolle mit Zählung der Zustände: 2 → 27934, 3 → 50640 Teil-Dreiecke.
+- Schnitt bei x = −97,5 (Original-Netzkoordinaten), Achse y = 0, z = −0,625. Ergebnis wird um den Ursprung zentriert (Verschiebung x + 6,35).
+- Steckergeometrie unverändert aus dem Adapter, inklusive Schlüsselflächen.
+- Griff rund: ø 21,25, bis an den Hals (x = −15), **ohne Fase** (Wunsch des Nutzers). Unten bei z = −10,625 abgeflacht (7,2 mm). Die Bohrung ø 10 ist um 0,37° gegen die Originalbohrung verdreht, damit keine Ecken zusammenfallen.
+- Geschenke:
+  - Je Seite **ein quadratischer** Karton 26 × 26, Baum-Material, angebunden an Fußrand und Griffmantel.
+  - **Farbe nur aufgebracht**, wie die übrige Deko: Die oberste Haut von 0,8 mm (`haut_oben`) wird je nach 2D-Fläche zum Bauteil Weiß oder Rot. Keine frei stehenden Schleifen (der Nutzer fand sie instabil), keine Farbe über die volle Höhe (zu viele Farbwechsel).
+  - Volumenlose Splitter entfernt `saeubern()`.
+- Bemalung (paint_color) wird über `face_id` von manifold3d auf die Dreiecke des Ergebnisses übertragen.
 
 ## Offen
 
-- Geschenk-Variante nicht gedruckt; Farbwechsel in jeder Lage (Grün/Weiß/Rot).
+- Nicht geprüft, ob Anycubic Slicer Next Bauteil-Filamente und Bemalung aus der 3MF übernimmt. Andernfalls im Slicer zuweisen bzw. die STLs nutzen.
 
 - Nicht gedruckt erprobt. Liegender Druck von O-Ring- und Rastnut könnte nacharbeiten erfordern; Alternative wäre ein separat stehend gedruckter Stecker zum Einkleben.

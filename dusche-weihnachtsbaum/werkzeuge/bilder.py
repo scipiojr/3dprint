@@ -41,6 +41,9 @@ def flaechen(name, m, licht):
 def ansicht(tl, datei, elev, azim, grenzen, groesse, licht=(-0.4, -0.6, 0.9)):
     fig = plt.figure(figsize=groesse, dpi=130)
     ax = fig.add_subplot(projection="3d", computed_zorder=False)
+    e, az = np.radians(elev), np.radians(azim)
+    blick = np.array([np.cos(e) * np.cos(az), np.cos(e) * np.sin(az), np.sin(e)])  # zur Kamera
+    tl = [(n, m.submesh([np.nonzero(m.face_normals @ blick > 0)[0]], append=True)) for n, m in tl]
     tri, fc = zip(*(flaechen(n, m, licht) for n, m in tl))
     ax.add_collection3d(Poly3DCollection(np.concatenate(tri), facecolors=np.concatenate(fc), linewidths=0))
     lo, hi = grenzen
@@ -103,7 +106,9 @@ if __name__ == "__main__":
     einfach, mit = teile(ordner, False), teile(ordner, True)
     alles = np.array([[-122, -43, -11], [122, 43, 11]])
     ansicht(einfach, out / "uebersicht.png", 35, -60, alles, (8, 5))
-    ansicht(mit, out / "geschenke.png", 62, -90, alles, (9, 4.2), licht=(-0.3, -0.5, 1))
-    draufsicht(mit, out / "geschenke_draufsicht.png", (-50, 20),
-               "Draufsicht (Schnitt auf halber Höhe): Geschenke unter dem Baum")
+    ansicht(mit, out / "geschenke.png", 55, -70, alles, (9, 4.6), licht=(-0.3, -0.5, 1))
+    nah = [(n, m.slice_plane([30, 0, 0], [-1, 0, 0])) for n, m in mit]
+    nah = [(n, m.slice_plane([-35, 0, 0], [1, 0, 0])) for n, m in nah]
+    ansicht(nah, out / "geschenke_draufsicht.png", 90, -90,
+            np.array([[-35, -43, -11], [30, 43, 11]]), (6.5, 8), licht=(0.2, -0.3, 1))
     schnitt(einfach[0][1], out / "schnitt.png")

@@ -4,11 +4,18 @@
 Aus dem Original (DuchaArbolBolas.3mf, QuiqueCrimson/MakerWorld):
 - der 1/2"-Gewindezapfen wird durch den Stecker aus
   schnellkupplung_stecker.scad ersetzt,
-- der eckige Griff (20 x 20) wird durch einen runden ersetzt,
-- mit --geschenke kommen weiße Geschenke mit roten Schleifen unter den Baum.
+- der eckige Griff (20 x 20) wird durch einen runden ersetzt (ohne Fase zum Baum),
+- mit --geschenke kommt links und rechts ein quadratischer Karton unter den
+  Baum (Baum-Material). Die Farbe ist wie die übrige Deko nur aufgebracht:
+  Karton weiß, Bänder und Schleife rot, jeweils nur in der obersten Haut
+  (0,8 mm), damit nur in wenigen Lagen die Farbe gewechselt wird.
 
-Ausgabe: STL(s) und eine Bambu-Studio-3MF, die Druckeinstellungen und
-Metadaten des Originals behält.
+Ziel ist ein Anycubic-Drucker mit ACE (4 Filamente) und Anycubic Slicer Next
+(Orca-basiert, liest Bambu-3MF mit Bauteilen und Farbbemalung). Die
+Bambu-Druckeinstellungen des Originals werden deshalb nicht übernommen, und
+die Bemalung der Kugeln wird auf die Filamente 1–4 umnummeriert.
+
+Ausgabe: STL(s) und eine 3MF (Bambu/Orca-Format) mit Bauteilen und Bemalung.
 
 Aufruf:
   python3 erzeuge_modell.py <original.3mf> <ausgabe_ordner> [--geschenke]
@@ -32,19 +39,48 @@ OBJ = '3D/Objects/object_1.model'
 ACHSE_Y, ACHSE_Z = 0.0, -0.625   # Griffachse = Mitte des Griffs (20 x 20)
 Z_BETT, Z_OBEN = -10.625, 10.625 # Unter-/Oberseite des Modells (Stärke 21,25)
 X_STECKER = -97.5                # Griffende; links davon saß das Gewinde (bis x = -115)
-X_GRIFF_ENDE = -17.0             # hier beginnt im Original die Fase zum Hals
 X_HALS = -15.0                   # Hals 13 x 15 bis zum Baumfuß
 X_FUSS = -3.5                    # Unterseite des Fußrands (voll, Hohlraum erst ab x = +1,75)
 BOHRUNG_D = 10.0                 # Wasserbohrung im Griff
 
 # --- neuer Griff ---
 GRIFF_D = 21.25                  # Achse bei z = -0,625: unten 7,2 mm breit abgeflacht, oben z = 10,0
-HALS_D = 15.0                    # Fase am Griffende auf diesen Durchmesser
 
 # --- Filamente (Slots der Original-3MF, 1-basiert) ---
-F_BAUM, F_ROT, F_WEISS = 6, 5, 14  # 6 = Grün Silk (Original), 5 = Rot Silk+, 14 = PLA Basic -> weiß
+# --- Filamente (ACE, 4 Slots) ---
+F_GRUEN, F_ROT, F_GOLD, F_WEISS = 1, 2, 3, 4
+# Bemalung im Original: Filament 4 = Gold, 5 = Rot, 6 = Grün (Bambu-Slots) -> neu
+UMNUMMERIERUNG = {4: F_GOLD, 5: F_ROT, 6: F_GRUEN}
+HAUT = 0.8                       # Dicke der aufgebrachten Farbe oben (4 Lagen à 0,2)
 
 NAME = 'weihnachtsbaum_dusche_quick_connect'
+
+
+def umnummerieren(code):
+    """paint_color (Bambu/Orca TriangleSelector, Hex-Nibbles von hinten gelesen) auf neue Filamente umschreiben."""
+    if not code:
+        return None
+    ein = [int(c, 16) for c in reversed(code)]
+    aus, i = [], 0
+
+    def knoten():
+        nonlocal i
+        c = ein[i]; i += 1
+        if c & 3:                                    # geteilt: Kinder folgen
+            aus.append(c)
+            for _ in range((c & 3) + 1):
+                knoten()
+            return
+        if (c & 0b1100) == 0b1100:
+            zustand = ein[i] + 3; i += 1
+        else:
+            zustand = c >> 2
+        zustand = UMNUMMERIERUNG.get(zustand, zustand)
+        aus.extend([0b1100, zustand - 3] if zustand >= 3 else [zustand << 2])
+
+    while i < len(ein):
+        knoten()
+    return ''.join('%X' % n for n in reversed(aus))
 
 
 def lade_original(xml_bytes):
@@ -53,7 +89,7 @@ def lade_original(xml_bytes):
     v = np.array([[float(e.get(k)) for k in 'xyz'] for e in t.iterfind('.//m:vertex', NS)], np.float32)
     tris = list(t.iterfind('.//m:triangle', NS))
     f = np.array([[int(e.get(k)) for k in ('v1', 'v2', 'v3')] for e in tris], np.uint32)
-    farbe = [e.get('paint_color') for e in tris]
+    farbe = [umnummerieren(e.get('paint_color')) for e in tris]
     k = mf.Manifold(mf.Mesh(vert_properties=v, tri_verts=f, face_id=np.arange(len(f), dtype=np.uint32)))
     assert k.status() == mf.Error.NoError, k.status()
     ids = set(np.asarray(k.to_mesh().run_original_id).tolist())
@@ -106,23 +142,18 @@ def stecker():
 
 
 def runder_griff():
-    g = zylinder_x(X_STECKER, X_GRIFF_ENDE, GRIFF_D) + zylinder_x(X_GRIFF_ENDE - 0.01, X_HALS + 0.3, GRIFF_D, HALS_D)
+    g = zylinder_x(X_STECKER, X_HALS + 0.3, GRIFF_D)        # stumpf bis an den Hals, keine Fase
     g = g ^ quader(-200, 200, z0=Z_BETT, z1=Z_OBEN)          # unten abflachen
     # gegen die Bohrung des Originals leicht verdreht, damit keine Ecken zusammenfallen
     return g - zylinder_x(X_STECKER - 1, X_HALS + 1, BOHRUNG_D, drehung=0.37)
 
 
 # ---------------- Geschenke ----------------
-# 2D-Silhouetten in der (x, y)-Ebene, x zeigt zur Baumspitze ("oben").
-# Jedes Geschenk: (Boden x, Deckel x, y von, y bis)
-GESCHENKE = [
-    (-33.0, -11.0, 9.6, 27.5),     # links groß, liegt am Griff an
-    (-24.0, -12.0, 27.0, 39.5),    # links klein, außen
-    (-29.0, -10.0, -26.0, -9.6),   # rechts, liegt am Griff an
-    (-37.0, -12.5, -39.5, -25.5),  # rechts hoch, außen
-]
-BAND = 3.2          # Breite der Schleifenbänder
-X_ANDOCK = -2.0     # Schleifen reichen 1,5 mm in den vollen Fußrand
+# 2D in der (x, y)-Ebene, x zeigt zur Baumspitze ("oben").
+KANTE = 26.0        # Karton quadratisch, 26 x 26 (Stärke wie der Baum: 21,25)
+Y_INNEN = 9.6       # 1 mm in den Griffmantel (r = 10,625)
+X_DECKEL = -2.5     # 1 mm in den vollen Fußrand (Unterseite x = -3,5, Hohlraum erst ab x = +1,75)
+BAND = 3.2          # Breite der aufgemalten Bänder
 
 
 def ellipse(cx, cy, a, b, winkel):
@@ -130,44 +161,49 @@ def ellipse(cx, cy, a, b, winkel):
     return affinity.translate(affinity.rotate(e, winkel, origin=(0, 0)), cx, cy)
 
 
-def schleife(x_deckel, yc, breite):
-    """Schleife auf dem Deckel: zwei Schlaufen und Knoten, oben in den Fußrand."""
-    h = X_ANDOCK - x_deckel                     # verfügbare Höhe bis in den Fußrand
-    teile = []
+def schleife(yc):
+    """Aufgemalte Schleife: Knoten an der Deckelkante, zwei Schlaufen schräg nach oben auf den untersten Ast."""
+    xk = X_DECKEL - 0.8
+    teile = [Point(xk, yc).buffer(2.6, 48)]
     for s in (1, -1):
-        a = min(breite * 0.30, 0.62 * h + 2)    # halbe Schlaufenlänge
-        b = max(2.6, a * 0.55)
-        w = 90 - s * 35                         # Schlaufen schräg nach oben-außen
-        cx = x_deckel + 0.55 * h
-        cy = yc + s * a * 0.55
-        aussen = ellipse(cx, cy, a, b, w)
-        innen = ellipse(cx, cy, a - 1.8, b - 1.8, w)
-        teile.append(aussen.difference(innen))
-    teile.append(Point(x_deckel + 1.6, yc).buffer(2.4, 48))     # Knoten
-    teile.append(box(x_deckel - 0.5, yc - BAND / 2, x_deckel + 2.0, yc + BAND / 2))
-    s = unary_union(teile)
-    # nach oben bis zur Andockkante strecken, falls die Schlaufen zu kurz sind
-    if s.bounds[2] < X_ANDOCK:
-        s = unary_union([s, box(s.bounds[2] - 1, yc - 1.5, X_ANDOCK, yc + 1.5)])
-    return s.intersection(box(x_deckel - 0.5, -100, X_ANDOCK, 100))
+        w = s * 50                              # 50° gegen die Baumachse, je eine Seite
+        r = np.radians(w)
+        cx, cy = xk + 6.2 * np.cos(r), yc + 6.2 * np.sin(r)
+        teile.append(ellipse(cx, cy, 6.6, 3.8, w).difference(ellipse(cx, cy, 4.6, 1.8, w)))
+    return unary_union(teile)
 
 
 def geschenke_2d():
-    kartons, baender = [], []
-    for x0, x1, y0, y1 in GESCHENKE:
+    """-> (Kartons, Flächen für die roten Bänder und Schleifen)"""
+    kartons, rot = [], []
+    for s in (1, -1):
+        y0, y1 = sorted((s * Y_INNEN, s * (Y_INNEN + KANTE)))
+        x0, x1 = X_DECKEL - KANTE, X_DECKEL
         yc, xc = (y0 + y1) / 2, (x0 + x1) / 2
-        kartons.append(box(x0, min(y0, y1), x1, max(y0, y1)))
-        baender.append(box(x0, yc - BAND / 2, x1, yc + BAND / 2))           # senkrechtes Band
-        baender.append(box(xc - BAND / 2, min(y0, y1), xc + BAND / 2, max(y0, y1)))  # waagrechtes Band
-        baender.append(schleife(x1, yc, abs(y1 - y0)))
-    return unary_union(kartons), unary_union(baender)
+        kartons.append(box(x0, y0, x1, y1))
+        rot += [box(x0, yc - BAND / 2, x1, yc + BAND / 2),      # Band längs
+                box(xc - BAND / 2, y0, xc + BAND / 2, y1),      # Band quer
+                schleife(yc)]                                   # Schleife, reicht auf den Baum
+    return unary_union(kartons), unary_union(rot)
 
 
-def extrudiere(flaeche):
+def saeubern(k, min_volumen=0.05):
+    """Volumenlose Splitter (Boolesche Reste an senkrechten Kanten) entfernen."""
+    return mf.Manifold.batch_boolean([t for t in k.decompose() if t.volume() > min_volumen], mf.OpType.Add)
+
+
+def haut_oben(k, d):
+    """Oberste Schicht der Dicke d (senkrecht gemessen), folgt auch schrägen Flächen:
+    Punkte in k, über denen im Abstand d kein Material mehr ist. Nur obere Hälfte,
+    sonst kämen Hohlraumböden dazu."""
+    return (k - k.translate([0, 0, -d])) ^ quader(-200, 200, z0=ACHSE_Z, z1=50)
+
+
+def extrudiere(flaeche, rand=0):
     k = mf.Manifold()
     for poly in getattr(flaeche, 'geoms', [flaeche]):
-        m = trimesh.creation.extrude_polygon(poly, Z_OBEN - Z_BETT)
-        m.apply_translation([0, 0, Z_BETT])
+        m = trimesh.creation.extrude_polygon(poly, Z_OBEN - Z_BETT + 2 * rand)
+        m.apply_translation([0, 0, Z_BETT - rand])
         k += zu_manifold(m)
     return k
 
@@ -194,6 +230,9 @@ def schreibe_3mf(quelle, aus, teile, titel):
             n = info.filename
             if n.startswith(('Auxiliaries/', 'Metadata/plate', 'Metadata/top', 'Metadata/pick')):
                 continue  # Fotos/Vorschauen des Originals passen nicht mehr
+            if n in ('Metadata/project_settings.config', 'Metadata/slice_info.config',
+                     'Metadata/filament_sequence.json'):
+                continue  # Bambu-X1C-Einstellungen (19 Filamente) passen nicht zum Anycubic/ACE
             d = z.read(n)
             if n == OBJ:
                 d = (kopf + ''.join(mesh_xml(m, i + 1, uuid.uuid4()) for i, (_, m, _) in enumerate(teile))
@@ -211,10 +250,6 @@ def schreibe_3mf(quelle, aus, teile, titel):
                 d = s.encode()
             elif n == 'Metadata/model_settings.config':
                 d = model_settings(teile, haupt, os.path.basename(aus)[:-4]).encode()
-            elif n == 'Metadata/project_settings.config' and any(f == F_WEISS for _, _, f in teile):
-                p = json.loads(d)
-                p['filament_colour'][F_WEISS - 1] = '#FFFFFF'
-                d = json.dumps(p, indent=4).encode()
             o.writestr(info, d)
 
 
@@ -232,8 +267,6 @@ def model_settings(teile, haupt, name):
                  f'facets_removed="0" facets_reversed="0" backwards_edges="0"/>\n    </part>\n')
     t.append('  </object>\n  <plate>\n    <metadata key="plater_id" value="1"/>\n'
              '    <metadata key="plater_name" value=""/>\n    <metadata key="locked" value="false"/>\n'
-             '    <metadata key="filament_map_mode" value="Auto For Flush"/>\n'
-             '    <metadata key="filament_maps" value="1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"/>\n'
              f'    <model_instance>\n      <metadata key="object_id" value="{haupt}"/>\n'
              '      <metadata key="instance_id" value="0"/>\n      <metadata key="identify_id" value="368"/>\n'
              '    </model_instance>\n  </plate>\n</config>\n')
@@ -247,23 +280,26 @@ def main(quelle, ziel, mit_geschenken):
 
     rest = baum ^ quader(X_HALS, 200)                    # Hals und Baum bleiben
     duschkopf = rest + runder_griff() + stecker()
-    teile = [('Baum', Teil(duschkopf, baum_id, farbe), F_BAUM)]
+    teile = [('Baum', Teil(duschkopf, baum_id, farbe), F_GRUEN)]
     name, titel = NAME, 'Xmas tree shower head – Hansgrohe Quick Connect'
 
     if mit_geschenken:
-        kartons, baender = geschenke_2d()
-        rot_roh, weiss_roh = extrudiere(baender), extrudiere(kartons)
-        rot = rot_roh - duschkopf
-        weiss = weiss_roh - duschkopf - rot
-        ganz = duschkopf + rot_roh + weiss_roh
-        # Geschenke berühren nur Griffmantel (|y| > 9,6) und Fußrand (x < -2) -> weit weg von
+        kartons, rot_2d = geschenke_2d()
+        karton = extrudiere(kartons)
+        # Kartons berühren nur Griffmantel (|y| > 9,6) und Fußrand (x < -2,5) -> weit weg von
         # Wasserbohrung (r < 5) und Hohlraum (x > 1,75)
-        b = (rot + weiss).bounding_box()
-        assert b[3] <= X_ANDOCK + 1e-6, 'Geschenke ragen zu weit in den Baum'
-        assert len(ganz.decompose()) == 1, 'Geschenke nicht mit dem Baum verbunden'
-        assert abs(ganz.volume() - (duschkopf.volume() + rot.volume() + weiss.volume())) < 1, 'Teile überlappen'
-        assert abs((rot ^ weiss).volume()) < 0.01
-        teile += [('Geschenke', Teil(weiss), F_WEISS), ('Schleifen', Teil(rot), F_ROT)]
+        assert karton.bounding_box()[3] <= X_DECKEL + 1e-6
+        ganz = duschkopf + karton
+        assert len(ganz.decompose()) == 1, 'Karton nicht mit dem Baum verbunden'
+        h = haut_oben(ganz, HAUT)
+        rot = saeubern(h ^ extrudiere(rot_2d, rand=1))
+        weiss = saeubern((h ^ extrudiere(kartons, rand=1)) - rot)
+        gruen = ganz - rot - weiss
+        summe = gruen.volume() + weiss.volume() + rot.volume()
+        assert abs(summe - ganz.volume()) < 0.5, ('Teile überlappen', summe, ganz.volume())
+        teile = [('Baum', Teil(gruen, baum_id, farbe), F_GRUEN),
+                 ('Geschenke', Teil(weiss), F_WEISS),
+                 ('Schleifen', Teil(rot), F_ROT)]
         name += '_geschenke'
         titel += ' – mit Geschenken'
 

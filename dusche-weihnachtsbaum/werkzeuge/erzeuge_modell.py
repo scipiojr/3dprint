@@ -200,6 +200,18 @@ FASE_OBEN = 1.2     # Fase zwischen gewölbter Oberseite und Seitenflächen
 FASE_ECKE = 2.0     # senkrechte Außenecke
 FASE_BETT = 0.6     # Unterkanten am Bett (klein, sonst fehlt Auflage)
 
+# --- Duschdüsen in den Geschenken (je Karton eine Kammer wie im Baum) ---
+WAND_G = 2.4        # Wand der Geschenkkammer zu Außenseiten und zur Griffseite
+DACH_G = 2.6        # Dachstärke: Kammerdecke folgt der Wölbung 2,6 mm tiefer
+X_PLATTE = Z_BETT + 2.125   # Oberkante der Düsenplatte (wie im Baum: z = -8,5)
+DUESE_D = 1.5       # Düsen ø 1,5 wie im Baum
+DUESEN_X = [-23.5, -18.0, -12.5, -7.0]   # Düsenraster je Karton: 4 x 3 = 12 Düsen
+DUESEN_Y = [16.0, 22.5, 29.0]
+PFOSTEN_X = [-20.75, -15.25, -9.75]      # Pfosten ø 1,5 in den Rasterfeldern
+PFOSTEN_Y = [19.25, 25.75]
+KANAL_X = -20.5     # Zulauf vom Griff in die Kammer (ø 5, Tropfenform), quer zur Griffachse
+KANAL_D = 5.0
+
 
 def ellipse(cx, cy, a, b, winkel):
     e = affinity.scale(Point(0, 0).buffer(1, 64), a, b)
@@ -273,6 +285,35 @@ def geschenk_koerper(f):
     k = k.trim_by_plane([1 / np.sqrt(2), 0, 1 / np.sqrt(2)], (x0 + Z_BETT + FASE_BETT) / np.sqrt(2))
     k = k.trim_by_plane([1 / np.sqrt(2), -1 / np.sqrt(2), 0], (x0 - y1 + FASE_ECKE) / np.sqrt(2))
     return k
+
+
+def geschenk_hohlraum(f):
+    """Wasserführender Hohlraum beider Geschenke (Kammer mit Pfosten, Düsen, Zulauf vom Griff).
+    Kammerdecke folgt der Wölbung, Pfosten tragen sie wie im Baum, der Zulauf ist wie die Bohrung
+    ein Tropfen (ohne Stützen druckbar)."""
+    xa, xb = X_DECKEL - KANTE + WAND_G, X_DECKEL - WAND_G
+    ya, yb = Y_INNEN + WAND_G, Y_INNEN + KANTE - WAND_G
+    yy = np.linspace(ya, yb, 80)
+    profil = Polygon([(y, f(y) - DACH_G) for y in yy] + [(yb, X_PLATTE), (ya, X_PLATTE)])
+    m = trimesh.creation.extrude_polygon(profil, xb - xa)
+    m.apply_transform(np.array([[0, 0, 1, xa], [1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1.0]]))
+    kammer = zu_manifold(m)
+    senkrecht = lambda x, y, z0, z1, d: (mf.Manifold.cylinder(z1 - z0, d / 2, d / 2, 32).translate([x, y, z0]))
+    pfosten = [senkrecht(x, y, X_PLATTE - 0.3, Z_OBEN + 5, DUESE_D) for x in PFOSTEN_X for y in PFOSTEN_Y]
+    kammer = kammer - mf.Manifold.batch_boolean(pfosten, mf.OpType.Add)
+    duesen = [senkrecht(x, y, Z_BETT - 1, X_PLATTE + 0.3, DUESE_D) for x in DUESEN_X for y in DUESEN_Y]
+    kanal = (zylinder_x(0, 14, KANAL_D) + bohrung_dach(0, 14, KANAL_D, DACH_WINKEL)).rotate([0, 0, 90])
+    kanal = kanal.translate([KANAL_X, 0, 0])
+    rechts = kammer + mf.Manifold.batch_boolean(duesen, mf.OpType.Add) + kanal
+    return rechts + rechts.mirror([0, 1, 0])
+
+
+def geschenk_blocker(f):
+    """Stützen-Blocker über beiden Geschenkkammern (Grundfläche der Kammer + 0,6 mm)."""
+    xa, xb = X_DECKEL - KANTE + WAND_G, X_DECKEL - WAND_G
+    ya, yb = Y_INNEN + WAND_G, Y_INNEN + KANTE - WAND_G
+    b = quader(xa - 0.6, xb + 0.6, ya - 0.6, yb + 0.6, X_PLATTE - 0.1, f(ya) - DACH_G + 1.5)
+    return b + b.mirror([0, 1, 0])
 
 
 def saeubern(k, min_volumen=0.05):
@@ -382,6 +423,8 @@ def main(quelle, ziel, mit_geschenken):
         # Wasserbohrung (r < 5) und Hohlraum (x > 1,75)
         assert karton.bounding_box()[3] <= X_DECKEL + 1e-6
         ganz = duschkopf + karton
+        wolb = woelbung(baum)
+        ganz = ganz - geschenk_hohlraum(wolb)             # Duschdüsen auch in den Geschenken
         assert len(ganz.decompose()) == 1, 'Karton nicht mit dem Baum verbunden'
         h = haut_oben(ganz, HAUT)
         rot = saeubern(h ^ extrudiere(rot_2d, rand=1))
@@ -409,6 +452,10 @@ def main(quelle, ziel, mit_geschenken):
         t.trimesh().export(os.path.join(ziel, f'{name}.stl' if len(teile) == 1 else f'{name}_{tn.lower()}.stl'))
     blocker.v += versatz
     teile.append(('Stuetzen-Blocker Kammer', blocker, F_GRUEN, 'support_blocker'))
+    if mit_geschenken:
+        gb = Teil(geschenk_blocker(wolb))
+        gb.v += versatz
+        teile.append(('Stuetzen-Blocker Geschenke', gb, F_GRUEN, 'support_blocker'))
 
     schreibe_3mf(quelle, os.path.join(ziel, name + '.3mf'), teile, titel)
     print(name, 'Maße', np.round(hi - lo, 2), 'Versatz x', round(versatz[0], 3),

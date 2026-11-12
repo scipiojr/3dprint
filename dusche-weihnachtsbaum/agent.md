@@ -28,6 +28,7 @@ Der 1/2"-Gewindezapfen des Weihnachtsbaum-Duschkopfs wird durch den Stecker der 
   - **Farbe nur aufgebracht**, wie die übrige Deko: Die oberste Haut von 0,8 mm (`haut_oben`) wird je nach 2D-Fläche zum Bauteil Weiß oder Rot. Keine frei stehenden Schleifen (der Nutzer fand sie instabil), keine Farbe über die volle Höhe (zu viele Farbwechsel).
   - Volumenlose Splitter entfernt `saeubern()`.
 - Innenraum (4. Runde): Der Slicer wollte in der Bohrung und in der Kammer Stützen setzen. Bohrung = Tropfen (`bohrung_dach()`, 40° im Griff; im SCAD `dach_winkel` 35° im Stecker), von x = −94,5 bis 9. Kammer des Originals unverändert (29 Pfosten ø 1,5, alle bis ins Dach, max. Abstand 4,8 mm); stattdessen `kammer_blocker()` als Bauteil mit `subtype="support_blocker"` in der 3MF (nicht in den STLs; bei Zentrierung ausgenommen, in `bilder.py` ausgeblendet). Analyse: lagenweise Überhangprüfung (Schicht für Schicht, Versatz 0,2/tan 30°). Wurde nicht im echten Anycubic Slicer geprüft.
+- Düsen in Geschenken (5. Runde, Nutzerwunsch): `geschenk_hohlraum()`/`geschenk_blocker()`, Parameter `WAND_G, DACH_G, DUESEN_X/Y, PFOSTEN_X/Y, KANAL_X`. Geprüft: Düsen durchgängig, Kanal frei. Geschenke sind jetzt wasserführend (frühere Vorgabe „nicht Teil des Wassersystems“ ersetzt). Durchflussrechnung im README.
 - Bemalung (paint_color) wird über `face_id` von manifold3d auf die Dreiecke des Ergebnisses übertragen.
 
 ## Offen

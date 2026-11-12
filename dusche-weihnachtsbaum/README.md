@@ -65,7 +65,8 @@ Benötigt: OpenSCAD (getestet 2021.01), Python mit `numpy trimesh manifold3d lxm
 - Farbe nur in der obersten Haut, 0,8 mm = 4 Lagen. Sie folgt auch schrägen Flächen: Gemeint sind alle Punkte, über denen in 0,8 mm Höhe kein Material mehr ist.
   - Karton: weiß, mit rotem Band über Kreuz (3,2 mm breit).
   - Schleife: rot. Der Knoten sitzt an der Deckelkante, die zwei Schlaufen liegen auf dem untersten Ast. Weil der Ast schräg abfällt, liegt das Rot der Schleife über etwa z = 0 … 10, also nicht nur in den letzten Lagen.
-- Wasserführung: Die Kartons berühren nur Vollmaterial, weit weg von Wasserbohrung (r < 5) und Hohlraum. Die Farbe ersetzt nur Material, sie ändert keine Form. Das Skript prüft Verbindung, Lage und Volumen.
+- **Duschdüsen in den Geschenken** (`geschenk_hohlraum()`): Jeder Karton hat wie der Baum eine Kammer mit Düsenplatte (12 Düsen ø 1,5, Raster 5,5 mm) und 6 Pfosten ø 1,5. Die Decke folgt der Wölbung, 2,6 mm unter der Oberseite (die Farbhaut bleibt unberührt). Der Zulauf ist ein ø-5-Kanal in Tropfenform quer aus der Griffbohrung bei x = −20,5, also ohne Stützen druckbar. Ein zweiter Stützen-Blocker (`Stuetzen-Blocker Geschenke`) liegt über den Kammern. Farbe ersetzt nur Material, sie ändert keine Form.
+- **Durchfluss** (Näherung, Düsenkoeffizient 0,7): Düsenfläche Baum 77,8 mm² (44 Düsen) + Geschenke 42,4 mm² (24 Düsen) = 120 mm². Bei 8 l/min strömt das Wasser mit 1,1 m/s aus den Düsen, der Druckabfall an den Düsen beträgt nur 0,013 bar. Aufteilung nach Fläche: Baum 65 %, je Geschenk 17 %. Rechnerische Düsenkapazität bei 4 bar: 143 l/min, die Düsen drosseln also nichts. Engste Stelle ist die Steckerbohrung (50,9 mm², bei 8 l/min 2,6 m/s). Kammervolumen: Baum 22,9 cm³, beide Geschenke zusammen 11,9 cm³ (inkl. Düsen und Kanal).
 
 **Innenraum (ohne Stützen druckbar)**
 

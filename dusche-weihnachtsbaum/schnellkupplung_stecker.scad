@@ -1,11 +1,24 @@
 /*
   Stecker für die Hansgrohe-Schnellkupplung (Quick Connect 28346000)
 
-  Geometrie unverändert aus hansgrohe_shower_quick_connect_adapter.scad
-  (Modul coupler() samt Schlüsselflächen und Wasserbohrung), ohne die
-  1/2"-Gewindebuchse. Die Achse ist +z, z = 0 ist die Anlagefläche am Griff
-  (dort beginnt die Rastnut). `ueberlapp` verlängert den Schaft nach -z in
-  den Griff hinein, damit die Vereinigung mit dem Duschkopf sauber ist.
+  Maße vom Nutzer am Original gemessen (12.11.2026), ersetzen die frühere
+  Geometrie aus hansgrohe_shower_quick_connect_adapter.scad, die in der Kupplung
+  nicht hielt (O-Ring-Nut war 1 mm zu flach, mehrere Längen wichen ab).
+  Die Achse ist +z, z = 0 ist die Anlagefläche am Griff (dort beginnt die
+  Rastnut). `ueberlapp` verlängert den Schaft nach -z in den Griff hinein,
+  damit die Vereinigung mit dem Duschkopf sauber ist.
+
+  Profil von der Anlagefläche zur Mündung (Durchmesser in mm):
+    0    ..  7.2   Ø12.4          Rastnut (Schaft)
+    7.2  .. 10.2   Ø16.7          Bund
+    10.2 .. 10.9   Ø16.7 -> 14    Fase
+    10.9 .. 18.8   Ø14            Backenbereich (7.9 lang)
+    18.8 .. 20.6   Ø14.3          Ring
+    20.6 .. 23.1   Ø11.3          O-Ring-Nut
+    23.1 .. 27.9   Ø14.2
+    27.9 .. 30.4   Ø14.2 -> 12.2  Fase zur Öffnung
+  Backen: zwei Flächen im Ø14-Bereich, nur 11.8 dick, 7.2 breit, 6.4 lang,
+  oben und unten bleibt je 0.75 mm Rand (Tasche axial geschlossen).
 
   Der Stecker wird von werkzeuge/erzeuge_modell.py an den Griff des
   Weihnachtsbaum-Duschkopfs gesetzt.
@@ -18,35 +31,32 @@ dach_winkel = 35;                // Tropfenform: Bohrungsdecke steigt mit 35° (
 $fa = 1;
 $fs = 0.25;
 
+st_profil = [[0, 12.4], [7.2, 12.4], [7.2, 16.7], [10.2, 16.7], [10.9, 14],
+             [18.8, 14], [18.8, 14.3], [20.6, 14.3], [20.6, 11.3], [23.1, 11.3],
+             [23.1, 14.2], [27.9, 14.2], [30.4, 12.2]];
+st_backe_dicke = 11.8;
+st_backe_breit = 7.2;
+st_backe_lang  = 6.4;
+st_backe_z0    = 10.9 + (7.9 - st_backe_lang)/2;
+
 module coupler()
 {
-  // Schaft am Rastnut-Durchmesser
-  cylinder(h=30, d=12.3);
-
-  translate([0,0,6.5]) {                   // Ende der Rastnut
-      cylinder(h=4, d=16.7);               // Bund
-      translate([0,0,4])
-      {
-        cylinder(h=1, d1=16.7, d2=14.5);   // Fase am Bund
-        cylinder(h=10, d=14.5);            // Schaft bis zur O-Ring-Nut
-        translate([0,0,4.5]) cube([3.4,13,6.6], center=true);
-        translate([0,0,12.5])              // nach der O-Ring-Nut (2,5 mm)
-        {
-            cylinder(h=6, d=14.5);
-            translate([0,0,6]) cylinder(h=1.2, d1=14.5, d2=12); // Fase an der Spitze
-        }
-      }
-  }
+  rotate_extrude($fn = 128)
+    polygon(concat([[0, 0]],
+                   [for (q = st_profil) [q[1]/2, q[0]]],
+                   [[0, st_profil[len(st_profil)-1][0]]]));
 }
 
 difference() {
     union() {
         difference() {
             coupler();
-            // Schlüsselflächen wie im Adapter (dort bei z = 34 = 19 + 15)
-            for (s=[1,-1]) translate([0,s*7,15]) cube([8.5,2.4,6.6], center=true);
+            // Backentaschen (Flächen bei y = +-5.9)
+            for (s=[1,-1])
+                translate([-st_backe_breit/2, s > 0 ? st_backe_dicke/2 : -st_backe_dicke/2 - 5, st_backe_z0])
+                    cube([st_backe_breit, 5, st_backe_lang]);
         }
-        translate([0,0,-ueberlapp]) cylinder(h=ueberlapp+0.01, d=12.3);
+        translate([0,0,-ueberlapp]) cylinder(h=ueberlapp+0.01, d=12.4);
     }
     translate([0,0,-ueberlapp-1]) bohrung(100);
 }

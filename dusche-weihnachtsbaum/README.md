@@ -25,7 +25,7 @@ Eine Variante mit LED-Stern und Wasserturbine im Griff ist in Planung: [`../dusc
 
 | Datei | Inhalt |
 |---|---|
-| `schnellkupplung_stecker.scad` | Stecker der Schnellkupplung. Geometrie 1:1 aus `hansgrohe_shower_quick_connect_adapter.scad` (Modul `coupler()`, Schlüsselflächen, Bohrung ø 7,94), ohne Gewindebuchse; 3 mm Überlappung in den Griff. |
+| `schnellkupplung_stecker.scad` | Stecker der Schnellkupplung. Profil nach den Messwerten des Nutzers am Original (12.11.2026, Rastnut, Bund, Backentaschen, Ring, O-Ring-Nut 11,3, Länge 30,4; Bohrung ø 7,94), ohne Gewindebuchse; 3 mm Überlappung in den Griff. |
 | `werkzeuge/erzeuge_modell.py` | Baut aus der Original-3MF den runden Griff mit Stecker, optional die Geschenke, und schreibt STL und 3MF (Bambu/Orca-Format, öffnet Anycubic Slicer Next). Die Farbbemalung der Kugeln bleibt erhalten, umnummeriert auf 4 Filamente. |
 | `werkzeuge/bilder.py` | Erzeugt die Bilder in `bilder/` (außer `stecker.png`, das kommt direkt aus OpenSCAD). |
 

@@ -19,8 +19,8 @@
 
   Druckausrichtung (PETG): rohr mit dem Stecker nach OBEN (Auslass auf dem Bett,
   dazu `druck = true`), leitrad2 ebenfalls mit `druck = true` (Nabe unten),
-  rotor stehend, kappe wie modelliert, spulenring und huelse stehend. Der Stecker stammt aus ../dusche-weihnachtsbaum/
-  schnellkupplung_stecker.scad (Geometrie unverändert, ohne Bohrung).
+  rotor stehend, kappe wie modelliert, spulenring und huelse stehend. Der Stecker ist nach den Messwerten des Nutzers neu modelliert
+  (siehe Abschnitt Stecker unten), ohne Bohrung.
 */
 include <parameter.scad>
 include <rotor.scad>
@@ -28,32 +28,43 @@ rotor_allein = false;
 
 druck = false;   // true: Rohr zum Drucken drehen (Stecker nach oben)
 
-// ---------- Stecker (aus dem Hauptprojekt, Bohrung wird im Rohr gebohrt) ----------
+// ---------- Stecker (Maße vom Nutzer am Original gemessen, 12.11.2026) ----------
+// Profil von der Anlagefläche (z = 0) zur Mündung. Alle Durchmesser in mm.
+//   0    ..  7.2   Ø12.4        Rastnut (Schaft)
+//   7.2  .. 10.2   Ø16.7        Bund
+//   10.2 .. 10.9   Ø16.7 -> 14  Fase
+//   10.9 .. 18.8   Ø14          Backenbereich (7.9 lang), Backen in Taschen
+//   18.8 .. 20.6   Ø14.3        Ring (1.8)
+//   20.6 .. 23.1   Ø11.3        O-Ring-Nut (2.5)
+//   23.1 .. 27.9   Ø14.2        (4.8)
+//   27.9 .. 30.4   Ø14.2 -> 12.2 Fase zur Öffnung (2.5)
+// Die Backen sind zwei Flächen im Ø14-Bereich: nur 11.8 dick, 7.2 breit, 6.4 lang,
+// oben und unten bleibt ein Rand von je 0.75 (Tasche ist axial geschlossen).
 ueberlapp = 3;
+st_profil = [[0, 12.4], [7.2, 12.4], [7.2, 16.7], [10.2, 16.7], [10.9, 14],
+             [18.8, 14], [18.8, 14.3], [20.6, 14.3], [20.6, 11.3], [23.1, 11.3],
+             [23.1, 14.2], [27.9, 14.2], [30.4, 12.2]];
+st_backe_dicke = 11.8;
+st_backe_breit = 7.2;
+st_backe_lang  = 6.4;
+st_backe_z0    = 10.9 + (7.9 - st_backe_lang)/2;
 
 module coupler() {
-  cylinder(h = 30, d = 12.3);
-  translate([0, 0, 6.5]) {
-    cylinder(h = 4, d = 16.7);
-    translate([0, 0, 4]) {
-      cylinder(h = 1, d1 = 16.7, d2 = 14.5);
-      cylinder(h = 10, d = 14.5);
-      translate([0, 0, 4.5]) cube([3.4, 13, 6.6], center = true);
-      translate([0, 0, 12.5]) {
-        cylinder(h = 6, d = 14.5);
-        translate([0, 0, 6]) cylinder(h = 1.2, d1 = 14.5, d2 = 12);
-      }
-    }
-  }
+  rotate_extrude($fn = 96)
+    polygon(concat([[0, 0]],
+                   [for (q = st_profil) [q[1]/2, q[0]]],
+                   [[0, st_profil[len(st_profil)-1][0]]]));
 }
 
 module stecker_aussen() {
   union() {
     difference() {
       coupler();
-      for (s = [1, -1]) translate([0, s*7, 15]) cube([8.5, 2.4, 6.6], center = true);
+      for (s = [1, -1])
+        translate([-st_backe_breit/2, s > 0 ? st_backe_dicke/2 : -st_backe_dicke/2 - 5, st_backe_z0])
+          cube([st_backe_breit, 5, st_backe_lang]);
     }
-    translate([0, 0, -ueberlapp]) cylinder(h = ueberlapp + 0.01, d = 12.3);
+    translate([0, 0, -ueberlapp]) cylinder(h = ueberlapp + 0.01, d = 12.4, $fn = 96);
   }
 }
 

@@ -2,7 +2,7 @@
 
 Stand **12.11.2026**. Gehört zu [`demonstrator.md`](demonstrator.md) (Plan, Rechnung, Bauteilliste). Alle Maße sind **Schätzungen** und werden am fertigen Modell geprüft.
 
-> **Wichtig:** Die Druckmodelle (`pruefgriff.scad`, `rotor.scad`) gibt es noch nicht. Diese Anleitung legt den Aufbau fest, nach dem sie konstruiert werden. Schritte 1–3 und 5 (Messen, Wickeln, Elektronik) können Sie schon vorbereiten.
+> **Wichtig:** Die Druckmodelle (`pruefgriff.scad`, `rotor.scad`, `parameter.scad`) sind konstruiert und auf geschlossene Körper und Kollisionen geprüft (`werkzeuge/pruefe_pruefgriff.py`). **Am Wasser erprobt ist nichts.** Die Maße unten sind Startwerte und werden nach dem ersten Druck und der Messung angepasst.
 
 ## 1. Wie kommt der Generator in den Griff, ohne den Druck zu unterbrechen?
 

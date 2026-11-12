@@ -19,7 +19,7 @@ Der 1/2"-Gewindezapfen des Weihnachtsbaum-Duschkopfs wird durch den Stecker der 
 - Drucker: **Anycubic mit ACE (4 Filamente)**, Anycubic Slicer Next (Orca-basiert). Die 3MF hat Bambu/Orca-Format (Bauteile in model_settings.config, Bemalung als paint_color), aber kein project_settings.config. Die Bambu-Profile des Originals passen nicht.
 - Filamente: 1 Grün, 2 Rot, 3 Gold, 4 Weiß. Die Bemalung im Original nutzt die Bambu-Slots 4 (Gold), 5 (Rot) und 6 (Grün). `umnummerieren()` schreibt die paint_color-Bäume um. Kontrolle mit Zählung der Zustände: 2 → 27934, 3 → 50640 Teil-Dreiecke.
 - Schnitt bei x = −97,5 (Original-Netzkoordinaten), Achse y = 0, z = −0,625. Ergebnis wird um den Ursprung zentriert (Verschiebung x + 6,35).
-- Steckergeometrie unverändert aus dem Adapter, inklusive Schlüsselflächen.
+- Steckergeometrie nach Messwerten des Nutzers (12.11.2026), Profil im Kopf von `schnellkupplung_stecker.scad`. Die frühere Geometrie aus dem Adapter hielt in der Kupplung nicht (O-Ring-Nut 1 mm zu flach).
 - Griff rund: ø 21,25, bis an den Hals (x = −15), **ohne Fase** zum Baum (Wunsch des Nutzers). Stirnkante am Stecker 1 mm gefast (`FASE_GRIFF`). Unten bei z = −10,625 abgeflacht (7,2 mm). Die Bohrung ø 10 ist um 0,37° gegen die Originalbohrung verdreht, damit keine Ecken zusammenfallen.
 - Geschenke:
   - Je Seite **ein quadratischer** Karton 26 × 26, Baum-Material, angebunden an Fußrand und Griffmantel.

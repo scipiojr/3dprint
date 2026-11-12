@@ -4,8 +4,9 @@ Arbeitsanweisung und Projektstand für KI-Agenten. Sprache mit dem Nutzer: **Deu
 
 ## Zuerst lesen
 
-1. `README.md` in diesem Ordner: Ziel, Messwerte, Energiebilanz, Konzept, nächste Schritte.
-2. `../dusche-weihnachtsbaum/README.md` und `agent.md`: Basismodell, Stecker, Koordinaten, Werkzeuge.
+1. `README.md` in diesem Ordner: Ziel, Entscheidungen, Messwerte, Energiebilanz, Konzept, nächste Schritte.
+2. `bauteile.md`: Bauteil-Recherche mit Links, Preisen, Maßen und Bewertung. Neue Recherchen dort ergänzen, mit Datum.
+3. `../dusche-weihnachtsbaum/README.md` und `agent.md`: Basismodell, Stecker, Koordinaten, Werkzeuge.
 
 ## Arbeitsweise
 
@@ -29,15 +30,16 @@ Arbeitsanweisung und Projektstand für KI-Agenten. Sprache mit dem Nutzer: **Deu
 ## Stand (12.11.2026)
 
 - Machbarkeit geprüft, siehe README. Fertige Hydrogeneratoren sind zu groß (≥ 32 mm dick, ≈ 85 mm lang). Der Baum-Hohlraum ist zu flach (≤ Ø 6 mm frei).
-- Gewähltes Konzept: **axiale Ring-Turbine mit mehreren Stufen im Griff**, Magnete im Rotorring, Spulen vergossen in der Griffwand, Stift-Lagerung. Ziel 0,05–0,1 bar Druckverlust und 0,1–0,3 W (geschätzt).
+- **Neu:** LED-Wasserhahnaufsätze (etwa 24 × 24 × 35 mm) und LED-Duschköpfe haben kleine Generatoren. Weg A (Spender ausbauen) wird zuerst geprüft. Der Nutzer kauft und zerlegt.
+- Weg B, falls A nicht klappt: **axiale Ring-Turbine mit mehreren Stufen im Griff**, Magnete im Rotorring, Spulen vergossen in der Griffwand, Stift-Lagerung. Ziel 0,05–0,1 bar Druckverlust und 0,1–0,3 W (geschätzt).
 - Noch keine Konstruktion.
 
-## Offen beim Nutzer
+## Entscheidungen des Nutzers (12.11.2026)
 
-- Ist ein Griff mit Ø 26–28 mm statt 21,25 in Ordnung?
-- Welche LED-Farbe soll der Stern haben, und ist der Stern aus durchscheinendem PETG in Ordnung?
-- Wie hoch sind Fließdruck und Durchfluss an seiner Dusche?
+- Griff darf dicker werden (Ø 26–28).
+- Stern gelb. Transparente Schicht oder Öffnungen für die LEDs sind erlaubt, alternativ farbige LEDs.
+- Hausdruck 4 bar. Fließdruck und Durchfluss misst der Nutzer noch.
 
 ## Nächster Schritt
 
-Prüfgriff konstruieren (`pruefgriff.scad`, `rotor.scad`), parametrisch, ohne Baum. Er bekommt ein Auslassstück mit Drossel, die etwa 78 mm² Düsenfläche nachbildet. Dazu eine Bau- und Messanleitung für den Nutzer ins README.
+Auf die Messwerte des Nutzers warten: Spender-Generatoren (Maße, Spannung, Strom) und Dusche (Fließdruck, l/min). Dann Prüfgriff konstruieren (`pruefgriff.scad`, ggf. `rotor.scad`), parametrisch, ohne Baum. Er bekommt ein Auslassstück mit Drossel, die etwa 78 mm² Düsenfläche nachbildet. Dazu eine Bau- und Messanleitung für den Nutzer ins README.

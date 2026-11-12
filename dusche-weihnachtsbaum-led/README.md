@@ -2,7 +2,16 @@
 
 Ableger von [`../dusche-weihnachtsbaum`](../dusche-weihnachtsbaum): Der Duschkopf mit Hansgrohe-Schnellkupplung bekommt einen **leuchtenden Stern**. Den Strom liefert eine **eigene Turbine mit Generator im Griff**, also keine Batterie und kein Kabel nach außen.
 
-**Stand: Konzept und Machbarkeit, noch nichts konstruiert oder gedruckt.** Nächster Schritt ist ein Prüfgriff (siehe unten).
+**Stand: Konzept und Machbarkeit, noch nichts konstruiert oder gedruckt.** Nächster Schritt: Spender-Generatoren kaufen und vermessen, dann ein Prüfgriff (siehe unten).
+
+Die Bauteil-Recherche mit Links, Preisen und Maßen steht in [`bauteile.md`](bauteile.md).
+
+## Entscheidungen des Nutzers (12.11.2026)
+
+- **Der Griff darf dicker werden** (Ø 26–28 mm statt 21,25).
+- **Der Stern bleibt gelb.** Er darf eine transparente Schicht oder Öffnungen für die LEDs haben. Alternativ gelbe bzw. farbige LEDs.
+- **Hausdruck 4 bar** (Ruhedruck). Fließdruck an der Dusche und Durchfluss ohne Duschkopf misst der Nutzer noch.
+- Hinweis des Nutzers: Ein Lowenergie-Dusch-Timer (Amazon B0CY2STKVG) misst Durchfluss und Temperatur, zeigt sie an und braucht keine Batterie. Er belegt, dass ein kleiner eingebauter Generator dafür reicht. Siehe `bauteile.md`, Abschnitt 2.
 
 ## Ziel und Randbedingungen (Vorgaben des Nutzers)
 
@@ -67,7 +76,20 @@ LED-Bedarf:
   2. Bei wenig Wasser werden alle LEDs dunkler.
   3. Jede LED bedeutet Drähte, Kanäle, Verguss und eine mögliche Undichtigkeit.
 
-## Konzept: Ring-Turbine und Generator im Griff
+## Zwei Wege zum Generator
+
+**Weg A: Spender-Generator (neu, bevorzugt prüfen).**
+- LED-Wasserhahnaufsätze mit Temperaturfarbe haben eine Mini-Turbine mit Generator. Das ganze Gerät misst nur etwa 33–36 × 24 × 24 mm und kostet etwa 10–15 €.
+- Auch billige LED-Duschköpfe haben einen kleinen Turbogenerator, und der ist für den vollen Duschdurchfluss ausgelegt.
+- Einen solchen Generator ausbauen und im dicken Griff einsetzen:
+  - Spart Eigenbau von Rotor und Spulen.
+  - Der Generator ist im Spender schon wasserdicht gelöst.
+- Wasserhahn-Spender sind für etwa 1,5–3 l/min gebaut. Im Griff bekommen sie deshalb ggf. nur einen **Teilstrom (Bypass)**.
+- Erst kaufen und zerlegen, dann vermessen.
+
+**Weg B: Eigenbau, Ring-Turbine (unten).** Falls kein Spender passt oder genug liefert.
+
+## Konzept Weg B: Ring-Turbine und Generator im Griff
 
 ```
  Stecker │◄──────────── Griff ≈ 82 mm, Ø 26–28 ────────────►│ Hals → Baum
@@ -91,14 +113,18 @@ LED-Bedarf:
   - Schottky-Brückengleichrichter und Glättungselko, dazu Vorwiderstand oder einfache Stromquelle.
   - Die Spannung legt die Windungszahl fest. Ziel: LEDs in Reihe.
   - Alles sitzt im Verguss in der Griffwand.
-- **Folge:** Der Griff wird dicker, **Ø 26–28 mm statt 21,25** (Spulen etwa 3 mm, Luftspalt, Rotor-Ring). **Der Nutzer muss das noch bestätigen.**
+- **Folge:** Der Griff wird dicker, **Ø 26–28 mm statt 21,25** (Spulen etwa 3 mm, Luftspalt, Rotor-Ring). Vom Nutzer freigegeben.
 - **Kabel zum Stern:** Lackdraht oder Silikonlitze im eigenen Kanal. Der Kanal liegt möglichst im Vollmaterial, also außerhalb des Hohlraums, und wird nach dem Einziehen vergossen.
 
 ### LEDs
 
-- Mindestausbau: **5 LEDs im Stern**, in Reihe (warmweiß etwa 15 V, gelb/bernstein etwa 10 V).
-  - In den Stern kommen Taschen von unten. Die Oberseite bleibt geschlossen, Resthaut etwa 2,5 mm.
-  - Stern aus **durchscheinendem PETG** (eigener ACE-Slot) statt Grün. Sonst kommt kaum Licht durch.
+- Mindestausbau: **5 LEDs im Stern**, in Reihe (warmweiß etwa 15 V, gelb/bernstein etwa 10 V). Die nötige Spannung hängt am gewählten Generator. Bei einem Spender mit etwa 3 V gehen die LEDs parallel, jede mit eigenem Vorwiderstand.
+  - Taschen von unten in den Stern.
+  - Stern **gelb**, so festgelegt. Optionen:
+    1. Ganzer Stern aus gelbem, durchscheinendem PETG mit warmweißen oder gelben LEDs dahinter.
+    2. Gelber Stern mit einer dünnen transparenten Schicht über jeder LED: Fenster aus transparentem PETG per Bemalung bzw. eigenem Bauteil, oder kleine Öffnungen, die mit Epoxid vergossen werden.
+    3. Gelbe LEDs hinter dünner gelber Haut.
+  - Option 1 ist die einfachste und dichteste und daher die Empfehlung.
 - Optional: je 1–2 LEDs pro Geschenk hinter weißen bzw. durchscheinenden Flächen.
 - Kaufteile:
   - Vorverdrahtete SMD-LEDs 0603/0805 für 3 V gibt es mit Lackdraht oder Litze.
@@ -125,14 +151,15 @@ LED-Bedarf:
 - Ob der Rotor mit eingeklebten Magneten rund läuft. Unwucht gibt Lärm und Verschleiß.
 - Warmwasser bis etwa 60 °C. PETG hält das, ist aber knapp. Epoxid entsprechend wählen.
 - Die Lage des Kabelkanals zum Stern muss am Netz geplant werden.
-- **Offen beim Nutzer:**
-  - Ist ein dickerer Griff (Ø 26–28) in Ordnung?
-  - Welche LED-Farbe soll der Stern haben?
-  - Wie hoch ist der Fließdruck an seiner Dusche, und wie viele l/min fließen ohne Duschkopf?
+- **Offen beim Nutzer:** Fließdruck an der Dusche und Durchfluss in l/min messen (Ruhedruck im Haus: 4 bar). Am einfachsten mit Eimer und Stoppuhr, einmal ohne Kopf und einmal mit dem bisherigen Kopf.
 
 ## Nächste Schritte
 
-1. **Prüfgriff konstruieren**, ohne Baum:
+0. **Spender beschaffen und vermessen** (siehe `bauteile.md`, „Empfohlene Erstbestellung“):
+   - 1–2 LED-Wasserhahnaufsätze und 1 billigen LED-Duschkopf zerlegen.
+   - Generator vermessen: Maße, Leerlaufspannung, Strom an einer LED bei verschiedenen Durchflüssen.
+   - Durchfluss und Fließdruck an der Dusche messen.
+1. **Prüfgriff konstruieren** (mit Spender-Generator-Aufnahme oder Ring-Turbine), ohne Baum:
    - Hansgrohe-Stecker, dicker Griff mit Turbinenkammer, Leitschaufeln und Spulentaschen.
    - Am Ende ein kurzes Auslassstück mit Drossel, die den Baum nachbildet (etwa 78 mm² Düsenfläche).
    - Rotor als eigenes Druckteil.

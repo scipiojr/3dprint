@@ -180,13 +180,34 @@ def baum_duesen(baum):
     a_soll = np.pi / 4 * DUESE_D_ORIGINAL ** 2
     punkte = []
     for q in flaechen:      # jede Schnittschleife einzeln (Löcher sind eigene Schleifen)
-        if 0.5 * a_soll < q.area < 1.6 * a_soll and q.centroid.x > 5:
+        if 0.5 * a_soll < q.area < 1.6 * a_soll and q.centroid.x > X_FUSS:
             punkte.append((q.centroid.x, q.centroid.y))
     return punkte
 
 
+def duesen_freiraum(baum, pts):
+    """Freier Platz über jeder Düse: Abstand vom Düsenmittelpunkt zum nächsten Material in der Kammer
+    (Rand der Kammer, Pfosten), gemessen knapp über der Düsenplatte. Eine aufgebohrte Düse darf dort
+    nichts anschneiden."""
+    g = baum.to_mesh()
+    m = trimesh.Trimesh(np.asarray(g.vert_properties)[:, :3], np.asarray(g.tri_verts), process=False)
+    frei = np.full(len(pts), np.inf)
+    for z in (X_PLATTE + 0.15, X_PLATTE + 0.3):
+        s = m.section(plane_origin=[0, 0, z], plane_normal=[0, 0, 1])
+        schleifen = [Polygon(e[:, :2]).buffer(0) for e in s.discrete if len(e) > 3]
+        fest = schleifen[0]
+        for q in schleifen[1:]:
+            fest = fest.symmetric_difference(q)        # gerade-ungerade Füllung: Außenkontur minus Kammer plus Pfosten
+        for i, (x, y) in enumerate(pts):
+            pt = Point(x, y)
+            frei[i] = min(frei[i], -fest.distance(pt) if fest.contains(pt) else fest.distance(pt))
+    return frei
+
+
 def duesen_aufbohren(duschkopf, baum, d):
-    """Düsen des Baums von ø 1,5 auf ø d aufbohren (nur in der Düsenplatte)."""
+    """Düsen des Baums von ø 1,5 auf ø d aufbohren (nur in der Düsenplatte). Düsen, die dicht an der
+    Kammerwand oder einem Pfosten sitzen, werden nur so weit aufgebohrt, wie der Platz reicht
+    (Rand 0,1 mm); bleibt kein Gewinn, bleiben sie ø 1,5."""
     assert DUESE_D_ORIGINAL <= d <= DUESE_D_MAX, f'Düsendurchmesser {d} außerhalb {DUESE_D_ORIGINAL} bis {DUESE_D_MAX}'
     if d <= DUESE_D_ORIGINAL + 1e-9:
         return duschkopf
@@ -196,9 +217,17 @@ def duesen_aufbohren(duschkopf, baum, d):
     dist = np.linalg.norm(arr[:, None] - arr[None], axis=2) + np.eye(len(arr)) * 1e9
     steg = dist.min() - d
     assert steg >= STEG_MIN, f'Steg zwischen Düsen nur {steg:.2f} mm bei ø {d}'
-    print(f'Düsen im Baum: {len(pts)}, aufgebohrt auf ø {d}, kleinster Steg {steg:.2f} mm')
-    zyl = [mf.Manifold.cylinder(X_PLATTE + 0.3 - (Z_BETT - 1), d / 2, d / 2, 48).translate([x, y, Z_BETT - 1])
-           for x, y in pts]
+    frei = duesen_freiraum(baum, pts)
+    dn = np.minimum(d, 2 * (frei - 0.1))
+    zyl, begrenzt = [], []
+    for (x, y), di in zip(pts, dn):
+        if di < d - 1e-6:
+            begrenzt.append((round(x, 1), round(y, 1), round(float(max(di, DUESE_D_ORIGINAL)), 2)))
+        if di > DUESE_D_ORIGINAL + 0.05:
+            zyl.append(mf.Manifold.cylinder(X_PLATTE + 0.3 - (Z_BETT - 1), di / 2, di / 2, 48).rotate([0, 0, 3.7])
+                       .translate([x, y, Z_BETT - 1]))   # leicht gedreht: Facetten fallen nicht auf Kanten des Originals
+    print(f'Düsen im Baum: {len(pts)}, auf ø {d} aufgebohrt: {sum(abs(di - d) < 1e-6 for di in dn)}, '
+          f'durch Platz begrenzt: {len(begrenzt)} {begrenzt}, kleinster Steg {steg:.2f} mm')
     return duschkopf - mf.Manifold.batch_boolean(zyl, mf.OpType.Add)
 
 

@@ -452,6 +452,10 @@ def main(quelle, ziel, mit_geschenken):
         t.trimesh().export(os.path.join(ziel, f'{name}.stl' if len(teile) == 1 else f'{name}_{tn.lower()}.stl'))
     blocker.v += versatz
     teile.append(('Stuetzen-Blocker Kammer', blocker, F_GRUEN, 'support_blocker'))
+    # Bohrung: die gekappte Tropfenspitze im Stecker ist eine 1-mm-Brücke; keine Stützen in der Bohrung
+    bb = Teil(zylinder_x(X_STECKER - 31, X_STECKER, 7.6) + zylinder_x(X_STECKER, X_BOHR_ENDE, 9.6))
+    bb.v += versatz
+    teile.append(('Stuetzen-Blocker Bohrung', bb, F_GRUEN, 'support_blocker'))
     if mit_geschenken:
         gb = Teil(geschenk_blocker(wolb))
         gb.v += versatz

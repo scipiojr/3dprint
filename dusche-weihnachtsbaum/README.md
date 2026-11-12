@@ -74,7 +74,7 @@ Benötigt: OpenSCAD (getestet 2021.01), Python mit `numpy trimesh manifold3d lxm
 
 Der Baum liegt beim Drucken flach. Im Inneren gibt es zwei Stellen, an denen ein Slicer mit automatischen Stützen Überhänge findet. Dort wären Stützen nicht mehr zu entfernen. Gemessen wurde lagenweise (Schwelle 30°, 0,2 mm Lagen).
 
-- **Bohrung in Stecker, Griff und Hals:** Eine liegende runde Bohrung hat eine Decke, die oben flach ausläuft. Der Slicer wollte darin über die ganze Länge Stützen setzen. Jetzt ist die Bohrung ein **Tropfen**: Kreis plus Dach, dessen Flanken den Kreis tangential berühren, im Griff mit 40°, im Stecker mit 35° (`DACH_WINKEL` bzw. `dach_winkel` im SCAD). Damit gibt es über der Achse keine Überhänge mehr. Der Querschnitt wächst von 78,5 auf 82 mm² (Griff) bzw. von 49,5 auf 50,9 mm² (Stecker). Die Tropfenform reicht vom Steckerschaft (x = −94,5) bis zur Kammer (x = 9).
+- **Bohrung in Stecker, Griff und Hals:** Eine liegende runde Bohrung hat eine Decke, die oben flach ausläuft. Der Slicer wollte darin über die ganze Länge Stützen setzen. Jetzt ist die Bohrung ein **Tropfen**: Kreis plus Dach, dessen Flanken den Kreis tangential berühren, im Griff mit 40°, im Stecker mit 35° (`DACH_WINKEL` bzw. `dach_winkel` im SCAD). Im Stecker ist die Spitze bei r = 4,45 flach gekappt (`dach_kappe`), weil die neu vermessene O-Ring-Nut (Ø 11,3) sonst nur 0,8 mm Wand ließe; so bleiben 1,2 mm, oben eine 1 mm breite Brücke. Ein dritter Stützen-Blocker (`Stuetzen-Blocker Bohrung`) liegt in der ganzen Bohrung. Damit gibt es über der Achse keine Überhänge mehr. Der Querschnitt wächst von 78,5 auf 82 mm² (Griff) bzw. von 49,5 auf 50,9 mm² (Stecker). Die Tropfenform reicht vom Steckerschaft (x = −94,5) bis zur Kammer (x = 9).
 - **Kammer im Baum:** Die Decke ist beim Original parallel zur Außenhaut gewölbt und nur etwa 9° geneigt, am Scheitel waagrecht. Das ist für den Slicer ein Überhang, auch wenn der Entwurf bewusst ohne Stützen auskommt: 29 Pfosten (ø 1,5, Raster 8 × 10 mm, versetzt) tragen die Decke. Alle Pfosten reichen bis ins Dach, der größte Abstand eines Deckenpunkts zum nächsten Pfosten oder zur Wand ist 4,8 mm (Brücken bis etwa 10 mm). Die Kammer ist also konstruktiv in Ordnung und wurde **nicht verändert**. Neu ist ein **Stützen-Blocker** als eigenes Bauteil in der 3MF (`Stuetzen-Blocker Kammer`, Untertyp `support_blocker`, Grundfläche der Kammer von der Düsenplatte bis über die Decke). Der Slicer setzt dort keine Stützen, alle Überhänge der Kammer liegen innerhalb des Blockers (geprüft). Der Blocker wird nicht gedruckt und steckt nicht in den STLs.
 - Übrig bleiben außen liegende Überhänge, die sich entfernen lassen: der Stecker (Achse 10 mm über dem Bett) und die 11,5 mm lange Brücke unter dem Hals (Unterseite z = −8, 2,6 mm über dem Bett).
 
@@ -90,7 +90,7 @@ Der Baum liegt beim Drucken flach. Im Inneren gibt es zwei Stellen, an denen ein
 **Allgemein**
 - Die Farbbemalung des Originals wird Dreieck für Dreieck übernommen und von den Bambu-Slots 4/5/6 auf 3/2/1 umnummeriert. Verloren geht nur die Grün-Bemalung des alten eckigen Griffs.
 - Die Druckeinstellungen des Originals (Bambu X1C, 19 Filamente) sind nicht in der 3MF. Anycubic Slicer Next nimmt beim Öffnen das eigene Drucker- und Filamentprofil.
-- Das Modell ist 242,7 × 85 × 21,25 mm groß. Es passt auf 250er-Betten (Kobra 3, Kobra S1), nicht auf 220er. Der Duschkopf ist ein geschlossenes, einteiliges Netz.
+- Das Modell ist 242,9 × 85 × 21,25 mm groß. Es passt auf 250er-Betten (Kobra 3, Kobra S1), nicht auf 220er. Der Duschkopf ist ein geschlossenes, einteiliges Netz.
 
 ## Druck
 
@@ -121,4 +121,5 @@ Der Baum liegt beim Drucken flach. Im Inneren gibt es zwei Stellen, an denen ein
   - Ausrichtung auf Anycubic/ACE mit 4 Filamenten.
 - 12.11.2026, dritte Runde: Geschenke oben gewölbt wie der Baum, Außenkanten gefast; Stirnkante des Griffs 1 mm gefast.
 - 12.11.2026, vierte Runde (Innenraum): Bohrung als Tropfen (selbsttragend), Stützen-Blocker für die Kammer in der 3MF. Kammer und Pfosten unverändert (Analyse siehe Innenraum).
+- 12.11.2026, abends: Modelle mit dem neu vermessenen Stecker (Commit ed41b63) neu erzeugt; Tropfenspitze im Stecker gekappt, Blocker in der Bohrung.
 - Noch nicht gedruckt erprobt. Die Steckermaße sind die des vorhandenen Adapters, nur die Drucklage ist anders (liegend statt stehend).

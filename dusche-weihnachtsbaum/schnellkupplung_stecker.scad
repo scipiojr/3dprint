@@ -26,6 +26,7 @@
 
 water_passage_d = (5/16)*25.4;   // 7,94 mm Wasserbohrung
 ueberlapp = 3;                   // mm in den Griff hinein
+dach_kappe = 4.45;               // Tropfenspitze bei r = 4,45 flach gekappt: an der O-Ring-Nut (Ø 11,3) bleiben 1,2 mm Wand
 dach_winkel = 35;                // Tropfenform: Bohrungsdecke steigt mit 35° (> 30°) -> ohne Stützen druckbar
 
 $fa = 1;
@@ -67,11 +68,14 @@ difference() {
 module bohrung(h)
 {
     r = water_passage_d/2;
-    linear_extrude(h) union() {
+    linear_extrude(h) intersection() {
+      translate([-r-1, -r-1]) square([r + 1 + dach_kappe, 2*r + 2]);   // 1 mm breite Brücke oben
+      union() {
         circle(d=water_passage_d);
         polygon([[0,0],
                  [r*cos(dach_winkel), -r*sin(dach_winkel)],
                  [r/cos(dach_winkel), 0],
                  [r*cos(dach_winkel),  r*sin(dach_winkel)]]);
+      }
     }
 }

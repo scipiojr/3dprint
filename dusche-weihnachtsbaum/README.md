@@ -34,7 +34,7 @@ Eine Variante mit LED-Stern und Wasserturbine im Griff ist in Planung: [`../dusc
 ```sh
 python3 werkzeuge/erzeuge_modell.py DuchaArbolBolas.3mf ausgabe/              # Standard
 python3 werkzeuge/erzeuge_modell.py DuchaArbolBolas.3mf ausgabe/ --geschenke  # mit Geschenken
-python3 werkzeuge/bilder.py ausgabe/ bilder/                                  # braucht beide Varianten
+python3 werkzeuge/bilder.py ausgabe/ bilder/                                  # braucht beide 3MFs, zeigt die Druckfarben
 ```
 
 Benötigt: OpenSCAD (getestet 2021.01), Python mit `numpy trimesh manifold3d lxml shapely` (für die Bilder zusätzlich `matplotlib`).

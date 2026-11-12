@@ -28,6 +28,14 @@ water_passage_d = (5/16)*25.4;   // 7,94 mm Wasserbohrung
 ueberlapp = 3;                   // mm in den Griff hinein
 dach_kappe = 4.45;               // Tropfenspitze bei r = 4,45 flach gekappt: an der O-Ring-Nut (Ø 11,3) bleiben 1,2 mm Wand
 dach_winkel = 35;                // Tropfenform: Bohrungsdecke steigt mit 35° (> 30°) -> ohne Stützen druckbar
+// koerper = true setzt oben den Körper zum Schaft an (nur für den Einzeldruck zum Anprobieren,
+// im Baum ersetzt der Griff ihn). Nach -z, von der Anlagefläche aus gemessen (Durchmesser in mm):
+//   0 .. -5.4    Ø18.8 -> 20.7   (steil)
+//   -5.4 .. -19  Ø20.7 -> 23     (flach)
+koerper = false;
+koerper_profil = [[-19, 23], [-5.4, 20.7], [0, 18.8]];
+schlauch_d = 10;          // Innendurchmesser im Körper, nicht kleiner als der Duschschlauch (Schätzung, anpassen)
+bohrung_rund = false;     // true: runde Bohrung statt Tropfen (für stehenden Druck)
 
 $fa = 1;
 $fs = 0.25;
@@ -42,9 +50,12 @@ st_backe_z0    = 10.9 + (7.9 - st_backe_lang)/2;
 
 module coupler()
 {
+  vorn = koerper ? concat(koerper_profil, [[0, 12.4]]) : [];   // Stufe 18.8 -> 12.4 an der Anlagefläche
+  alle = concat(vorn, st_profil);
+  z0 = alle[0][0];
   rotate_extrude($fn = 128)
-    polygon(concat([[0, 0]],
-                   [for (q = st_profil) [q[1]/2, q[0]]],
+    polygon(concat([[0, z0]],
+                   [for (q = alle) [q[1]/2, q[0]]],
                    [[0, st_profil[len(st_profil)-1][0]]]));
 }
 
@@ -57,21 +68,30 @@ difference() {
                 translate([-st_backe_breit/2, s > 0 ? st_backe_dicke/2 : -st_backe_dicke/2 - 5, st_backe_z0])
                     cube([st_backe_breit, 5, st_backe_lang]);
         }
-        translate([0,0,-ueberlapp]) cylinder(h=ueberlapp+0.01, d=12.4);
+        if (!koerper) translate([0,0,-ueberlapp]) cylinder(h=ueberlapp+0.01, d=12.4);
     }
-    translate([0,0,-ueberlapp-1]) bohrung(100);
+    if (koerper) {
+        // weite Bohrung im Körper, 45°-Kegel auf die Steckerbohrung kurz vor der Anlagefläche
+        kegel = (schlauch_d - water_passage_d)/2;
+        translate([0,0,-20]) bohrung(20 - kegel + 0.01, schlauch_d);
+        translate([0,0,-kegel]) cylinder(h=kegel+0.01, d1=schlauch_d-0.05, d2=water_passage_d);   // 0.05 kleiner: keine deckungsgleichen Flächen
+        translate([0,0,-0.01]) bohrung(100);
+    } else
+        translate([0,0,-ueberlapp-1]) bohrung(100);
 }
 
 // Wasserbohrung als Tropfen: Kreis plus Dach, dessen Flanken den Kreis tangential berühren.
 // +x ist beim Drucken oben (liegender Stecker); eine runde Decke wäre für den Slicer ein
 // Überhang und bekäme Stützen, die sich in der Bohrung nicht mehr entfernen lassen.
-module bohrung(h)
+module bohrung(h, d=water_passage_d)
 {
-    r = water_passage_d/2;
+    r = d/2;
+    kappe = (d > water_passage_d) ? r + 1 : dach_kappe;   // Kappe nur an der engen Bohrung (Wand an der O-Ring-Nut)
     linear_extrude(h) intersection() {
-      translate([-r-1, -r-1]) square([r + 1 + dach_kappe, 2*r + 2]);   // 1 mm breite Brücke oben
+      translate([-r-1, -r-1]) square([r + 1 + kappe, 2*r + 2]);   // 1 mm breite Brücke oben
       union() {
-        circle(d=water_passage_d);
+        circle(d=d);
+        if (!bohrung_rund)
         polygon([[0,0],
                  [r*cos(dach_winkel), -r*sin(dach_winkel)],
                  [r/cos(dach_winkel), 0],

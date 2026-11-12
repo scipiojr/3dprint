@@ -19,6 +19,8 @@ Stecker aus `schnellkupplung_stecker.scad`:
 
 ![Stecker](bilder/stecker.png)
 
+Eine Variante mit LED-Stern und Wasserturbine im Griff ist in Planung: [`../dusche-weihnachtsbaum-led`](../dusche-weihnachtsbaum-led).
+
 ## Dateien
 
 | Datei | Inhalt |

@@ -1,0 +1,4 @@
+# Netze des MakerWorld-Originals nicht einchecken (Lizenz)
+*.3mf
+ausgabe/
+__pycache__/

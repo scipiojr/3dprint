@@ -73,8 +73,12 @@ difference() {
     if (koerper) {
         // weite Bohrung im Körper, 45°-Kegel auf die Steckerbohrung kurz vor der Anlagefläche
         kegel = (schlauch_d - water_passage_d)/2;
-        translate([0,0,-20]) bohrung(20 - kegel + 0.01, schlauch_d);
-        translate([0,0,-kegel]) cylinder(h=kegel+0.01, d1=schlauch_d-0.05, d2=water_passage_d);   // 0.05 kleiner: keine deckungsgleichen Flächen
+        translate([0,0,-20]) bohrung(20 - kegel + 0.02, schlauch_d);
+        // Übergang als Hülle zweier dünner Scheiben (gleiche Tropfenform), also stufenlos
+        hull() {
+            translate([0,0,-kegel]) bohrung(0.01, schlauch_d);
+            translate([0,0,-0.01]) bohrung(0.01);
+        }
         translate([0,0,-0.01]) bohrung(100);
     } else
         translate([0,0,-ueberlapp-1]) bohrung(100);

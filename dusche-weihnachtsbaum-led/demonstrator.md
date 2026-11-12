@@ -64,7 +64,7 @@ Die erste Rechnung war zu optimistisch. Drei Dinge begrenzen sich gegenseitig:
 - Der alte Kopf bremst auf knapp ein Drittel. Der Baum verbraucht also etwa **dreimal so viel Wasser** wie der alte Kopf.
 - Der Fließdruck ist weiter unbekannt. Aus den zwei Punkten folgt nur: Die Versorgung ist „steif". Ein Druckverlust von etwa 0,1 bar am Baum (Schätzung, siehe unten) kostet nur wenige Prozent Durchfluss.
 
-Gerechnet wird ab jetzt mit **14,2 l/min** statt der früheren Annahme 8 l/min. Das erhöht Drehzahl, Spannung und Leistung, aber auch die Strömungsgeschwindigkeit in Stecker und Rotor (Schätzung: 4,8 m/s in der Steckerbohrung, 5,3 m/s im Rotor, entspricht rund 0,12–0,14 bar Staudruck). Der **Druckverlust des Prüfgriffs wird dadurch vermutlich höher als das Ziel 0,1 bar**. Das muss die Messung zeigen. Hebel: Rotor-Kanal größer (Ø 9 → 10–11), steilere Leitschaufeln nur im Notfall.
+Gerechnet wird mit **14,2 l/min als Höchstfall** (Alltagsbetrieb voraussichtlich 6–8 l/min, siehe unten). Das erhöht Drehzahl, Spannung und Leistung, aber auch die Strömungsgeschwindigkeit in Stecker und Rotor (Schätzung: 4,8 m/s in der Steckerbohrung, 5,3 m/s im Rotor, entspricht rund 0,12–0,14 bar Staudruck). Der **Druckverlust des Prüfgriffs wird dadurch vermutlich höher als das Ziel 0,1 bar**. Das muss die Messung zeigen. Hebel: Rotor-Kanal größer (Ø 9 → 10–11), steilere Leitschaufeln nur im Notfall.
 
 Zum Vergleich der Baumdüsen (44 × Ø 1,5 mm = 78 mm², Schätzung mit Auslaufzahl 0,6–0,8): bei 14,2 l/min etwa 0,07–0,13 bar, bei den früheren 8 l/min nur 0,02–0,04 bar. Die Drossel im Prüfgriff (Kappe, Gesamtfläche ≈ 78 mm²) bildet diese Düsenfläche nach.
 
@@ -77,7 +77,20 @@ Ergebnisse bei **14,2 l/min** (`werkzeuge/demonstrator_rechnung.py`, Schätzung,
 | **300°** | **1,0 mm** | **Ø 0,08** | 5410 U/min | 3220 | 101 Ω | **6,7 V** | **56 mW** |
 | 300° | 0,8 mm | Ø 0,08 | 5410 U/min | 3220 | 101 Ω | 7,5 V | 70 mW |
 
-(Bei 8 l/min waren es 3,8 V und 18 mW für die gewählte Zeile.)
+**Hinweis des Nutzers (12.11.2026): Die Strahlen aus dem Baum sind bei 14 l/min ziemlich hart, „fast schmerzhaft".** Im Alltag wird der Hahn deshalb voraussichtlich **teilweise zugedreht**, vermutlich auf 6–8 l/min. Ausgelegt wird daher auf **6–8 l/min**, 14,2 l/min ist der Höchstfall. Für die gewählte Zeile (300°, 1,0 mm, Ø 0,08) gilt (Schätzung):
+
+| Durchfluss | Spitzenspannung | größte Leistung | Druckverlust Baumdüsen | Staudruck im Rotor |
+|---|---|---|---|---|
+| 4,6 l/min (wie alter Kopf) | 2,2 V | 6 mW | 0,01 bar | 0,015 bar |
+| 6 l/min | 2,8 V | 10 mW | 0,01–0,02 bar | 0,025 bar |
+| 8 l/min | 3,8 V | 18 mW | 0,02–0,04 bar | 0,044 bar |
+| 10 l/min | 4,7 V | 28 mW | 0,04–0,06 bar | 0,07 bar |
+| 14,2 l/min | 6,7 V | 56 mW | 0,07–0,13 bar | 0,14 bar |
+
+- Bei 6–8 l/min reicht die Leistung für 3 LEDs (6–12 mW), aber knapp. Die Spannung von 2,8–3,8 V Spitze liegt an der Grenze für parallele LEDs (≈ 3 V). Ein **Spannungsverdoppler** ist dann eingeplant, nicht optional.
+- Bei nur 4,6 l/min (Durchfluss des alten Kopfes) leuchten die LEDs voraussichtlich nicht ohne Verdoppler.
+- Der Druckverlust im Prüfgriff ist bei diesen Durchflüssen kein Problem mehr (Staudruck unter 0,05 bar). Das Risiko durch 5 m/s gilt nur für den Höchstfall.
+- Die Messung am Prüfgriff soll deshalb bei **mehreren Durchflüssen** erfolgen (voll, etwa 8 und etwa 5 l/min).
 
 Gewählt bleiben **300°, 1,0 mm Wand, Ø 0,08 mm** (Zeile 3). Zum Vergleich: Drei gelbe LEDs mit je 1 mA brauchen etwa 6 mW, mit je 2 mA 12 mW, fünf mit je 2 mA 20 mW.
 

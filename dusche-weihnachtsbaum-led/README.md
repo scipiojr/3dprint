@@ -13,7 +13,7 @@ Der Plan für den **Eigenbau-Demonstrator** (Prüfgriff mit Ring-Turbine, Rechnu
 - **Der Griff darf dicker werden** (Ø 26–28 mm statt 21,25).
 - **Der Stern bleibt gelb.** Er darf eine transparente Schicht oder Öffnungen für die LEDs haben. Alternativ gelbe bzw. farbige LEDs.
 - **Hausdruck 4 bar** (Ruhedruck).
-- **Durchfluss gemessen (12.11.2026, Eimer und Stoppuhr, je ein Versuch):** bisheriger Duschkopf 4,6 l/min (3,5 l in 46,09 s), Schlauch ohne Kopf 14,6 l/min (3,15 l in 12,92 s), Baum ohne Geschenke 14,2 l/min (3,2 l in 13,48 s). Der Baum bremst kaum, der alte Kopf auf ein Drittel. Fließdruck bleibt offen. Rechnung ab jetzt mit 14,2 l/min, siehe [`demonstrator.md`](demonstrator.md).
+- **Durchfluss gemessen (12.11.2026, Eimer und Stoppuhr, je ein Versuch):** bisheriger Duschkopf 4,6 l/min (3,5 l in 46,09 s), Schlauch ohne Kopf 14,6 l/min (3,15 l in 12,92 s), Baum ohne Geschenke 14,2 l/min (3,2 l in 13,48 s). Der Baum bremst kaum, der alte Kopf auf ein Drittel. Fließdruck bleibt offen. Die Strahlen sind bei 14 l/min sehr hart, der Hahn wird im Alltag wohl auf **6–8 l/min** zugedreht. Ausgelegt wird auf 6–8 l/min, 14,2 l/min ist der Höchstfall. Rechnung dazu in [`demonstrator.md`](demonstrator.md).
 - Hinweis des Nutzers: Ein Lowenergie-Dusch-Timer (Amazon B0CY2STKVG) misst Durchfluss und Temperatur, zeigt sie an und braucht keine Batterie. Er belegt, dass ein kleiner eingebauter Generator dafür reicht. Siehe `bauteile.md`, Abschnitt 2.
 
 ## Ziel und Randbedingungen (Vorgaben des Nutzers)
@@ -155,7 +155,7 @@ LED-Bedarf:
 - Warmwasser bis etwa 60 °C. PETG hält das, ist aber knapp. Epoxid entsprechend wählen.
 - Die Lage des Kabelkanals zum Stern muss am Netz geplant werden.
 - **Offen beim Nutzer:** Fließdruck an der Dusche (nur mit Manometer; Ruhedruck im Haus: 4 bar). Der Durchfluss ist gemessen (siehe Entscheidungen).
-- **Neues Risiko durch den höheren Durchfluss:** Strömung in Stecker und Rotor etwa 5 m/s, Druckverlust des Prüfgriffs vermutlich über 0,1 bar. Rotor-Drehzahl im Leerlauf rechnerisch über 10 000 U/min (Lager, Lärm, Unwucht).
+- **Höchstfall 14,2 l/min:** Strömung in Stecker und Rotor etwa 5 m/s, Druckverlust des Prüfgriffs dort vermutlich über 0,1 bar. Im erwarteten Betrieb bei 6–8 l/min unkritisch, dafür ist die Spannung knapp (2,8–3,8 V Spitze, Verdoppler einplanen). Rotor-Drehzahl im Leerlauf rechnerisch über 10 000 U/min (Lager, Lärm, Unwucht).
 
 ## Nächste Schritte
 

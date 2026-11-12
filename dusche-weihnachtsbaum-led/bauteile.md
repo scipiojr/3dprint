@@ -46,6 +46,27 @@ Daten gleicher Bauart bei anderen Anbietern (der Name „YWBL" ist nicht nötig,
 - DEWIN, **M26×1,5**, seitlicher Einlass, AC 2–10 V, 10–50 mA, ABS, Lebensdauer über 3000 h: [Amazon.co.uk](https://www.amazon.co.uk/DEWIN-Generator-M26x1-5-10%E2%80%9150MA-AC2%E2%80%9110V/dp/B0D4Z8RBMN). Anderes Gewinde, also vor dem Kauf Maße prüfen.
 - Mdxtog, AC 2–7,5 V, 5–60 mA, 2–10 l/min, 12-mm-Steckanschluss: [Amazon.com](https://www.amazon.com/Generator-2-7-5V-Hydroelectric-Connect-Faucets/dp/B0G2L8TNVR). Anderer Anschluss, größerer Körper.
 
+**Fund des Nutzers (12.11.2026): „AC3-12V 3000RPM Micro Water Power Hydroelectric Generator Motor with 4pcs LED".** Anbieter-Recherche, Stand 12.11.2026, eBay.de, alles Händler in China (Versand 15,72 €, ein Händler 22,84 €):
+
+| Händler (eBay) | Preis | Versand | Bewertung |
+|---|---|---|---|
+| chuanglinf17 | 11,44 € (10,87 € mit Gutschein), Preisvorschlag möglich | 15,72 € | 100 % (165) |
+| tianma06 | 11,31 € (10,75 € mit Gutschein) | 22,84 € | 100 % (195) |
+| chuangf4lin | 15,98 € (15,18 € mit Gutschein) | 15,72 € | 97,8 % (173) |
+| jied3yun | 16,29 € (15,48 € mit Gutschein) | 15,72 € | 100 % (305) |
+| jianghu05 | 16,14 € | 15,72 € | 99,4 % (283) |
+| 66liancheng | 16,30 € | 15,72 € | 100 % (161) |
+| shendiao996 | 16,36 € | 15,72 € | 100 % (212) |
+| zlka638zlk | 16,48 € | 15,72 € | 100 % (116) |
+| e9yunmao2023 | 16,54 € (15,71 € mit Gutschein) | 15,72 € | 99 % (313) |
+| egieznA (Anzeige) | etwa 20 $ | – | – |
+
+- Es sind Wiederverkäufer desselben Artikels. Das ursprünglich gefundene Angebot von WWX Electronics (7,98 US$) ist **beendet** (17.04., „enthielt einen Fehler"). Mit Versand kostet ein Stück bei allen etwa **26–27 €**, bei Mengenkauf lohnt sich ein Sammelkauf.
+- Die Suche fand auf eBay.de nur diese Händler. Eine Quelle in der EU (kürzere Lieferzeit) wurde nicht gefunden. AliExpress und Amazon wurden nicht geprüft.
+- **Die Angebotstexte waren nicht abrufbar** (nur Suchergebnisse und Vorschaubild gesehen). **Maße, Gewinde, Spannung und Strom des Teils sind unbekannt.** Das Vorschaubild zeigt einen weißen Zylinder mit vier LEDs oben, also einen LED-Wasserhahn-Aufsatz. Das ist die Bauart aus der Einschränkung oben: Generator und LEDs sind vermutlich vergossen und nicht trennbar.
+- Der Titel „AC3-12V 3000RPM" ist die Typangabe der Mini-Motor-Generatoren (3000 U/min, 16 mm), die der gleiche Händler als Windrad-Motor verkauft. Das Teil liefert also wohl nur wenige mA und passt nicht zu einem „Generator mit Kabel" für den Stern.
+- **Bewertung: ⚠️ nur als Spender zum Zerlegen und Vermessen, nicht als Bauteil.** Für den Einbau bleibt der AC2-10V-Generator M23×1,5 (10–50 mA, Kabel) besser. Ein Stück zum Zerlegen reicht, sinnvoll erst nach Rückfrage beim Händler nach Maßen und Fotos.
+
 **Verfügbarkeit geprüft am 12.11.2026 (Browser):** Amazon.de M23×1,5 (YWBL-WH, Bodeneinlass) und Amazon.de M26×1,5 (Eujgoov, seitlicher Einlass, Maße 43 × 31 × 12 mm laut Angebot) sind beide „Derzeit nicht verfügbar". eBay.de findet unter „hydro generator AC2-10V M23x1.5" keine exakten Treffer. Die Angebote bei eBay.com und Fruugo stehen weiter unter „Funde" oben, Lagerbestand dort **nicht bestätigt**.
 
 Offene Punkte (Schätzung, zu messen): Der Generator ist für Wasserhahn-Durchfluss gebaut. Bei etwa 8 l/min drosselt er stark, daher Teilstrom (Bypass) im Griff. Kopf Ø 23 mm braucht einen Griff mit mindestens Ø 26–27 mm außen, der untere Körper Ø 19,8 mm ist unkritisch. Es ist **Wechselspannung** (Gleichrichter nötig), 10–50 mA bei 2–10 V sind laut Angebot der Bereich über den Druck.

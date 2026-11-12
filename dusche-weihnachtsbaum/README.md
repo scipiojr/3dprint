@@ -34,6 +34,7 @@ Eine Variante mit LED-Stern und Wasserturbine im Griff ist in Planung: [`../dusc
 ```sh
 python3 werkzeuge/erzeuge_modell.py DuchaArbolBolas.3mf ausgabe/              # Standard
 python3 werkzeuge/erzeuge_modell.py DuchaArbolBolas.3mf ausgabe/ --geschenke  # mit Geschenken
+# bei --geschenke entsteht zusätzlich *_komplett.stl (alles in einem Stück, geschlossen)
 python3 werkzeuge/bilder.py ausgabe/ bilder/                                  # braucht beide 3MFs, zeigt die Druckfarben
 ```
 

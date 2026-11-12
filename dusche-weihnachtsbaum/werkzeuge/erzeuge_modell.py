@@ -486,6 +486,7 @@ def main(quelle, ziel, mit_geschenken):
     duschkopf = duesen_aufbohren(duschkopf, baum, DUESE_D)   # Düsen im Baum auf ø DUESE_D
     teile = [('Baum', Teil(duschkopf, baum_id, farbe), F_GRUEN)]
     name, titel = NAME, 'Xmas tree shower head – Hansgrohe Quick Connect'
+    komplett = None
 
     if mit_geschenken:
         kartons, rot_2d = geschenke_2d()
@@ -507,6 +508,7 @@ def main(quelle, ziel, mit_geschenken):
         teile = [('Baum', Teil(gruen, baum_id, farbe), F_GRUEN),
                  ('Geschenke', Teil(weiss), F_WEISS),
                  ('Schleifen', Teil(rot), F_ROT)]
+        komplett = Teil(ganz)            # alles in einem Stück, für eine einzelne STL
         name += '_geschenke'
         titel += ' – mit Geschenken'
 
@@ -522,6 +524,9 @@ def main(quelle, ziel, mit_geschenken):
     for tn, t, _ in teile:
         t.v += versatz
         t.trimesh().export(os.path.join(ziel, f'{name}.stl' if len(teile) == 1 else f'{name}_{tn.lower()}.stl'))
+    if komplett is not None:
+        komplett.v += versatz
+        komplett.trimesh().export(os.path.join(ziel, f'{name}_komplett.stl'))
     blocker.v += versatz
     teile.append(('Stuetzen-Blocker Kammer', blocker, F_GRUEN, 'support_blocker'))
     # Bohrung: die gekappte Tropfenspitze im Stecker ist eine 1-mm-Brücke; keine Stützen in der Bohrung

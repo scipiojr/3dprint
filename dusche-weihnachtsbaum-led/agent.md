@@ -38,7 +38,7 @@ Arbeitsanweisung und Projektstand für KI-Agenten. Sprache mit dem Nutzer: **Deu
 
 - Griff darf dicker werden (Ø 26–28).
 - Stern gelb. Transparente Schicht oder Öffnungen für die LEDs sind erlaubt, alternativ farbige LEDs.
-- Hausdruck 4 bar. **Durchfluss gemessen:** alter Kopf 4,6 l/min, Schlauch 14,6, Baum ohne Geschenke 14,2 l/min (je ein Versuch). Strahlen bei 14 l/min zu hart: **Auslegung auf 6–8 l/min**, 14,2 l/min nur Höchstfall (Tabelle in `demonstrator.md`). Bei 6–8 l/min nur 10–18 mW und 2,8–3,8 V Spitze, Spannungsverdoppler einplanen. Fließdruck offen.
+- Hausdruck 4 bar. **Durchfluss gemessen:** alter Kopf 4,6 l/min, Schlauch 14,6, Baum ohne Geschenke 14,2 l/min (je ein Versuch). Strahlen bei 14 l/min zu hart: **Auslegung auf 6–8 l/min**, 14,2 l/min nur Höchstfall (Tabelle in `demonstrator.md`). Bei 6–8 l/min nur 10–18 mW und 2,8–3,8 V Spitze, Spannungsverdoppler einplanen. Fließdruck offen. **Düsen im Baum standardmäßig ø 2,0** (`--duesen-d` im Hauptprojekt, `duesen_d` in `parameter.scad`).
 
 ## Nächster Schritt
 

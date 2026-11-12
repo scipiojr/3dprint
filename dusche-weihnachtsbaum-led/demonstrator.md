@@ -66,7 +66,7 @@ Die erste Rechnung war zu optimistisch. Drei Dinge begrenzen sich gegenseitig:
 
 Gerechnet wird mit **14,2 l/min als Höchstfall** (Alltagsbetrieb voraussichtlich 6–8 l/min, siehe unten). Das erhöht Drehzahl, Spannung und Leistung, aber auch die Strömungsgeschwindigkeit in Stecker und Rotor (Schätzung: 4,8 m/s in der Steckerbohrung, 5,3 m/s im Rotor, entspricht rund 0,12–0,14 bar Staudruck). Der **Druckverlust des Prüfgriffs wird dadurch vermutlich höher als das Ziel 0,1 bar**. Das muss die Messung zeigen. Hebel: Rotor-Kanal größer (Ø 9 → 10–11), steilere Leitschaufeln nur im Notfall.
 
-Zum Vergleich der Baumdüsen (44 × Ø 1,5 mm = 78 mm², Schätzung mit Auslaufzahl 0,6–0,8): bei 14,2 l/min etwa 0,07–0,13 bar, bei den früheren 8 l/min nur 0,02–0,04 bar. Die Drossel im Prüfgriff (Kappe, Gesamtfläche ≈ 78 mm²) bildet diese Düsenfläche nach.
+Zum Vergleich der Baumdüsen (44 × Ø 1,5 mm = 78 mm², Schätzung mit Auslaufzahl 0,6–0,8): bei 14,2 l/min etwa 0,07–0,13 bar, bei den früheren 8 l/min nur 0,02–0,04 bar. Mit größeren Düsen (Nutzerwunsch, Standard **ø 2,0 mm**, Fläche 138 mm²) sinkt der Druckverlust der Düsen bei 14,2 l/min auf etwa 0,03 bar und die Strahlen werden weicher (≈ 2,5 m/s statt 4,3 m/s). Die Drossel im Prüfgriff (Kappe) folgt dem Parameter `duesen_d` in `parameter.scad` (Standard 2,0 → Ø 13,3 mm).
 
 Ergebnisse bei **14,2 l/min** (`werkzeuge/demonstrator_rechnung.py`, Schätzung, kinematisches Modell ohne Schlupf):
 
@@ -77,7 +77,7 @@ Ergebnisse bei **14,2 l/min** (`werkzeuge/demonstrator_rechnung.py`, Schätzung,
 | **300°** | **1,0 mm** | **Ø 0,08** | 5410 U/min | 3220 | 101 Ω | **6,7 V** | **56 mW** |
 | 300° | 0,8 mm | Ø 0,08 | 5410 U/min | 3220 | 101 Ω | 7,5 V | 70 mW |
 
-**Hinweis des Nutzers (12.11.2026): Die Strahlen aus dem Baum sind bei 14 l/min ziemlich hart, „fast schmerzhaft".** Im Alltag wird der Hahn deshalb voraussichtlich **teilweise zugedreht**, vermutlich auf 6–8 l/min. Ausgelegt wird daher auf **6–8 l/min**, 14,2 l/min ist der Höchstfall. Für die gewählte Zeile (300°, 1,0 mm, Ø 0,08) gilt (Schätzung):
+**Hinweis des Nutzers (12.11.2026): Die Strahlen aus dem Baum sind bei 14 l/min ziemlich hart, „fast schmerzhaft".** Im Alltag wird der Hahn deshalb voraussichtlich **teilweise zugedreht**, vermutlich auf 6–8 l/min. Mit größeren Düsen (ø 2,0) werden die Strahlen aber auch bei vollem Durchfluss weicher; dann ist der volle Durchfluss wieder der Normalfall. Beide Fälle bleiben im Entwurf: Ausgelegt wird auf **6–8 l/min** als sicheren Fall, 14,2 l/min ist der gute Fall (56 mW). Für die gewählte Zeile (300°, 1,0 mm, Ø 0,08) gilt (Schätzung):
 
 | Durchfluss | Spitzenspannung | größte Leistung | Druckverlust Baumdüsen | Staudruck im Rotor |
 |---|---|---|---|---|

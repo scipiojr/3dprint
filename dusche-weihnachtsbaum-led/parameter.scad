@@ -87,5 +87,7 @@ d_kappe      = 25;
 z_kappe_u    = 75;         // Unterkante Kappe
 z_boden_o    = 73;         // Oberkante Kappenboden = Rohrende
 
-// --- Drossel (Gesamtfläche ≈ 78 mm², wie 44 Düsen im Baum) ---
-drossel_variante = 1;      // 1: ein Loch Ø10, 2: vier Löcher Ø5
+// --- Drossel: bildet die Düsenfläche des Baums nach (44 Düsen) ---
+duesen_d         = 2.0;    // Düsen-Ø im Baum in mm (Original 1,5 -> 78 mm², Standard hier 2,0 -> 138 mm²)
+drossel_flaeche  = 44 * PI / 4 * duesen_d * duesen_d;   // mm²
+drossel_variante = 1;      // 1: ein Loch (Ø folgt aus der Fläche, 2,0 -> Ø13,3), 2: vier Löcher (nur bis ≈ 100 mm², sonst überlappen sie)

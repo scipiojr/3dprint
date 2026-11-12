@@ -18,7 +18,12 @@ die Bemalung der Kugeln wird auf die Filamente 1–4 umnummeriert.
 Ausgabe: STL(s) und eine 3MF (Bambu/Orca-Format) mit Bauteilen und Bemalung.
 
 Aufruf:
-  python3 erzeuge_modell.py <original.3mf> <ausgabe_ordner> [--geschenke]
+  python3 erzeuge_modell.py <original.3mf> <ausgabe_ordner> [--geschenke] [--duesen-d=2.0]
+
+--duesen-d: Durchmesser der Duschdüsen in mm (Standard 2.0). Die 44 Düsen im Baum (Original: 1,5 mm)
+  werden auf diesen Durchmesser aufgebohrt, die Düsen der Geschenke entstehen damit. Mit
+  --duesen-d=1.5 bleibt der Baum wie im Original. Größere Düsen machen die Strahlen weicher
+  (bei 14 l/min: 1,5 mm ≈ 4,3 m/s, 2,0 mm ≈ 2,5 m/s, 2,5 mm ≈ 1,6 m/s, Auslaufzahl 0,7).
 Benötigt: openscad, numpy, trimesh, manifold3d, lxml, shapely
 """
 import json, os, re, subprocess, sys, tempfile, uuid, zipfile
@@ -164,9 +169,42 @@ def bohrung_dach(x0, x1, d=BOHRUNG_D, winkel=DACH_WINKEL):
     return mf.Manifold.extrude(cs, x1 - x0).rotate([0, 90, 0]).translate([x0, ACHSE_Y, ACHSE_Z])
 
 
+def baum_duesen(baum):
+    """Mittelpunkte der Düsen in der Düsenplatte des Originals.
+    Schnitt in halber Plattenstärke: Jede Düse ist dort ein kleines Loch in der Schnittfläche."""
+    g = baum.to_mesh()
+    m = trimesh.Trimesh(np.asarray(g.vert_properties)[:, :3], np.asarray(g.tri_verts), process=False)
+    s = m.section(plane_origin=[0, 0, (Z_BETT + X_PLATTE) / 2], plane_normal=[0, 0, 1])
+    assert s is not None, 'Düsenplatte nicht gefunden'
+    flaechen = [Polygon(e[:, :2]).buffer(0) for e in s.discrete if len(e) > 3]
+    a_soll = np.pi / 4 * DUESE_D_ORIGINAL ** 2
+    punkte = []
+    for q in flaechen:      # jede Schnittschleife einzeln (Löcher sind eigene Schleifen)
+        if 0.5 * a_soll < q.area < 1.6 * a_soll and q.centroid.x > 5:
+            punkte.append((q.centroid.x, q.centroid.y))
+    return punkte
+
+
+def duesen_aufbohren(duschkopf, baum, d):
+    """Düsen des Baums von ø 1,5 auf ø d aufbohren (nur in der Düsenplatte)."""
+    assert DUESE_D_ORIGINAL <= d <= DUESE_D_MAX, f'Düsendurchmesser {d} außerhalb {DUESE_D_ORIGINAL} bis {DUESE_D_MAX}'
+    if d <= DUESE_D_ORIGINAL + 1e-9:
+        return duschkopf
+    pts = baum_duesen(baum)
+    assert len(pts) == 44, f'erwartet 44 Düsen im Baum, gefunden {len(pts)}'
+    arr = np.array(pts)
+    dist = np.linalg.norm(arr[:, None] - arr[None], axis=2) + np.eye(len(arr)) * 1e9
+    steg = dist.min() - d
+    assert steg >= STEG_MIN, f'Steg zwischen Düsen nur {steg:.2f} mm bei ø {d}'
+    print(f'Düsen im Baum: {len(pts)}, aufgebohrt auf ø {d}, kleinster Steg {steg:.2f} mm')
+    zyl = [mf.Manifold.cylinder(X_PLATTE + 0.3 - (Z_BETT - 1), d / 2, d / 2, 48).translate([x, y, Z_BETT - 1])
+           for x, y in pts]
+    return duschkopf - mf.Manifold.batch_boolean(zyl, mf.OpType.Add)
+
+
 def kammer_blocker(duschkopf):
     """Stützen-Blocker: Grundfläche der Kammer (knapp über der Düsenplatte), Höhe bis über die Decke.
-    Die Kammer ist geschlossen und hat nur 1,5-mm-Düsen; Stützen darin ließen sich nicht entfernen."""
+    Die Kammer ist geschlossen und hat nur kleine Düsen (ø 1,5 bis 3 mm); Stützen darin ließen sich nicht entfernen."""
     g = duschkopf.to_mesh()
     m = trimesh.Trimesh(np.asarray(g.vert_properties)[:, :3], np.asarray(g.tri_verts), process=False)
     kammern = []
@@ -204,7 +242,11 @@ FASE_BETT = 0.6     # Unterkanten am Bett (klein, sonst fehlt Auflage)
 WAND_G = 2.4        # Wand der Geschenkkammer zu Außenseiten und zur Griffseite
 DACH_G = 2.6        # Dachstärke: Kammerdecke folgt der Wölbung 2,6 mm tiefer
 X_PLATTE = Z_BETT + 2.125   # Oberkante der Düsenplatte (wie im Baum: z = -8,5)
-DUESE_D = 1.5       # Düsen ø 1,5 wie im Baum
+DUESE_D = 2.0       # Düsen ø (Standard 2,0; per --duesen-d änderbar). Baum-Original: 1,5
+DUESE_D_ORIGINAL = 1.5   # Düsen im Original-Baum
+DUESE_D_MAX = 3.0   # größere Düsen lässt das Skript nicht zu (Stege, Pfosten)
+STEG_MIN = 1.0      # kleinster Steg zwischen zwei Düsen (mm), sonst Abbruch
+PFOSTEN_D = 1.5     # Stützpfosten in den Kammern
 DUESEN_X = [-23.5, -18.0, -12.5, -7.0]   # Düsenraster je Karton: 4 x 3 = 12 Düsen
 DUESEN_Y = [16.0, 22.5, 29.0]
 PFOSTEN_X = [-20.75, -15.25, -9.75]      # Pfosten ø 1,5 in den Rasterfeldern
@@ -299,7 +341,7 @@ def geschenk_hohlraum(f):
     m.apply_transform(np.array([[0, 0, 1, xa], [1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1.0]]))
     kammer = zu_manifold(m)
     senkrecht = lambda x, y, z0, z1, d: (mf.Manifold.cylinder(z1 - z0, d / 2, d / 2, 32).translate([x, y, z0]))
-    pfosten = [senkrecht(x, y, X_PLATTE - 0.3, Z_OBEN + 5, DUESE_D) for x in PFOSTEN_X for y in PFOSTEN_Y]
+    pfosten = [senkrecht(x, y, X_PLATTE - 0.3, Z_OBEN + 5, PFOSTEN_D) for x in PFOSTEN_X for y in PFOSTEN_Y]
     kammer = kammer - mf.Manifold.batch_boolean(pfosten, mf.OpType.Add)
     duesen = [senkrecht(x, y, Z_BETT - 1, X_PLATTE + 0.3, DUESE_D) for x in DUESEN_X for y in DUESEN_Y]
     kanal = (zylinder_x(0, 14, KANAL_D) + bohrung_dach(0, 14, KANAL_D, DACH_WINKEL)).rotate([0, 0, 90])
@@ -412,6 +454,7 @@ def main(quelle, ziel, mit_geschenken):
     duschkopf = rest + runder_griff() + stecker()
     # Tropfenform der Bohrung (Decke selbsttragend) vom Steckerschaft bis zur Kammer
     duschkopf = duschkopf - bohrung_dach(X_BOHR_ANFANG, X_BOHR_ENDE)
+    duschkopf = duesen_aufbohren(duschkopf, baum, DUESE_D)   # Düsen im Baum auf ø DUESE_D
     teile = [('Baum', Teil(duschkopf, baum_id, farbe), F_GRUEN)]
     name, titel = NAME, 'Xmas tree shower head – Hansgrohe Quick Connect'
 
@@ -468,4 +511,7 @@ def main(quelle, ziel, mit_geschenken):
 
 if __name__ == '__main__':
     a = [x for x in sys.argv[1:] if not x.startswith('--')]
+    for x in sys.argv[1:]:
+        if x.startswith('--duesen-d='):
+            DUESE_D = float(x.split('=', 1)[1])
     main(a[0], a[1], '--geschenke' in sys.argv)

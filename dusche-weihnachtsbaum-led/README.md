@@ -14,6 +14,7 @@ Der Plan für den **Eigenbau-Demonstrator** (Prüfgriff mit Ring-Turbine, Rechnu
 - **Der Stern bleibt gelb.** Er darf eine transparente Schicht oder Öffnungen für die LEDs haben. Alternativ gelbe bzw. farbige LEDs.
 - **Hausdruck 4 bar** (Ruhedruck).
 - **Durchfluss gemessen (12.11.2026, Eimer und Stoppuhr, je ein Versuch):** bisheriger Duschkopf 4,6 l/min (3,5 l in 46,09 s), Schlauch ohne Kopf 14,6 l/min (3,15 l in 12,92 s), Baum ohne Geschenke 14,2 l/min (3,2 l in 13,48 s). Der Baum bremst kaum, der alte Kopf auf ein Drittel. Fließdruck bleibt offen. Die Strahlen sind bei 14 l/min sehr hart, der Hahn wird im Alltag wohl auf **6–8 l/min** zugedreht. Ausgelegt wird auf 6–8 l/min, 14,2 l/min ist der Höchstfall. Rechnung dazu in [`demonstrator.md`](demonstrator.md).
+- **Größere Düsen im Baum, Standard ø 2,0 mm** (Nutzer, 12.11.2026): macht die Strahlen bei vollem Durchfluss weicher (≈ 2,5 statt 4,3 m/s bei 14,2 l/min) und lässt dem Generator volle Leistung (14,2 l/min statt gedrosselt). Umgesetzt als Parameter `--duesen-d` im Skript des Hauptprojekts, im Prüfgriff als `duesen_d` in `parameter.scad` (Drossel Ø 13,3 statt Ø 10).
 - Hinweis des Nutzers: Ein Lowenergie-Dusch-Timer (Amazon B0CY2STKVG) misst Durchfluss und Temperatur, zeigt sie an und braucht keine Batterie. Er belegt, dass ein kleiner eingebauter Generator dafür reicht. Siehe `bauteile.md`, Abschnitt 2.
 
 ## Ziel und Randbedingungen (Vorgaben des Nutzers)

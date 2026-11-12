@@ -196,10 +196,10 @@ module kappe() {
     translate([0, 0, -z_ende]) gewinde(d_gew + gew_spiel, gew_l + 0.5);
     // Drossel im Boden
     if (drossel_variante == 1) {
-      translate([0, 0, -z_kappe_u - 1]) cylinder(d = 10, h = 4, $fn = 64);
+      translate([0, 0, -z_kappe_u - 1]) cylinder(d = sqrt(4 * drossel_flaeche / PI), h = 4, $fn = 64);
     } else {
       for (i = [0 : 3]) rotate(i * 90 + 45)
-        translate([3.9, 0, -z_kappe_u - 1]) cylinder(d = 5, h = 4, $fn = 48);
+        translate([3.9, 0, -z_kappe_u - 1]) cylinder(d = sqrt(4 * drossel_flaeche / 4 / PI) , h = 4, $fn = 48);
     }
   }
 }

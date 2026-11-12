@@ -165,7 +165,7 @@ LED-Bedarf:
    - Hansgrohe-Stecker, dicker Griff mit Turbinenkammer, Leitschaufeln und Spulentaschen.
    - Am Ende ein kurzes Auslassstück mit Drossel, die den Baum nachbildet (etwa 78 mm² Düsenfläche).
    - Rotor als eigenes Druckteil.
-   - Alles parametrisch in OpenSCAD: `pruefgriff.scad`, `rotor.scad`.
+   - Alles parametrisch in OpenSCAD: `parameter.scad`, `rotor.scad`, `pruefgriff.scad` (konstruiert und auf Geschlossenheit und Kollisionen geprüft, am Wasser noch nicht erprobt).
 2. Nutzer druckt, bewickelt und misst an der echten Dusche:
    - Leerlaufspannung und Strom an 1 kΩ bzw. an der LED-Kette über dem Durchfluss.
    - Durchfluss mit und ohne Prüfgriff (Eimer und Stoppuhr).

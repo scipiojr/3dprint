@@ -37,7 +37,20 @@ Material **PETG** (nicht PLA), 0,2 mm Schicht, Düse 0,4 mm.
 | D | **Rotor** | ja | Ring Ø 14 außen, Ø 9 innen frei, ≈ 25 mm lang, innen schraubenförmige Schaufeln. 8 Magnettaschen außen, ≈ 1,3 mm tief. Wenn möglich mit dem Ring stehend drucken. |
 | E | **Leitrad 2** (Einsatz) | ja | Wird von der Auslassseite eingeschoben, Nabe mit Loch Ø 2 für den Stift. |
 | F | **Auslasskappe** | ja | Schraubt auf das Rohr. Nimmt die Drossel auf. |
-| G | **Drossel-Scheiben** (2 Varianten) | ja | Variante 1: ein Loch Ø 10 (≈ 78 mm²). Variante 2: 44 Löcher Ø 1,5 mm wie im Baum. Erst Variante 1. |
+| G | **Drossel** (im Boden der Kappe, `drossel_variante` in `parameter.scad`) | ja | Variante 1: ein Loch Ø 10 (≈ 78 mm²). Variante 2: vier Löcher Ø 5 (zusammen ≈ 78 mm²). Erst Variante 1. |
+
+**STL erzeugen** (OpenSCAD, Parameter in `parameter.scad`):
+
+```
+openscad -q -D 'teil="rohr"'     -D 'druck=true' -o rohr.stl     pruefgriff.scad
+openscad -q -D 'teil="leitrad2"' -D 'druck=true' -o leitrad2.stl pruefgriff.scad
+openscad -q -D 'teil="rotor"'    -o rotor.stl    pruefgriff.scad
+openscad -q -D 'teil="spulenring"' -o spulenring.stl pruefgriff.scad
+openscad -q -D 'teil="huelse"'   -o huelse.stl   pruefgriff.scad
+openscad -q -D 'teil="kappe"'    -o kappe.stl    pruefgriff.scad
+```
+
+Mit `druck=true` werden Rohr und Leitrad 2 in Druckrichtung gedreht (Leitrad 2 mit der Nabenseite auf dem Bett, damit nichts frei in der Luft hängt). Das Rohr braucht etwa 10 s zum Rendern. Der Edelstahlstift (`teil="stift"`) ist nur Referenz und wird nicht gedruckt. `python3 -I werkzeuge/pruefe_pruefgriff.py <Ordner>` prüft die Teile des Zusammenbaus auf geschlossene Körper und Kollisionen.
 
 Die **Magnete im Rotor liegen im Wasser.** Nickelbeschichtete Neodym-Magnete sind nur für trockene Räume gedacht. Deshalb: Taschen nach dem Einkleben mit einer dünnen Schicht Epoxid (etwa 0,3 mm) **überziehen**, bis kein Metall mehr frei liegt.
 
@@ -54,9 +67,9 @@ Durchfluss und Fließdruck wie im Chat beschrieben (Eimer und Stoppuhr, optional
 ### 3.3 Spulen wickeln (vor dem Anbau)
 Das ist der Schritt, der **nicht im Druck** stattfindet.
 1. **Wickelkern:** ein kleiner Spulenkörper (4 × 5 mm Kern, Flansche 1 mm) aus PETG, alternativ ein dünner Stift mit Kern 4 × 5 mm, den man später herauszieht.
-2. **Wickeln:** 8 Spulen, je **etwa 340 Windungen** Kupferlackdraht Ø 0,1 mm. Kern in Akkuschrauber oder Bohrmaschine einspannen, **langsam** drehen, Draht mit zwei Fingern bremsen. 0,1 mm reißt leicht. Windungen laut Zählung mitzählen (Strichliste oder Handy-Zähler). Alle Spulen **in gleicher Richtung** wickeln.
+2. **Wickeln:** 8 Spulen, je **etwa 400 Windungen** Kupferlackdraht Ø 0,08–0,09 mm (Schätzung, passt knapp ins Fenster 4,4 × 5,4 mm). Kern in Akkuschrauber oder Bohrmaschine einspannen, **langsam** drehen, Draht mit zwei Fingern bremsen. So dünner Draht reißt leicht. Windungen laut Zählung mitzählen (Strichliste oder Handy-Zähler). Alle Spulen **in gleicher Richtung** wickeln.
 3. Spule mit einem Tropfen Sekundenkleber fixieren, Anfang und Ende je ≈ 4 cm Draht stehen lassen.
-4. Pro Spule **Widerstand messen.** Soll ≈ 15 Ω (gesamt etwa 120 Ω bei 8 Spulen, Schätzung). Starke Abweichung heißt Windungsfehler oder Bruch.
+4. Pro Spule **Widerstand messen.** Soll ≈ 13 Ω (gesamt etwa 100 Ω bei 8 Spulen, Schätzung). Starke Abweichung heißt Windungsfehler oder Bruch.
 
 ### 3.4 Rotor bauen (Teil D)
 1. Magnetpolung festlegen: **abwechselnd N und S nach außen.** Mit einem Kompass oder einem zweiten Magneten prüfen, nicht raten. Jede Tasche mit Filzstift mit „N" oder „S" markieren.
@@ -67,7 +80,7 @@ Das ist der Schritt, der **nicht im Druck** stattfindet.
 ### 3.5 Zusammenbau
 1. Stift in die Nabe von Leitrad 1 stecken (Teil A).
 2. Rotor aufstecken, Leitrad 2 (E) von der Auslassseite einschieben, bis der Stift in der Nabe sitzt.
-3. Kappe (F) mit Drossel (G) aufschrauben. Gewinde mit Dichtband abdichten, sonst verfälscht Leckwasser die Messung.
+3. Kappe (F, Drossel ist im Boden enthalten) aufschrauben. Gewinde mit Dichtband abdichten, sonst verfälscht Leckwasser die Messung.
 4. **Trockentest:** Rohr senkrecht, durch das Rohr blasen. Der Rotor muss mitlaufen.
 
 ### 3.6 Spulenring und Verschaltung
@@ -78,7 +91,7 @@ Das ist der Schritt, der **nicht im Druck** stattfindet.
    A ─ Anfang1…Ende1 ─ Ende2…Anfang2 ─ Anfang3…Ende3 ─ Ende4…Anfang4 ─
        Anfang5…Ende5 ─ Ende6…Anfang6 ─ Anfang7…Ende7 ─ Ende8…Anfang8 ─ B
    ```
-4. Lack an den Drahtenden abschaben oder mit 380 °C Lötkolben abbrennen, verzinnen, verlöten. Mit dem Multimeter den **Gesamtwiderstand** prüfen (≈ 120 Ω).
+4. Lack an den Drahtenden abschaben oder mit 380 °C Lötkolben abbrennen, verzinnen, verlöten. Mit dem Multimeter den **Gesamtwiderstand** prüfen (≈ 100 Ω).
 5. Zwei dünne Silikonlitzen (≈ 30 cm) an A und B löten, durch das Loch im Ring nach außen führen. Außenhülse (C) aufschieben.
 
 ### 3.7 Elektronik (offen auf dem Brett)
@@ -106,7 +119,7 @@ Vier 1N5819 als Brücke, Elko parallel zur Last, LED-Kette mit Vorwiderstand. **
 
 ## 4. Wenn die Spannung nicht reicht
 
-Der Plan geht von etwa 9 V Spitze aus (Schätzung). Typische Ursachen und Gegenmaßnahmen:
+Der Plan geht von etwa 4 V Spitze und etwa 20 mW aus (Schätzung, siehe `demonstrator.md`). LEDs deshalb **parallel** mit je einem Vorwiderstand, bei zu wenig Spannung Spannungsverdoppler. Typische Ursachen und Gegenmaßnahmen:
 
 | Beobachtung | Mögliche Ursache | Gegenmaßnahme |
 |---|---|---|

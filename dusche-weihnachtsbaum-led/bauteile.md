@@ -34,6 +34,22 @@ Alle sind für den Griff (heute Ø 21,25, künftig etwa Ø 26–28) und für den
 
 **Hinweis zum Durchfluss bei Wasserhahn-Spendern:** Sie sind für etwa 1,5–3 l/min gebaut, die Dusche braucht etwa 8 l/min. Ganz eingebaut würde der Aufsatz drosseln. Ausweg: Nur ein **Teilstrom** läuft durch den Spender-Generator (Bypass im Griff), der Rest strömt frei daran vorbei. Das muss der Prüfgriff zeigen.
 
+**Einschränkung (Hinweis des Nutzers, 12.11.2026):** In den LED-Wasserhahnaufsätzen ist nur **eine LED** eingebaut, und sie ist **vergossen**. Ob sich der Generator unbeschädigt lösen und an die Spulendrähte kommen lässt, ist **ungeprüft** und eher unwahrscheinlich. Die Bewertung „Favorit als Spender" in der Tabelle oben gilt deshalb nur unter Vorbehalt. Bevorzugt werden **nackte Generatoren mit Kabel** (Gewinde M23×1,5 oder M26×1,5, AC 2–10 V), siehe unten. Aufsätze nur kaufen, wenn die Angebotsfotos oder eine Zerlegung zeigen, dass sich der Generator herausnehmen lässt.
+
+**Fund des Nutzers (12.11.2026): YWBL-WH „Wasserfließender Generator AC2-10V M23x1,5" (Amazon.de, derzeit nicht verfügbar).** Mini-Generator mit **seitlichem Einlass**, ABS, Anschlusskabel mit kleinem Steckverbinder, Ausgangsspannung proportional zum Wasserdruck. Der Händler nennt ihn für Bad und Duscharmaturen. Das ist dieselbe Bauart wie in den LED-Wasserhahnaufsätzen oben. ✅ **Passender Spender, Wunschkandidat für Weg A.**
+
+Maße aus der Zeichnung des Angebots (Screenshot des Nutzers, Händlerangabe, **nicht nachgemessen**): Gewinde M23×1,5; Kopf Ø 23 × 7 mm mit Bund 2,5 mm; Länge ab Bund 24,5 mm; unterer Körper Ø 19,8 mm, davon 14,9 mm Länge. Gesamtlänge also grob 34 mm.
+
+Daten gleicher Bauart bei anderen Anbietern (der Name „YWBL" ist nicht nötig, das Teil ist ein No-name-Standard): AC 2–10 V, 10–50 mA, M23×1,5, Varianten mit seitlichem oder unterem Einlass.
+- eBay „Hydro Generator Kit … AC2V-10V 10-50MA M23x1.5": [Angebot](https://www.ebay.com/itm/387291653493)
+- Fruugo, **Bottom Inlet**, 15,95 € plus 16,49 € Versand: [Angebot](https://www.fruugo.ie/micro-hydro-generator-kit-electric-water-hydroelectric-power-for-smart-bathroom-ac210v-1050ma-m23x15-bottom-inlet/p-343269084-752194920)
+- DEWIN, **M26×1,5**, seitlicher Einlass, AC 2–10 V, 10–50 mA, ABS, Lebensdauer über 3000 h: [Amazon.co.uk](https://www.amazon.co.uk/DEWIN-Generator-M26x1-5-10%E2%80%9150MA-AC2%E2%80%9110V/dp/B0D4Z8RBMN). Anderes Gewinde, also vor dem Kauf Maße prüfen.
+- Mdxtog, AC 2–7,5 V, 5–60 mA, 2–10 l/min, 12-mm-Steckanschluss: [Amazon.com](https://www.amazon.com/Generator-2-7-5V-Hydroelectric-Connect-Faucets/dp/B0G2L8TNVR). Anderer Anschluss, größerer Körper.
+
+**Verfügbarkeit geprüft am 12.11.2026 (Browser):** Amazon.de M23×1,5 (YWBL-WH, Bodeneinlass) und Amazon.de M26×1,5 (Eujgoov, seitlicher Einlass, Maße 43 × 31 × 12 mm laut Angebot) sind beide „Derzeit nicht verfügbar". eBay.de findet unter „hydro generator AC2-10V M23x1.5" keine exakten Treffer. Die Angebote bei eBay.com und Fruugo stehen weiter unter „Funde" oben, Lagerbestand dort **nicht bestätigt**.
+
+Offene Punkte (Schätzung, zu messen): Der Generator ist für Wasserhahn-Durchfluss gebaut. Bei etwa 8 l/min drosselt er stark, daher Teilstrom (Bypass) im Griff. Kopf Ø 23 mm braucht einen Griff mit mindestens Ø 26–27 mm außen, der untere Körper Ø 19,8 mm ist unkritisch. Es ist **Wechselspannung** (Gleichrichter nötig), 10–50 mA bei 2–10 V sind laut Angebot der Bereich über den Druck.
+
 ## 3. LEDs
 
 | Teil | Preis | Maße / Daten | Bewertung | Quelle |

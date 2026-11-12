@@ -6,6 +6,8 @@ Ableger von [`../dusche-weihnachtsbaum`](../dusche-weihnachtsbaum): Der Duschkop
 
 Die Bauteil-Recherche mit Links, Preisen und Maßen steht in [`bauteile.md`](bauteile.md).
 
+Der Plan für den **Eigenbau-Demonstrator** (Prüfgriff mit Ring-Turbine, Rechnung, Bauschritte, Bauteilliste) steht in [`demonstrator.md`](demonstrator.md).
+
 ## Entscheidungen des Nutzers (12.11.2026)
 
 - **Der Griff darf dicker werden** (Ø 26–28 mm statt 21,25).

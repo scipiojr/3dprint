@@ -58,9 +58,15 @@ def teile(ordner, geschenke):
     z = zipfile.ZipFile(datei)
     filament = {int(i): int(f) for i, f in re.findall(
         r'<part id="(\d+)".*?key="extruder" value="(\d+)"', z.read("Metadata/model_settings.config").decode(), re.S)}
+    # Stützen-Blocker/-Verstärker sind keine Druckteile -> nicht zeichnen
+    ms = z.read("Metadata/model_settings.config").decode()
+    kein_teil = {int(i) for i, a in re.findall(r'<part id="(\d+)" subtype="(\w+)"', ms)
+                 if a in ("support_blocker", "support_enforcer", "negative_part", "modifier_part")}
     t = etree.fromstring(z.read("3D/Objects/object_1.model"))
     out = []
     for o in t.iterfind(".//m:object", NS):
+        if int(o.get("id")) in kein_teil:
+            continue
         v = np.array([[float(e.get(k)) for k in "xyz"] for e in o.iterfind(".//m:vertex", NS)])
         tri = list(o.iterfind(".//m:triangle", NS))
         f = np.array([[int(e.get(k)) for k in ("v1", "v2", "v3")] for e in tri])
@@ -118,9 +124,42 @@ def schnitt(m, datei):
     plt.close(fig)
 
 
+def innenraum(ordner, datei):
+    """Schnitte durch Bohrung (Tropfenform) und Kammer mit dem Stützen-Blocker aus der 3MF."""
+    z = zipfile.ZipFile(ordner / f"{NAME}.3mf")
+    ms = z.read("Metadata/model_settings.config").decode()
+    bid = int(re.search(r'<part id="(\d+)" subtype="support_blocker"', ms).group(1))
+    t = etree.fromstring(z.read("3D/Objects/object_1.model"))
+    o = [e for e in t.iterfind(".//m:object", NS) if int(e.get("id")) == bid][0]
+    bl = trimesh.Trimesh(np.array([[float(e.get(k)) for k in "xyz"] for e in o.iterfind(".//m:vertex", NS)]),
+                         np.array([[int(e.get(k)) for k in ("v1", "v2", "v3")] for e in o.iterfind(".//m:triangle", NS)]),
+                         process=False)
+    m = trimesh.load(str(ordner / f"{NAME}.stl"))
+    fig = plt.figure(figsize=(11, 6.2), dpi=130)
+    gs = fig.add_gridspec(2, 3, height_ratios=[1, 1.15])
+    for k, (x, t_) in enumerate([(-110, "Stecker (x = -110)"), (-50, "Griff (x = -50)"), (4, "Hals/Fuß (x = 4)")]):
+        ax = fig.add_subplot(gs[0, k])
+        for e in m.section(plane_origin=[x, 0, 0], plane_normal=[1, 0, 0]).discrete:
+            ax.plot(e[:, 1], e[:, 2], "k", lw=0.8)
+        ax.axhline(-10.625, color="r", lw=0.6)
+        ax.set_aspect("equal"); ax.set_title(t_ + " – Bohrung als Tropfen", fontsize=8); ax.tick_params(labelsize=6)
+    ax = fig.add_subplot(gs[1, :])
+    for e in m.section(plane_origin=[0, 0, 0], plane_normal=[0, 1, 0]).discrete:
+        ax.plot(e[:, 0], e[:, 2], "k", lw=0.7)
+    sb = bl.section(plane_origin=[0, 0, 0], plane_normal=[0, 1, 0])
+    for e in sb.discrete:
+        ax.fill(e[:, 0], e[:, 2], color="tab:blue", alpha=0.25, lw=0)
+        ax.plot(e[:, 0], e[:, 2], color="tab:blue", lw=0.6)
+    ax.set_aspect("equal"); ax.set_xlim(-30, 125)
+    ax.set_title("Längsschnitt y = 0: blau = Stützen-Blocker in der Kammer (Pfosten Ø 1,5 mm stehen unverändert)", fontsize=8)
+    ax.tick_params(labelsize=6)
+    fig.tight_layout(); fig.savefig(datei); plt.close(fig)
+
+
 if __name__ == "__main__":
     ordner, out = Path(sys.argv[1]), Path(sys.argv[2])
     out.mkdir(parents=True, exist_ok=True)
+    innenraum(ordner, out / "innenraum.png")
     einfach, mit = teile(ordner, False), teile(ordner, True)
     alles = np.array([[-122, -43, -11], [122, 43, 11]])
     ansicht(einfach, out / "uebersicht.png", 35, -60, alles, (8, 5))

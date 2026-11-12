@@ -13,6 +13,7 @@
 
 water_passage_d = (5/16)*25.4;   // 7,94 mm Wasserbohrung
 ueberlapp = 3;                   // mm in den Griff hinein
+dach_winkel = 35;                // Tropfenform: Bohrungsdecke steigt mit 35° (> 30°) -> ohne Stützen druckbar
 
 $fa = 1;
 $fs = 0.25;
@@ -47,5 +48,20 @@ difference() {
         }
         translate([0,0,-ueberlapp]) cylinder(h=ueberlapp+0.01, d=12.3);
     }
-    translate([0,0,-ueberlapp-1]) cylinder(h=100, d=water_passage_d);
+    translate([0,0,-ueberlapp-1]) bohrung(100);
+}
+
+// Wasserbohrung als Tropfen: Kreis plus Dach, dessen Flanken den Kreis tangential berühren.
+// +x ist beim Drucken oben (liegender Stecker); eine runde Decke wäre für den Slicer ein
+// Überhang und bekäme Stützen, die sich in der Bohrung nicht mehr entfernen lassen.
+module bohrung(h)
+{
+    r = water_passage_d/2;
+    linear_extrude(h) union() {
+        circle(d=water_passage_d);
+        polygon([[0,0],
+                 [r*cos(dach_winkel), -r*sin(dach_winkel)],
+                 [r/cos(dach_winkel), 0],
+                 [r*cos(dach_winkel),  r*sin(dach_winkel)]]);
+    }
 }

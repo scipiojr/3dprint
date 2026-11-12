@@ -42,6 +42,9 @@ X_STECKER = -97.5                # Griffende; links davon saß das Gewinde (bis 
 X_HALS = -15.0                   # Hals 13 x 15 bis zum Baumfuß
 X_FUSS = -3.5                    # Unterseite des Fußrands (voll, Hohlraum erst ab x = +1,75)
 BOHRUNG_D = 10.0                 # Wasserbohrung im Griff
+DACH_WINKEL = 40.0               # Tropfenform der Bohrung: Decke steigt mit 40° (Slicer-Schwelle meist 30°)
+X_BOHR_ANFANG = X_STECKER + 3.0  # ab hier (Ende des Steckerschafts im Griff) Tropfenform
+X_BOHR_ENDE = 9.0                # davor mündet die Bohrung in die Kammer (Kammer ab x ≈ 9,5)
 
 # --- neuer Griff ---
 GRIFF_D = 21.25                  # Achse bei z = -0,625: unten 7,2 mm breit abgeflacht, oben z = 10,0
@@ -149,6 +152,41 @@ def runder_griff():
     g = g ^ quader(-200, 200, z0=Z_BETT, z1=Z_OBEN)          # unten abflachen
     # gegen die Bohrung des Originals leicht verdreht, damit keine Ecken zusammenfallen
     return g - zylinder_x(X_STECKER - 1, X_HALS + 1, BOHRUNG_D, drehung=0.37)
+
+
+def bohrung_dach(x0, x1, d=BOHRUNG_D, winkel=DACH_WINKEL):
+    """Dachprisma über der runden Bohrung (Tangenten unter `winkel` zur Waagrechten):
+    zusammen mit dem Kreis entsteht eine Tropfenform, die ohne Stützen druckbar ist."""
+    r, w = d / 2, np.radians(winkel)
+    hoch = [(0, 0), (r * np.cos(w), -r * np.sin(w)), (r / np.cos(w), 0), (r * np.cos(w), r * np.sin(w))]
+    # Querschnitt (u, y) mit u = -z, damit die Drehung um y (z -> x) das Dach nach +z legt
+    cs = mf.CrossSection([np.array([(-v, y) for v, y in hoch][::-1], float)])
+    return mf.Manifold.extrude(cs, x1 - x0).rotate([0, 90, 0]).translate([x0, ACHSE_Y, ACHSE_Z])
+
+
+def kammer_blocker(duschkopf):
+    """Stützen-Blocker: Grundfläche der Kammer (knapp über der Düsenplatte), Höhe bis über die Decke.
+    Die Kammer ist geschlossen und hat nur 1,5-mm-Düsen; Stützen darin ließen sich nicht entfernen."""
+    g = duschkopf.to_mesh()
+    m = trimesh.Trimesh(np.asarray(g.vert_properties)[:, :3], np.asarray(g.tri_verts), process=False)
+    kammern = []
+    for dz in (2.3, 4.6):       # knapp über der Düsenplatte und weiter oben; die Vereinigung deckt auch Ecken ab
+        s = m.section(plane_origin=[0, 0, Z_BETT + dz], plane_normal=[0, 0, 1])
+        flaechen = [Polygon(e[:, :2]).buffer(0) for e in s.discrete if len(e) > 3]
+        # Schnittlinien einzeln: größte = Außenkontur, darin liegende große Schleife im Baumbereich = Kammer
+        aussen = max(flaechen, key=lambda p: p.area)
+        kandidaten = [p for p in flaechen if p is not aussen and p.area > 500 and p.centroid.x > 5
+                      and aussen.contains(p.representative_point())]
+        assert kandidaten, 'Kammer nicht gefunden'
+        kammern.append(max(kandidaten, key=lambda q: q.area))
+    kammer = unary_union(kammern).buffer(0.6)
+    return extrudiere_z(kammer, Z_BETT + 2.15, Z_BETT + 15.0)
+
+
+def extrudiere_z(flaeche, z0, z1):
+    m = trimesh.creation.extrude_polygon(flaeche, z1 - z0)
+    m.apply_translation([0, 0, z0])
+    return zu_manifold(m)
 
 
 # ---------------- Geschenke ----------------
@@ -285,7 +323,7 @@ def schreibe_3mf(quelle, aus, teile, titel):
                 continue  # Bambu-X1C-Einstellungen (19 Filamente) passen nicht zum Anycubic/ACE
             d = z.read(n)
             if n == OBJ:
-                d = (kopf + ''.join(mesh_xml(m, i + 1, uuid.uuid4()) for i, (_, m, _) in enumerate(teile))
+                d = (kopf + ''.join(mesh_xml(m, i + 1, uuid.uuid4()) for i, (_, m, *_) in enumerate(teile))
                      + ' </resources>\n <build/>\n</model>\n').encode()
             elif n == '3D/3dmodel.model':
                 s = d.decode()
@@ -307,9 +345,10 @@ def model_settings(teile, haupt, name):
     t = ['<?xml version="1.0" encoding="UTF-8"?>\n<config>\n',
          f'  <object id="{haupt}">\n    <metadata key="name" value="{name}"/>\n',
          f'    <metadata key="extruder" value="{teile[0][2]}"/>\n',
-         f'    <metadata face_count="{sum(len(m.f) for _, m, _ in teile)}"/>\n']
-    for i, (tn, m, f) in enumerate(teile):
-        t.append(f'    <part id="{i + 1}" subtype="normal_part">\n'
+         f'    <metadata face_count="{sum(len(x[1].f) for x in teile)}"/>\n']
+    for i, (tn, m, f, *rest) in enumerate(teile):
+        art = rest[0] if rest else 'normal_part'
+        t.append(f'    <part id="{i + 1}" subtype="{art}">\n'
                  f'      <metadata key="name" value="{tn}"/>\n'
                  f'      <metadata key="matrix" value="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1"/>\n'
                  f'      <metadata key="extruder" value="{f}"/>\n'
@@ -330,6 +369,8 @@ def main(quelle, ziel, mit_geschenken):
 
     rest = baum ^ quader(X_HALS, 200)                    # Hals und Baum bleiben
     duschkopf = rest + runder_griff() + stecker()
+    # Tropfenform der Bohrung (Decke selbsttragend) vom Steckerschaft bis zur Kammer
+    duschkopf = duschkopf - bohrung_dach(X_BOHR_ANFANG, X_BOHR_ENDE)
     teile = [('Baum', Teil(duschkopf, baum_id, farbe), F_GRUEN)]
     name, titel = NAME, 'Xmas tree shower head – Hansgrohe Quick Connect'
 
@@ -356,6 +397,9 @@ def main(quelle, ziel, mit_geschenken):
 
     assert len(duschkopf.decompose()) == 1 and duschkopf.status() == mf.Error.NoError, 'Duschkopf nicht einteilig'
 
+    # Stützen-Blocker für die Kammer (nur in der 3MF, nicht im Druckmodell)
+    blocker = Teil(kammer_blocker(duschkopf))
+
     # um den Ursprung zentrieren (wie im Original), Unterseite bleibt bei z = -10.625
     lo = np.min([t.v.min(axis=0) for _, t, _ in teile], axis=0)
     hi = np.max([t.v.max(axis=0) for _, t, _ in teile], axis=0)
@@ -363,10 +407,12 @@ def main(quelle, ziel, mit_geschenken):
     for tn, t, _ in teile:
         t.v += versatz
         t.trimesh().export(os.path.join(ziel, f'{name}.stl' if len(teile) == 1 else f'{name}_{tn.lower()}.stl'))
+    blocker.v += versatz
+    teile.append(('Stuetzen-Blocker Kammer', blocker, F_GRUEN, 'support_blocker'))
 
     schreibe_3mf(quelle, os.path.join(ziel, name + '.3mf'), teile, titel)
     print(name, 'Maße', np.round(hi - lo, 2), 'Versatz x', round(versatz[0], 3),
-          {tn: (len(t.f), sum(c is not None for c in t.farbe)) for tn, t, _ in teile})
+          {tn: (len(t.f), sum(c is not None for c in t.farbe)) for tn, t, *_ in teile})
 
 
 if __name__ == '__main__':

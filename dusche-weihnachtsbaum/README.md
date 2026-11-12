@@ -49,7 +49,7 @@ Benötigt: OpenSCAD (getestet 2021.01), Python mit `numpy trimesh manifold3d lxm
 - Statt 20 × 20 mm eckig jetzt ein Zylinder mit ø 21,25 mm von der Stirnfläche bis an den Hals (x = −97,5 … −15). Er endet stumpf, die Fase des Originals zum Baum hin entfällt. Die Außenkante der Stirnfläche am Stecker ist 1 mm gefast, die Anlagefläche bleibt also bis ø 19,25 eben.
 - Unten ist der Griff auf Bettniveau abgeflacht, die Fläche ist 7,2 mm breit. Oben endet er bei z = 10,0, also unter der Oberkante des Baums.
 - Die ø-21,25-Stirnfläche entspricht der ø-21-Schulter des Adapters, an der die Kupplung anliegt.
-- Wasserweg: Stecker ø 7,94 → Griffbohrung ø 10 → Hals ø 10 → Duschkopf. Durchgehend geprüft (Strahl entlang der Achse).
+- Wasserweg: Stecker ø 7,94 → Griffbohrung ø 10 → Hals ø 10 → Duschkopf. Durchgehend geprüft (Strahl entlang der Achse). Die Bohrung ist als **Tropfen** ausgeführt (siehe Innenraum).
 
 **Geschenke** (`KANTE`, `Y_INNEN`, `X_DECKEL`, `schleife()` in `erzeuge_modell.py`)
 - Je Seite ein Karton mit 26 × 26 mm Grundfläche, aus Baum-Material.
@@ -66,6 +66,16 @@ Benötigt: OpenSCAD (getestet 2021.01), Python mit `numpy trimesh manifold3d lxm
   - Karton: weiß, mit rotem Band über Kreuz (3,2 mm breit).
   - Schleife: rot. Der Knoten sitzt an der Deckelkante, die zwei Schlaufen liegen auf dem untersten Ast. Weil der Ast schräg abfällt, liegt das Rot der Schleife über etwa z = 0 … 10, also nicht nur in den letzten Lagen.
 - Wasserführung: Die Kartons berühren nur Vollmaterial, weit weg von Wasserbohrung (r < 5) und Hohlraum. Die Farbe ersetzt nur Material, sie ändert keine Form. Das Skript prüft Verbindung, Lage und Volumen.
+
+**Innenraum (ohne Stützen druckbar)**
+
+![Innenraum](bilder/innenraum.png)
+
+Der Baum liegt beim Drucken flach. Im Inneren gibt es zwei Stellen, an denen ein Slicer mit automatischen Stützen Überhänge findet. Dort wären Stützen nicht mehr zu entfernen. Gemessen wurde lagenweise (Schwelle 30°, 0,2 mm Lagen).
+
+- **Bohrung in Stecker, Griff und Hals:** Eine liegende runde Bohrung hat eine Decke, die oben flach ausläuft. Der Slicer wollte darin über die ganze Länge Stützen setzen. Jetzt ist die Bohrung ein **Tropfen**: Kreis plus Dach, dessen Flanken den Kreis tangential berühren, im Griff mit 40°, im Stecker mit 35° (`DACH_WINKEL` bzw. `dach_winkel` im SCAD). Damit gibt es über der Achse keine Überhänge mehr. Der Querschnitt wächst von 78,5 auf 82 mm² (Griff) bzw. von 49,5 auf etwa 55 mm² (Stecker). Die Tropfenform reicht vom Steckerschaft (x = −94,5) bis zur Kammer (x = 9).
+- **Kammer im Baum:** Die Decke ist beim Original parallel zur Außenhaut gewölbt und nur etwa 9° geneigt, am Scheitel waagrecht. Das ist für den Slicer ein Überhang, auch wenn der Entwurf bewusst ohne Stützen auskommt: 29 Pfosten (ø 1,5, Raster 8 × 10 mm, versetzt) tragen die Decke. Alle Pfosten reichen bis ins Dach, der größte Abstand eines Deckenpunkts zum nächsten Pfosten oder zur Wand ist 4,8 mm (Brücken bis etwa 10 mm). Die Kammer ist also konstruktiv in Ordnung und wurde **nicht verändert**. Neu ist ein **Stützen-Blocker** als eigenes Bauteil in der 3MF (`Stuetzen-Blocker Kammer`, Untertyp `support_blocker`, Grundfläche der Kammer von der Düsenplatte bis über die Decke). Der Slicer setzt dort keine Stützen, alle Überhänge der Kammer liegen innerhalb des Blockers (geprüft). Der Blocker wird nicht gedruckt und steckt nicht in den STLs.
+- Übrig bleiben außen liegende Überhänge, die sich entfernen lassen: der Stecker (Achse 10 mm über dem Bett) und die 11,5 mm lange Brücke unter dem Hals (Unterseite z = −8, 2,6 mm über dem Bett).
 
 **Filamente** (ACE, 4 Slots)
 
@@ -86,7 +96,7 @@ Benötigt: OpenSCAD (getestet 2021.01), Python mit `numpy trimesh manifold3d lxm
 - Lage wie im Original: flach, Baum liegend, Unterseite aufs Bett.
 - Im Slicer einstellen, weil die Einstellungen nicht mitkommen:
   - Filamente 1–4 den ACE-Slots zuordnen (Grün, Rot, Gold, Weiß).
-  - **Stützen an**: Baum, nur vom Druckbett.
+  - **Stützen an**: Baum, nur vom Druckbett. In der Kammer verhindert der Blocker aus der 3MF jede Stütze; falls der Slicer den Blocker nicht übernimmt, im Slicer einen Stützen-Blocker über die Kammer legen (x = 7 … 92, y = ±29, z = −8,5 … 4).
     - Die Steckerachse liegt 10 mm über dem Bett, der Bund also 1,65 mm darüber.
     - Der runde Griff steigt seitlich der 7-mm-Auflage flach an.
   - Im Original sind 0,2 mm Lagenhöhe, 2 Wände, 5 obere und 3 untere Lagen eingestellt.
@@ -109,4 +119,5 @@ Benötigt: OpenSCAD (getestet 2021.01), Python mit `numpy trimesh manifold3d lxm
   - Griff ohne Fase.
   - Ausrichtung auf Anycubic/ACE mit 4 Filamenten.
 - 12.11.2026, dritte Runde: Geschenke oben gewölbt wie der Baum, Außenkanten gefast; Stirnkante des Griffs 1 mm gefast.
+- 12.11.2026, vierte Runde (Innenraum): Bohrung als Tropfen (selbsttragend), Stützen-Blocker für die Kammer in der 3MF. Kammer und Pfosten unverändert (Analyse siehe Innenraum).
 - Noch nicht gedruckt erprobt. Die Steckermaße sind die des vorhandenen Adapters, nur die Drucklage ist anders (liegend statt stehend).

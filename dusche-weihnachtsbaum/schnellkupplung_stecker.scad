@@ -20,6 +20,9 @@
   Backen: zwei Flächen im Ø14-Bereich, nur 11.8 dick, 7.2 breit, 6.4 lang,
   oben und unten bleibt je 0.75 mm Rand (Tasche axial geschlossen).
 
+  Eigenständiges Modell mit Anleitung zur Übernahme: ../schnellkupplung-stecker/ (gleiche Maße,
+  dort ist die Maßquelle; Änderungen in beiden Dateien nachziehen).
+
   Der Stecker wird von werkzeuge/erzeuge_modell.py an den Griff des
   Weihnachtsbaum-Duschkopfs gesetzt.
 */

@@ -20,9 +20,11 @@ Der 1/2"-Gewindezapfen des Weihnachtsbaum-Duschkopfs wird durch den Stecker der 
 - Filamente: 1 Grün, 2 Rot, 3 Gold, 4 Weiß. Die Bemalung im Original nutzt die Bambu-Slots 4 (Gold), 5 (Rot) und 6 (Grün). `umnummerieren()` schreibt die paint_color-Bäume um. Kontrolle mit Zählung der Zustände: 2 → 27934, 3 → 50640 Teil-Dreiecke.
 - Schnitt bei x = −97,5 (Original-Netzkoordinaten), Achse y = 0, z = −0,625. Ergebnis wird um den Ursprung zentriert (Verschiebung x + 6,35).
 - Steckergeometrie unverändert aus dem Adapter, inklusive Schlüsselflächen.
-- Griff rund: ø 21,25, bis an den Hals (x = −15), **ohne Fase** (Wunsch des Nutzers). Unten bei z = −10,625 abgeflacht (7,2 mm). Die Bohrung ø 10 ist um 0,37° gegen die Originalbohrung verdreht, damit keine Ecken zusammenfallen.
+- Griff rund: ø 21,25, bis an den Hals (x = −15), **ohne Fase** zum Baum (Wunsch des Nutzers). Stirnkante am Stecker 1 mm gefast (`FASE_GRIFF`). Unten bei z = −10,625 abgeflacht (7,2 mm). Die Bohrung ø 10 ist um 0,37° gegen die Originalbohrung verdreht, damit keine Ecken zusammenfallen.
 - Geschenke:
   - Je Seite **ein quadratischer** Karton 26 × 26, Baum-Material, angebunden an Fußrand und Griffmantel.
+  - Oberseite folgt der Wölbung des Baumfußes (`woelbung()`: Strahlen von oben bei x = −2). Kanten gefast (`FASE_OBEN`, `FASE_ECKE`, `FASE_BETT`). Das linke Geschenk ist das gespiegelte rechte.
+  - Zwischen Geschenk und Hals bleibt ein Spalt von etwa 2–3 mm (Hals schmaler als Griff). Bisher nicht beanstandet.
   - **Farbe nur aufgebracht**, wie die übrige Deko: Die oberste Haut von 0,8 mm (`haut_oben`) wird je nach 2D-Fläche zum Bauteil Weiß oder Rot. Keine frei stehenden Schleifen (der Nutzer fand sie instabil), keine Farbe über die volle Höhe (zu viele Farbwechsel).
   - Volumenlose Splitter entfernt `saeubern()`.
 - Bemalung (paint_color) wird über `face_id` von manifold3d auf die Dreiecke des Ergebnisses übertragen.

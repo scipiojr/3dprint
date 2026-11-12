@@ -46,13 +46,18 @@ Benötigt: OpenSCAD (getestet 2021.01), Python mit `numpy trimesh manifold3d lxm
 - Griffachse: y = 0, z = −0,625 mm in Original-Koordinaten (Mitte des alten 20-mm-Griffs, gemessen an Außenkontur und Bohrung).
 
 **Runder Griff**
-- Statt 20 × 20 mm eckig jetzt ein Zylinder mit ø 21,25 mm von der Stirnfläche bis an den Hals (x = −97,5 … −15). Er endet stumpf, die Fase des Originals zum Baum hin entfällt.
+- Statt 20 × 20 mm eckig jetzt ein Zylinder mit ø 21,25 mm von der Stirnfläche bis an den Hals (x = −97,5 … −15). Er endet stumpf, die Fase des Originals zum Baum hin entfällt. Die Außenkante der Stirnfläche am Stecker ist 1 mm gefast, die Anlagefläche bleibt also bis ø 19,25 eben.
 - Unten ist der Griff auf Bettniveau abgeflacht, die Fläche ist 7,2 mm breit. Oben endet er bei z = 10,0, also unter der Oberkante des Baums.
 - Die ø-21,25-Stirnfläche entspricht der ø-21-Schulter des Adapters, an der die Kupplung anliegt.
 - Wasserweg: Stecker ø 7,94 → Griffbohrung ø 10 → Hals ø 10 → Duschkopf. Durchgehend geprüft (Strahl entlang der Achse).
 
 **Geschenke** (`KANTE`, `Y_INNEN`, `X_DECKEL`, `schleife()` in `erzeuge_modell.py`)
-- Je Seite ein Karton, 26 × 26 mm, so dick wie der Baum (21,25 mm), aus Baum-Material.
+- Je Seite ein Karton mit 26 × 26 mm Grundfläche, aus Baum-Material.
+- **Oberseite gewölbt wie der Baum:** Die Höhe folgt der Wölbung des Baumfußes. Sie wird bei x = −2 abgetastet: am Griff etwa 20 mm über dem Bett, außen bei |y| ≈ 35 nur noch etwa 10,5 mm. Der Übergang zum Baum ist dadurch bündig.
+- **Kanten gefast,** damit sich niemand verletzt:
+  - Oberseite zu den Außenseiten 1,2 mm.
+  - Senkrechte Außenecke 2 mm.
+  - Unterkanten am Bett 0,6 mm.
 - Halt:
   - Die Deckelseite reicht über die ganze Kartonbreite 1 mm in den vollen Fußrand des Baums (Unterseite x = −3,5; der Hohlraum beginnt erst bei x = +1,75).
   - Die Innenseite liegt 1 mm tief am Griffmantel an, über die ganze Kartonlänge.
@@ -103,4 +108,5 @@ Benötigt: OpenSCAD (getestet 2021.01), Python mit `numpy trimesh manifold3d lxm
   - Farbe nur oben aufgebracht, keine frei stehenden Schleifen mehr.
   - Griff ohne Fase.
   - Ausrichtung auf Anycubic/ACE mit 4 Filamenten.
+- 12.11.2026, dritte Runde: Geschenke oben gewölbt wie der Baum, Außenkanten gefast; Stirnkante des Griffs 1 mm gefast.
 - Noch nicht gedruckt erprobt. Die Steckermaße sind die des vorhandenen Adapters, nur die Drucklage ist anders (liegend statt stehend).

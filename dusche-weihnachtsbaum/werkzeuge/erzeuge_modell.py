@@ -45,6 +45,7 @@ BOHRUNG_D = 10.0                 # Wasserbohrung im Griff
 
 # --- neuer Griff ---
 GRIFF_D = 21.25                  # Achse bei z = -0,625: unten 7,2 mm breit abgeflacht, oben z = 10,0
+FASE_GRIFF = 1.0                 # Außenkante der Stirnfläche am Stecker
 
 # --- Filamente (Slots der Original-3MF, 1-basiert) ---
 # --- Filamente (ACE, 4 Slots) ---
@@ -142,7 +143,9 @@ def stecker():
 
 
 def runder_griff():
-    g = zylinder_x(X_STECKER, X_HALS + 0.3, GRIFF_D)        # stumpf bis an den Hals, keine Fase
+    # stumpf bis an den Hals (keine Fase zum Baum); Stirnkante am Stecker 1 mm gefast
+    g = (zylinder_x(X_STECKER, X_STECKER + FASE_GRIFF, GRIFF_D - 2 * FASE_GRIFF, GRIFF_D)
+         + zylinder_x(X_STECKER + FASE_GRIFF - 0.01, X_HALS + 0.3, GRIFF_D))
     g = g ^ quader(-200, 200, z0=Z_BETT, z1=Z_OBEN)          # unten abflachen
     # gegen die Bohrung des Originals leicht verdreht, damit keine Ecken zusammenfallen
     return g - zylinder_x(X_STECKER - 1, X_HALS + 1, BOHRUNG_D, drehung=0.37)
@@ -154,6 +157,10 @@ KANTE = 26.0        # Karton quadratisch, 26 x 26 (Stärke wie der Baum: 21,25)
 Y_INNEN = 9.6       # 1 mm in den Griffmantel (r = 10,625)
 X_DECKEL = -2.5     # 1 mm in den vollen Fußrand (Unterseite x = -3,5, Hohlraum erst ab x = +1,75)
 BAND = 3.2          # Breite der aufgemalten Bänder
+X_PROFIL = -2.0     # hier wird die Wölbung des Baumfußes abgenommen (knapp über dem gerundeten Rand)
+FASE_OBEN = 1.2     # Fase zwischen gewölbter Oberseite und Seitenflächen
+FASE_ECKE = 2.0     # senkrechte Außenecke
+FASE_BETT = 0.6     # Unterkanten am Bett (klein, sonst fehlt Auflage)
 
 
 def ellipse(cx, cy, a, b, winkel):
@@ -185,6 +192,49 @@ def geschenke_2d():
                 box(xc - BAND / 2, y0, xc + BAND / 2, y1),      # Band quer
                 schleife(yc)]                                   # Schleife, reicht auf den Baum
     return unary_union(kartons), unary_union(rot)
+
+
+def woelbung(baum):
+    """Oberseite des Baumfußes z = f(|y|), abgetastet bei x = X_PROFIL (Strahlen von oben)."""
+    m = trimesh.Trimesh(*(lambda g: (np.asarray(g.vert_properties)[:, :3], np.asarray(g.tri_verts)))(baum.to_mesh()))
+    ys = np.arange(0, 45.01, 0.25)
+    z = np.full(len(ys), np.nan)
+    orte, strahl, _ = m.ray.intersects_location(np.c_[np.full(len(ys), X_PROFIL), ys, np.full(len(ys), 50.0)],
+                                                np.tile([0, 0, -1.0], (len(ys), 1)))
+    for (_, _, zz), i in zip(orte, strahl):
+        z[i] = zz if np.isnan(z[i]) else max(z[i], zz)
+    ok = ~np.isnan(z)
+    letzte = np.nonzero(ok)[0][-1]
+    steigung = (z[letzte] - z[letzte - 8]) / (ys[letzte] - ys[letzte - 8])
+    z[letzte + 1:] = z[letzte] + steigung * (ys[letzte + 1:] - ys[letzte])   # über den Rand hinaus fortsetzen
+    return lambda y: np.interp(np.abs(y), ys, z)
+
+
+def geschenk_koerper(f):
+    """Rechtes Geschenk (y > 0): Grundriss KANTE x KANTE, Oberseite folgt der Wölbung f des Baums,
+    Außenkanten gefast. Das linke entsteht durch Spiegeln."""
+    x0, x1 = X_DECKEL - KANTE, X_DECKEL
+    y0, y1 = Y_INNEN, Y_INNEN + KANTE
+    yy = np.linspace(y0, y1 - FASE_OBEN, 120)
+    # Querschnitt (y, z): gewölbte Oberseite, außen oben und unten gefast
+    oben = [(y, f(y)) for y in yy] + [(y1, f(y1) - FASE_OBEN)]
+    profil = Polygon(oben + [(y1, Z_BETT + FASE_BETT), (y1 - FASE_BETT, Z_BETT), (y0, Z_BETT)])
+    hoch = Polygon(oben + [(y1 + 5, f(y1) - FASE_OBEN - 5), (y1 + 5, Z_BETT - 50), (y0, Z_BETT - 50)])
+
+    def entlang_x(poly, xa, xb):
+        m = trimesh.creation.extrude_polygon(poly, xb - xa)      # (y, z) in xy, Höhe in z
+        m.apply_transform(np.array([[0, 0, 1, xa], [1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1.0]]))
+        return zu_manifold(m)
+
+    k = entlang_x(profil, x0, x1)
+    # Kante Oberseite / Unterseite des Kartons (x = x0): gescherte Wölbung, 45°
+    schraeg = entlang_x(hoch, x0 - 10, x1 + 10).transform(
+        np.array([[1, 0, 0, 0], [0, 1, 0, 0], [1, 0, 1, -x0 - FASE_OBEN]], dtype=float))
+    k = k ^ schraeg
+    # Kante am Bett bei x = x0 und senkrechte Außenecke (x0, y1)
+    k = k.trim_by_plane([1 / np.sqrt(2), 0, 1 / np.sqrt(2)], (x0 + Z_BETT + FASE_BETT) / np.sqrt(2))
+    k = k.trim_by_plane([1 / np.sqrt(2), -1 / np.sqrt(2), 0], (x0 - y1 + FASE_ECKE) / np.sqrt(2))
+    return k
 
 
 def saeubern(k, min_volumen=0.05):
@@ -285,7 +335,8 @@ def main(quelle, ziel, mit_geschenken):
 
     if mit_geschenken:
         kartons, rot_2d = geschenke_2d()
-        karton = extrudiere(kartons)
+        rechts = geschenk_koerper(woelbung(baum))
+        karton = rechts + rechts.mirror([0, 1, 0])
         # Kartons berühren nur Griffmantel (|y| > 9,6) und Fußrand (x < -2,5) -> weit weg von
         # Wasserbohrung (r < 5) und Hohlraum (x > 1,75)
         assert karton.bounding_box()[3] <= X_DECKEL + 1e-6

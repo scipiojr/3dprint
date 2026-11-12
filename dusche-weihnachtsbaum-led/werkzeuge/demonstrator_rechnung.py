@@ -12,7 +12,7 @@ Rechnet drei Dinge, die sich gegenseitig begrenzen:
 import math
 
 # ---- Annahmen (Schätzung) ----
-Q_lpm      = 8.0      # Durchfluss, l/min (Nutzer misst noch)
+Q_lpm      = 14.2     # Durchfluss, l/min (gemessen 12.11.2026 am Baum ohne Geschenke)
 d_kanal    = 9.0      # freier Rotordurchmesser, mm
 d_nabe     = 3.6
 n_blatt, t_blatt = 4, 0.9

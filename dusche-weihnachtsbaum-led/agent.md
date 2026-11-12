@@ -38,8 +38,8 @@ Arbeitsanweisung und Projektstand für KI-Agenten. Sprache mit dem Nutzer: **Deu
 
 - Griff darf dicker werden (Ø 26–28).
 - Stern gelb. Transparente Schicht oder Öffnungen für die LEDs sind erlaubt, alternativ farbige LEDs.
-- Hausdruck 4 bar. Fließdruck und Durchfluss misst der Nutzer noch.
+- Hausdruck 4 bar. **Durchfluss gemessen:** alter Kopf 4,6 l/min, Schlauch 14,6, Baum ohne Geschenke 14,2 l/min (je ein Versuch). Rechnung läuft mit 14,2 l/min. Fließdruck offen.
 
 ## Nächster Schritt
 
-Auf die Messwerte des Nutzers warten: Spender-Generatoren (Maße, Spannung, Strom) und Dusche (Fließdruck, l/min). Dann Prüfgriff konstruieren (`pruefgriff.scad`, ggf. `rotor.scad`), parametrisch, ohne Baum. Er bekommt ein Auslassstück mit Drossel, die etwa 78 mm² Düsenfläche nachbildet. Dazu eine Bau- und Messanleitung für den Nutzer ins README.
+Durchfluss ist da (12.11.2026) und eingerechnet. Prüfgriff (Weg B) baut und prüft fehlerfrei (OpenSCAD 2021.01, `werkzeuge/pruefe_pruefgriff.py`: alle Teile dicht, nur 1,1 mm³ Überschneidung Rohr/Spulenring). Es fehlen noch Fließdruck und Spender-Generatoren (Maße, Spannung, Strom). Als Nächstes: Druckverlust des Prüfgriffs bei 14,2 l/min abschätzen und den Rotor-Kanal prüfen (Ø 9 → größer?). Dann Prüfgriff konstruieren (`pruefgriff.scad`, ggf. `rotor.scad`), parametrisch, ohne Baum. Er bekommt ein Auslassstück mit Drossel, die etwa 78 mm² Düsenfläche nachbildet. Dazu eine Bau- und Messanleitung für den Nutzer ins README.

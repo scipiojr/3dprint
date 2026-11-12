@@ -12,7 +12,8 @@ Der Plan für den **Eigenbau-Demonstrator** (Prüfgriff mit Ring-Turbine, Rechnu
 
 - **Der Griff darf dicker werden** (Ø 26–28 mm statt 21,25).
 - **Der Stern bleibt gelb.** Er darf eine transparente Schicht oder Öffnungen für die LEDs haben. Alternativ gelbe bzw. farbige LEDs.
-- **Hausdruck 4 bar** (Ruhedruck). Fließdruck an der Dusche und Durchfluss ohne Duschkopf misst der Nutzer noch.
+- **Hausdruck 4 bar** (Ruhedruck).
+- **Durchfluss gemessen (12.11.2026, Eimer und Stoppuhr, je ein Versuch):** bisheriger Duschkopf 4,6 l/min (3,5 l in 46,09 s), Schlauch ohne Kopf 14,6 l/min (3,15 l in 12,92 s), Baum ohne Geschenke 14,2 l/min (3,2 l in 13,48 s). Der Baum bremst kaum, der alte Kopf auf ein Drittel. Fließdruck bleibt offen. Rechnung ab jetzt mit 14,2 l/min, siehe [`demonstrator.md`](demonstrator.md).
 - Hinweis des Nutzers: Ein Lowenergie-Dusch-Timer (Amazon B0CY2STKVG) misst Durchfluss und Temperatur, zeigt sie an und braucht keine Batterie. Er belegt, dass ein kleiner eingebauter Generator dafür reicht. Siehe `bauteile.md`, Abschnitt 2.
 
 ## Ziel und Randbedingungen (Vorgaben des Nutzers)
@@ -60,7 +61,7 @@ Alle marktüblichen Module für G1/2-Leitungen sind viel zu groß für Griff (Ø
 
 ### Energiebilanz (Überschlag, nicht gemessen)
 
-Grenze: Leistung = Druckverlust × Durchfluss × Wirkungsgrad. **Eine längere Turbine erhöht diese Grenze nicht.** Sie verbessert aber den Wirkungsgrad bei wenig Druck und bietet Platz für einen größeren Generator, der langsamer drehen kann.
+Grenze: Leistung = Druckverlust × Durchfluss × Wirkungsgrad. Die Tabelle gilt für die frühere Annahme 8 l/min. Mit dem gemessenen **14,2 l/min** sind die Werte um den Faktor 1,8 höher (0,05 bar → 1,18 W im Wasser, 0,1 bar → 2,4 W, 0,2 bar → 4,7 W). **Eine längere Turbine erhöht diese Grenze nicht.** Sie verbessert aber den Wirkungsgrad bei wenig Druck und bietet Platz für einen größeren Generator, der langsamer drehen kann.
 
 | Druckverlust | Leistung im Wasser bei 8 l/min | elektrisch bei 15–25 % |
 |---|---|---|
@@ -153,14 +154,15 @@ LED-Bedarf:
 - Ob der Rotor mit eingeklebten Magneten rund läuft. Unwucht gibt Lärm und Verschleiß.
 - Warmwasser bis etwa 60 °C. PETG hält das, ist aber knapp. Epoxid entsprechend wählen.
 - Die Lage des Kabelkanals zum Stern muss am Netz geplant werden.
-- **Offen beim Nutzer:** Fließdruck an der Dusche und Durchfluss in l/min messen (Ruhedruck im Haus: 4 bar). Am einfachsten mit Eimer und Stoppuhr, einmal ohne Kopf und einmal mit dem bisherigen Kopf.
+- **Offen beim Nutzer:** Fließdruck an der Dusche (nur mit Manometer; Ruhedruck im Haus: 4 bar). Der Durchfluss ist gemessen (siehe Entscheidungen).
+- **Neues Risiko durch den höheren Durchfluss:** Strömung in Stecker und Rotor etwa 5 m/s, Druckverlust des Prüfgriffs vermutlich über 0,1 bar. Rotor-Drehzahl im Leerlauf rechnerisch über 10 000 U/min (Lager, Lärm, Unwucht).
 
 ## Nächste Schritte
 
 0. **Spender beschaffen und vermessen** (siehe `bauteile.md`, „Empfohlene Erstbestellung“):
    - 1–2 LED-Wasserhahnaufsätze und 1 billigen LED-Duschkopf zerlegen.
    - Generator vermessen: Maße, Leerlaufspannung, Strom an einer LED bei verschiedenen Durchflüssen.
-   - Durchfluss und Fließdruck an der Dusche messen.
+   - Fließdruck an der Dusche messen (Durchfluss ist gemessen: 14,2 l/min am Baum).
 1. **Prüfgriff konstruieren** (mit Spender-Generator-Aufnahme oder Ring-Turbine), ohne Baum:
    - Hansgrohe-Stecker, dicker Griff mit Turbinenkammer, Leitschaufeln und Spulentaschen.
    - Am Ende ein kurzes Auslassstück mit Drossel, die den Baum nachbildet (etwa 78 mm² Düsenfläche).

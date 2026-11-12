@@ -21,6 +21,15 @@ Stecker aus `schnellkupplung_stecker.scad`:
 
 Eine Variante mit LED-Stern und Wasserturbine im Griff ist in Planung: [`../dusche-weihnachtsbaum-led`](../dusche-weihnachtsbaum-led).
 
+## Fertige Modelle
+
+In [`modelle/`](modelle/) liegen die fertigen Dateien (runder Griff, Schnellkupplung, Düsen ø 2,0 mm, Stand 13.11.2026). Der Nutzer hat die Erlaubnis zum Einchecken. Die Dateien sind nicht im echten Slicer geprüft.
+
+| Datei | Inhalt |
+|---|---|
+| `standard_runder_griff.stl` / `.3mf` | Baum ohne Geschenke (3MF mit Farben und Stützen-Blockern) |
+| `geschenke_runder_griff_komplett.stl` / `.3mf` | Baum mit Geschenken und Schleifen, STL in einem Stück |
+
 ## Dateien
 
 | Datei | Inhalt |

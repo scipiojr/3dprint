@@ -1,5 +1,9 @@
-# Abgeleitete Netze des MakerWorld-Originals nicht einchecken (Lizenz)
+# Abgeleitete Netze des MakerWorld-Originals nicht einchecken (Lizenz) ...
 *.stl
 *.3mf
 ausgabe/
 __pycache__/
+# ... außer den fertigen Modellen in modelle/ (Nutzer hat die Erlaubnis des Urhebers, 13.11.2026)
+!modelle/
+!modelle/*.stl
+!modelle/*.3mf

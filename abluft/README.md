@@ -29,6 +29,8 @@ Abluft-Anschluss für einen Laser-Cutter: Eine 5 mm dicke Plexiglasscheibe häng
 | `abluft_filterkasten.scad` | Filterkasten (G4-Vlies + Kassette) zwischen 100er Schlauch und Ventilator: Rahmen, Einlass, Auslass, Deckel, Kassette, Schneidlehre → `filterkasten/` |
 | `abluft_k40_anschluss.scad` | Ersatz für das Abluftblech des OMTech K40+: Platte im Lochbild des Blechs + Bogen nach links zum Filterkasten (Muffe über den ø100-Stutzen oder Magnetflansch) → `k40_anschluss/` |
 | `abluft_ventilator_konsole.scad` | Konsole zum Aufsetzen des Ventilators vor der Wand: Platte 120 × 120 mm mit Wandstützen und Auskragung → `ventilator_konsole/` (STL und 3MF) |
+| `abluft_aufhaengung.scad` | Aufhängung für Magnetmuffen: Platte mit Magnettaschen (6 oder 8 Magnete), Wandwinkel oder Regalschrauben, mehrere Muffen nebeneinander; optional Lüfter-Lochbild und Auflagezunge (`ah_luefter`, `ah_zunge_l`) |
+| `abluft_luefterhalter.scad` | **Lüfterhalter mit Magnetmuffe**: Aufhängung (Winkel, 6 Magnete) kombiniert mit der Lüfterkonsole → `luefterhalter/luefterhalter.stl` |
 | `magnetring_150.stl`, `magnetring_100.stl` | Magnetringe in Standardmaßen (Dicke 8, ohne Schraublöcher) |
 | `durchfuehrung_innen.stl` | Innenscheibe mit Zentrierbund und Gewinderohr (Raumseite) |
 | `durchfuehrung_aussen.stl` | Halteplatte mit Innengewinde (Dachseite), mit Bohrungen für zwei M4-Sicherungsschrauben |
@@ -316,3 +318,16 @@ Konsole, auf die der Ventilator geschraubt wird und die vor der Wand steht. Ein 
 - **Druck:** Plattenoberseite (Lüfterseite) liegt flach auf dem Druckbett, Träger und Rippen zeigen nach oben, **ohne Stützen**. Die Wandlöcher und ihre Senkungen sind **tropfenförmig** (Spitze nach oben, 45°). Die Rippenrundung hat Material darunter.
 - **Annahmen (unbestätigt):** Trägerbreite 24 mm und Lage der zwei Doppelträger (Rippen 2 mm neben den Langlöchern), Lochhöhen der Wandschrauben, Auskragung 70 mm.
 - **Nicht geprüft:** Die SCAD-Datei wurde nicht mit OpenSCAD gerendert (nicht verfügbar). STL und 3MF stammen aus dem gleichwertigen Python-Modell `werkzeuge/ventilator_konsole_export.py` (trimesh/manifold, wasserdicht, Maße geprüft); Bild mit `werkzeuge/bild_ventilator_konsole.py`. Nicht gedruckt, Festigkeit der Träger in PETG und Passung an der Wand ungeprüft.
+
+## Lüfterhalter mit Magnetmuffe (`abluft_luefterhalter.scad`)
+
+![Lüfterhalter: Schnitte durch Lüfterseite, Magnetseite und Seitenansicht](bilder/luefterhalter.png)
+
+Kombination aus der Lüfterkonsole und der Aufhängung mit Wandwinkeln und 6 Magneten (100er Muster): Der Lüfter wird auf die flache Oberseite geschraubt, darunter schnappt die Magnetmuffe an. Ein Druckteil, `luefterhalter/luefterhalter.stl` (199 × 175 × 46 mm, ca. 259 cm³).
+
+- **Lüfter:** 4 Langlöcher 6 × 12 mm im Lochbild der Konsole (59 mm Mitte–Mitte in Richtung Wand, 54 mm Innenkante–Innenkante in Reihenrichtung), mittig über der Muffe (`fan_muffe`, Versatz `fan_dx`, `fan_dy`). Die Muttern (M4) sitzen in **Sechskanttaschen von der Magnetseite** (`fan_nut_h` 3,4 mm, `fan_nut_af` 7,2, Mutter wird entlang des Langlochs mitgeführt), stehen also nicht über und stören die angesetzte Muffe nicht. Schraubenlänge: Lüfterfuß + 4,6 mm Plattenrest + höchstens 3 mm in die Tasche.
+- **Hinten aufliegend wie die Konsole:** eine **Zunge** 25 mm lang, 2 mm dick (`ah_zunge_l`, `ah_zunge_t`), bündig mit der Oberseite, hinter den Wandwinkeln. Sie liegt auf der Oberkante der Wand bzw. Platte auf und trägt die Last; die Wandplatten der beiden Winkel (Bein 20 mm, zwei 4-mm-Rippen, 70 mm Auskragung) werden mit den Tropfenlöchern ø5,5 und Senkung ø10 (Höhe 18 und 34 mm) angeschraubt, wie bei der Konsole.
+- **Magnete:** 6 × 15 × 3 mm, Teilkreis R 66, Polung wie im ganzen System (Kerbe auf Kerbe stößt ab).
+- **Druck:** Oberseite (Lüfterseite) auf dem Bett, Winkel nach oben, Magnet- und Mutterntaschen oben offen, **keine Stützen**.
+- **Varianten:** `-D ah_muster=150` (8 Magnete, 237 × 231 × 46 mm), `-D ah_n=2 -D 'ah_stil="voll"'` mit `part="wand_teil"` und `teil_nr` für Reihen. Export: `werkzeuge/export_luefterhalter.sh [ordner] [-D ...]`, Prüfung: `werkzeuge/pruefung_luefterhalter.py`, Bild: `werkzeuge/bild_luefterhalter.py`.
+- **Geprüft:** wasserdicht, passt ins Druckbett, Lochbild und Tiefe der Taschen, Mutterntaschen mindestens 16 mm von den Magnettaschen, keine Überlappung mit einem Muffen-Proxy. **Annahmen:** Lüftermitte über der Muffenmitte (gleiches Lochbild wie die Konsole, aber 70,7 mm statt 35 mm von der Wand); die Wandoberkante liegt wie bei der Konsole 2 mm unter der Oberseite. **Nicht geprüft:** gedruckt, Durchbiegung der 8-mm-Platte unter dem Lüfter, Festigkeit der Winkel in PETG, Passung am Lüfter.

@@ -22,9 +22,9 @@ units_l = 3;      // Länge   (von der Wand weg)  in Rastereinheiten
 /* [Raster / Eurobox] */
 grid    = 40;     // Rastermaß [mm]
 tol     = 0.5;    // Spiel pro Box (Box ist um tol kleiner als ihr Raster)
-eb_x    = 560;    // nutzbares Innenmaß Eurobox am BODEN, lange Seite  -> nachmessen!
-eb_y    = 360;    // nutzbares Innenmaß Eurobox am BODEN, kurze Seite  -> nachmessen!
-eb_h    = 75;     // nutzbare Innenhöhe Eurobox                        -> nachmessen!
+eb_x    = 555;    // Innenmaß Eurobox, lange Seite (Herstellerangabe 55,5 cm; am Boden wegen Schräge evtl. kleiner -> nachmessen!)
+eb_y    = 355;    // Innenmaß Eurobox, kurze Seite (Herstellerangabe 35,5 cm; am Boden evtl. kleiner)
+eb_h    = 105;    // Innenhöhe Eurobox (Herstellerangabe 10,5 cm; Box 60x40x12 cm, 20 l)
 
 /* [Feste Höhe] */
 H       = 70;     // Gesamthöhe Box inkl. Haken (für ALLE Boxen gleich)

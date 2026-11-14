@@ -6,8 +6,8 @@ Sortierboxen für Schrauben und andere Kleinteile. Jede Box passt **liegend lüc
 
 ## Prinzip
 
-- **Raster 40 mm.** Eine Box ist `units_w` (Breite, entlang der Wand) mal `units_l` (Tiefe, von der Wand weg) Einheiten groß, abzüglich 0,5 mm Spiel. In die Eurobox (Innenmaß am Boden 560 × 360 mm, **noch nachmessen**) passen 14 × 9 Einheiten. Haken und Etiketteneinschub sind **im Raster eingerechnet**: Der Boxkörper wird um deren Überstand kürzer, die belegte Fläche bleibt exakt `units × 40 − 0,5`.
-- **Feste Höhe 70 mm** (Eurobox innen ca. 75 mm, nachmessen), kleiner als der Stegabstand von **76 mm** (Oberkante zu Oberkante), damit sich die Boxen in der Wand nicht berühren.
+- **Raster 40 mm.** Eine Box ist `units_w` (Breite, entlang der Wand) mal `units_l` (Tiefe, von der Wand weg) Einheiten groß, abzüglich 0,5 mm Spiel. In die Eurobox (Innenmaß laut Hersteller 555 × 355 mm, am Boden wegen der Schräge evtl. kleiner, **nachmessen**) passen 13 × 8 Einheiten, z. B. 16 Boxen 2×3 plus 4 Boxen 1×2. Haken und Etiketteneinschub sind **im Raster eingerechnet**: Der Boxkörper wird um deren Überstand kürzer, die belegte Fläche bleibt exakt `units × 40 − 0,5`.
+- **Feste Höhe 70 mm** (Eurobox 60 × 40 × 12 cm, innen 105 mm hoch), kleiner als der Stegabstand von **76 mm** (Oberkante zu Oberkante), damit sich die Boxen in der Wand nicht berühren.
 - **Haken über die ganze Breite**, immer gleich: Dach 4 mm dick liegt auf dem Steg, dahinter greift eine 2 mm dicke Lippe **8 mm tief** (Steglänge) hinter den Steg. Schlitz für den Steg 4,1 mm (Steg 2 mm + 2,1 mm Luft).
 - **Etiketteneinschub** vorn: Rahmen oben und unten geschlossen, das Etikett wird **seitlich eingeschoben**. Höhen 6, 9, 12, 19 oder 24 mm, Breite Standard Boxbreite − 20 mm, mittig im oberen Drittel (bei hohen Etiketten weiter unten).
 - **Leicht und tragfest zugleich:** dünne Wände und ein automatisch bemessener Boden, dazu ein **massiver Tragrahmen** oben, wo Haken und Box verbunden sind (siehe unten).

@@ -50,7 +50,7 @@ Sammelboxen für Schrauben (Metall) und Kleinteile, die **liegend lückenlos in 
 
 ## Randbedingungen vom Nutzer
 
-- Eurobox 60 × 40 × 8 cm; die **Innenmaße am Boden und die Innenhöhe sind nicht gemessen** (Annahme 560 × 360 × 75 mm, `eb_x`, `eb_y`, `eb_h`). Steg-Dicke `rail_t` = 2 mm ist ebenfalls geschätzt.
+- Eurobox 60 × 40 × 12 cm, Innenmaß laut Hersteller 555 × 355 × 105 mm (`eb_x`, `eb_y`, `eb_h`); **am Boden wegen der Schräge nicht gemessen**. Steg-Dicke `rail_t` = 2 mm ist ebenfalls geschätzt.
 - Füllgut: **Metallschrauben**. Der Nutzer wollte, dass die Traglast gerechnet wird und die Wandanlage einen Teil der Last abträgt (Ergebnis siehe oben: sie trägt das Kippmoment).
 - 3MF **für Anycubic** (Slicer Next, Orca-Format). Der Nutzer gibt gern Rückmeldung per Foto/Screenshot.
 

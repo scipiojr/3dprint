@@ -20,10 +20,10 @@ Sammelboxen für Schrauben (Metall) und Kleinteile, die **liegend lückenlos in 
 
 | Datei | Inhalt |
 |---|---|
-| `kleinteilebox.scad` | Quelle. `part` = `box`, `tower`, `assembly`, `modifier`. Koordinaten: X Breite (entlang der Wand), Y Tiefe (0 = Wandseite mit Haken), Z Höhe = Druckrichtung |
-| `kleinteilebox_BxT.stl`, `_stuetzturm.stl`, `.3mf` | Ausgaben, eingecheckt für 1x2 und 2x3 |
-| `werkzeuge/export.sh` | `export.sh [BxT …]`: STL (box, tower) + 3MF je Größe, STL-Prüfung |
-| `werkzeuge/erzeuge_3mf.py` | 3MF im Bambu/Orca-Format (wie `biomuell-einsatz/werkzeuge/korb_3mf.py`): **ein Objekt, drei Bauteile** (Box, Stützturm, Tragzone als `modifier_part`), Einstellungen in `Metadata/model_settings.config`, Plattenmitte 125/125 |
+| `kleinteilebox.scad` | Quelle. `part` = `box`, `modifier` (Tragzone), `support_zone` (Stützbereich/Enforcer). Koordinaten: X Breite (entlang der Wand), Y Tiefe (0 = Wandseite mit Haken), Z Höhe = Druckrichtung |
+| `kleinteilebox_BxT.stl`, `.3mf` | Ausgaben, eingecheckt für 1x2 und 2x3 |
+| `werkzeuge/export.sh` | `export.sh [BxT …]`: STL (box) + 3MF je Größe, STL-Prüfung |
+| `werkzeuge/erzeuge_3mf.py` | 3MF im Bambu/Orca-Format (wie `biomuell-einsatz/werkzeuge/korb_3mf.py`): **ein Objekt, drei Bauteile** (Box, Tragzone als `modifier_part`, Stützbereich als `support_enforcer`), Einstellungen in `Metadata/model_settings.config`, Plattenmitte 125/125 |
 | `werkzeuge/stl_werkzeug.py` | STL laden/prüfen (wasserdicht, Volumen, Körperzahl), nur numpy |
 | `werkzeuge/traglast.py` | Traglastrechnung; liest die Standardwerte aus der SCAD-Datei, Parameter per `name=wert` überschreibbar |
 | `werkzeuge/bild_schnitt.py`, `bilder.sh` | Längsschnitt (matplotlib) und Ansicht (OpenSCAD-Vorschau) → `bilder/` |
@@ -36,7 +36,7 @@ Sammelboxen für Schrauben (Metall) und Kleinteile, die **liegend lückenlos in 
 - **Leichtbau + Tragrahmen (Nutzer, 14.11.2026):** Die Schichten, die Halter und Boxrahmen verbinden und die Last tragen, sollen massiv sein, die Box selbst möglichst leicht. Umsetzung: `wall` 1,2 mm, Boden automatisch aus der Durchbiegung (`sag_max` 2 mm, Schüttdichte 4 kg/l), obere `band_h` mm (Standard 20) mit 2,4 mm Rückwand und **Modifier-Volumen** (6 Wände, 100 % Füllung). Der Nutzer wies darauf hin, dass der tragende Rahmen **bei gleicher Gesamthöhe mehr Schichten haben darf**: deshalb ist `band_h` ein eigener Parameter, der Rahmen wächst nach unten.
 - **Nur die Rückwand ist im Rahmen dick (`band_ring = false`).** Gemessen: Ein 2,4-mm-Ring um alle Wände machte die Box schwerer als den alten Entwurf (56,4 statt 55,8 cm³); nur die Rückwand dick ergibt 49,3 cm³ (−12 %). Die Rechnung braucht den Ring nicht (Rückwand 28-fach, Rahmen 56-fach Reserve).
 - **Wandanlage:** Die Wand nimmt nur das Kippmoment auf (Horizontalkraft an der Lippe ≈ 0,95 × Gewichtskraft bei 2×3 voll), kein Gewicht. Reibung wird nicht angesetzt. **Schwächstes Glied ist die Hakenlippe** (Biegung quer zu den Schichten): 2,1-fache Reserve bei 2×3, nur 1,1-fach bei Tiefe ≥ 4 Einheiten. Gegenmittel: `hook_t` 3 mm (2,6-fach), hängt vom Abstand Steg–Wand ab (offen, Nutzer muss messen); sonst tiefe Boxen nicht voll füllen.
-- **Stützturm statt Abbruchstützen:** Die Hakenlippe hängt frei. Der Turm steht **frei hinter der Box** auf dem Bett (4,1 mm Abstand zur Rückwand, 0,2 mm Luft unter der Lippe, Hohlprofil mit Rippen, Fuß gegen Umkippen), ist in der 3MF ein eigenes Bauteil und wird nach dem Druck einfach weggenommen. Er setzt **0,2 mm Schichthöhe** voraus (`sup_gap`); `H`, `hook_top`, `hook_drop` sind so gewählt, dass die Lippenunterkante (58,0 mm) auf einer Schichtgrenze liegt.
+- **Stützen macht der Slicer, nicht das Modell (Nutzer, 14.11.2026):** Die Hakenlippe hängt frei. Der Nutzer will **keinen selbst gebauten Stützturm** im Modell, sondern in der 3MF **einen Bereich für Stützen**. Umsetzung: `part = "support_zone"` ist ein flacher Quader (Breite W, Y −0,5 bis hook_t + 0,5, Z `zl − 1` bis `zl + 1`, `zl` = Lippenunterkante 58 mm), in der 3MF Bauteil `support_enforcer`. Objekt-Einstellung `enable_support = 1`, `support_type = normal(manual)`, `support_on_build_plate_only = 1`: Stützen entstehen nur im Enforcer-Bereich. Nicht im Slicer geprüft (offen, siehe unten).
 - Etikettenrahmen unten mit 45°-Fase (druckbar ohne Stütze); Tragrahmen-Übergang ebenfalls 45°.
 
 ## Verworfene Varianten – nicht wieder vorschlagen
@@ -55,7 +55,7 @@ Sammelboxen für Schrauben (Metall) und Kleinteile, die **liegend lückenlos in 
 
 ## Stand (14.11.2026) und offen
 
-- Modell, STL (1x2, 2x3), 3MF, Doku und Rechnung sind fertig und gepusht. **Nichts ist gedruckt**, die 3MF ist **nicht im Anycubic Slicer Next geöffnet** (nur Aufbau und XML geprüft). Ob der Slicer den Modifier mit seinen Einstellungen übernimmt, ist unbestätigt; Rückfallanleitung steht im README.
+- Modell, STL (1x2, 2x3), 3MF, Doku und Rechnung sind fertig und gepusht. **Nichts ist gedruckt**, die 3MF ist **nicht im Anycubic Slicer Next geöffnet** (nur Aufbau und XML geprüft). Ob der Slicer den Modifier mit seinen Einstellungen und den Stützbereich als Enforcer übernimmt (Stützen nur dort, Typ „normal (manuell)“), ist unbestätigt; Rückfallanleitung steht im README. Falls der Nutzer berichtet, dass keine oder falsche Stützen entstehen: Screenshot anfordern, dann `support_type` oder die Enforcer-Lage (`support_zone`) anpassen.
 - Nutzer soll nachmessen: Eurobox-Innenmaße und -höhe, `rail_t`, Abstand Steg–Wand (für `hook_t` 3).
 - Annahmen der Traglast (Schüttdichte 4 kg/l, zulässige Spannungen PETG, Ruckfaktor 1,5) sind nicht durch Versuch bestätigt; nach dem ersten Probedruck (1×2) mit Belastungsversuch abgleichen.
 - Möglich später: Haken mit Anschlagnase nach vorn gegen Abrutschen, Trennwand-Varianten, weitere Etikettenformen. Nur auf Wunsch.

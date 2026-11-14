@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Baut die 3MF (Bambu-Studio-/OrcaSlicer-Format, öffnet Anycubic Slicer Next) aus den STL-Dateien.
 
-Aufruf: erzeuge_3mf.py <box.stl> <stuetzturm.stl> <tragzone_modifier.stl> <aus.3mf> [titel]
+Aufruf: erzeuge_3mf.py <box.stl> <tragzone_modifier.stl> <stuetzbereich.stl> <aus.3mf> [titel]
 
 EIN Objekt mit drei Bauteilen (bleiben beim Verschieben/Anordnen zusammen):
-  1. Box           normal_part     3 Wände, 5 % Gyroid, oben/unten 4 Lagen, 0,2 mm, keine Stützen
-  2. Stützturm     normal_part     2 Wände, 0 % Füllung (steht frei hinter der Box, nach dem Druck wegnehmen)
-  3. Tragzone      modifier_part   6 Wände, 100 % Füllung in Z-Bereich des Tragrahmens (Haken + Rand)
+  1. Box           normal_part       3 Wände, 5 % Gyroid, oben/unten 4 Lagen, 0,2 mm
+  2. Tragzone      modifier_part     6 Wände, 100 % Füllung im Z-Bereich des Tragrahmens (Haken + Rand)
+  3. Stützbereich  support_enforcer  Bereich unter der Hakenlippe: nur dort soll der Slicer Stützen bauen
+Stützen: Objekt-Einstellung "normal(manual)" (nur aus Enforcern), nur auf dem Druckbett.
 Die Einstellungen stehen als Objekt-/Bauteil-Metadaten in Metadata/model_settings.config. Temperatur, Lüfter
 und Geschwindigkeiten kommen aus dem Filament-/Druckerprofil des Slicers (nicht in der 3MF).
 Plattenmitte (125, 125) = Mitte des 250 x 250 mm Betts (Anycubic Kobra S1; passt auch auf kleinere Betten ab 220 mm).
@@ -30,14 +31,14 @@ KOPF = ('<?xml version="1.0" encoding="UTF-8"?>\n<model unit="millimeter" xml:la
 
 OBJEKT = {  # gilt für das ganze Objekt (Box); Bauteile können überschreiben
     'layer_height': '0.2', 'wall_loops': '3', 'sparse_infill_density': '5%', 'sparse_infill_pattern': 'gyroid',
-    'top_shell_layers': '4', 'bottom_shell_layers': '4', 'enable_support': '0', 'brim_type': 'no_brim',
+    'top_shell_layers': '4', 'bottom_shell_layers': '4', 'brim_type': 'no_brim',
+    'enable_support': '1', 'support_type': 'normal(manual)', 'support_on_build_plate_only': '1',
 }
 TEILE = [  # Name, Subtyp, Überschreibungen
     ('Box', 'normal_part', {}),
-    ('Stuetzturm Hakenlippe (nach Druck entfernen)', 'normal_part',
-     {'wall_loops': '2', 'sparse_infill_density': '0%'}),
     ('Tragzone Haken und Rahmen (massiv)', 'modifier_part',
      {'wall_loops': '6', 'sparse_infill_density': '100%', 'sparse_infill_pattern': 'zig-zag'}),
+    ('Stuetzbereich Hakenlippe', 'support_enforcer', {}),
 ]
 
 
@@ -54,11 +55,10 @@ def mesh_xml(oid, v, t):
     return ''.join(z)
 
 
-def main(box, turm, modifier, aus, titel='Kleinteilebox Einhaengwand'):
-    netze = [indiziert(lade(p)) for p in (box, turm, modifier)]
-    # gemeinsame Mitte aus Box + Turm (der Modifier ragt oben leicht über, zählt nicht für die Höhe)
-    alle = np.concatenate([netze[0][0], netze[1][0]])
-    lo, hi = alle.min(0), alle.max(0)
+def main(box, modifier, stuetz, aus, titel='Kleinteilebox Einhaengwand'):
+    netze = [indiziert(lade(p)) for p in (box, modifier, stuetz)]
+    # Mitte und Höhe aus der Box (Modifier und Stützbereich ragen leicht über, zählen nicht)
+    lo, hi = netze[0][0].min(0), netze[0][0].max(0)
     mitte = (lo + hi) / 2
     hoehe = hi[2] - lo[2]
     netze = [(v - mitte, t) for v, t in netze]

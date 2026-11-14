@@ -11,9 +11,9 @@
 // ============================================================
 
 /* [Ausgabe] */
-// box = Box allein, tower = Druckstützturm allein,
-// assembly = Box + Turm in einer Datei, modifier = Volumen der Tragzone (nur für den Slicer)
-part = "box"; // [box, tower, assembly, modifier]
+// box = die Box, modifier = Volumen der Tragzone (nur für den Slicer),
+// support_zone = Bereich, in dem der Slicer Stützen erzeugen soll (Support-Enforcer, nur für den Slicer)
+part = "box"; // [box, modifier, support_zone]
 
 /* [Box-Größe in Rastereinheiten] */
 units_w = 2;      // Breite  (entlang der Wand) in Rastereinheiten
@@ -52,16 +52,6 @@ hook_t     = 2.0; // Dicke der Hakenlippe
 hook_top   = 4.0; // Dicke des Hakendachs (Tragkante)
 support_rib = false; // Abstützleiste unten hinten (standardmäßig aus)
 rib_h      = 6;   // Höhe der Abstützleiste
-
-/* [Druckstützturm für die Hakenlippe (part = tower / assembly)] */
-sup_gap    = 0.2;     // Luftspalt Turm -> Hakenlippe (= 1 Schichthöhe)
-sup_xy_gap = 0.6;     // seitlicher Abstand Turm -> Box (berührt die Box nirgends)
-sup_back   = 6;       // Turmtiefe nach hinten (nur zum Drucken, liegt außerhalb der Box)
-sup_wall_t = 0.8;     // Wandstärke Turm (2 Perimeter)
-sup_top    = 1.2;     // Dicke der Turmdecke
-sup_rib_pitch = 12;   // Abstand der Versteifungsrippen im Turm
-sup_foot   = 4;       // Fußverbreiterung am Druckbett (gegen Umkippen)
-sup_foot_h = 0.6;     // Höhe des Fußes
 
 /* [Trennwände (optional)] */
 n_laengs = 0;     // Anzahl Längswände (laufen von hinten nach vorne, teilen die Breite)
@@ -115,6 +105,7 @@ q_f   = rho_bulk * 9.81e-6 * (H - 2);                // Bodendruck bei voller Bo
 t_req = pow(plate_a(as / bs) * q_f * pow(bs, 4) / (E_mod * sag_max), 1/3);
 ft    = floor_t > 0 ? floor_t : max(1.0, ceil(t_req / 0.2 - 0.001) * 0.2);   // Schichtraster 0,2
 
+zl    = H - hook_top - hook_drop;                    // Unterkante der Hakenlippe
 dr    = wall_band - wall;                            // Höhe des 45°-Übergangs zum Tragrahmen
 zb    = H - band_h - dr;                             // Beginn des Übergangs
 vin   = iw0 * il0 * (H - ft) / 1e6;                  // Innenvolumen [Liter] (ohne Tragrahmen-Verengung)
@@ -134,7 +125,6 @@ assert(L > 2*wall_band + 5, "Box zu kurz.");
 assert(band_h >= hook_top + hook_drop + 2, "Tragrahmen muss mindestens bis 2 mm unter die Hakenlippe reichen.");
 assert(zb > ft + 5, "Tragrahmen zu hoch für die Box (band_h verkleinern).");
 assert(wall_band >= wall, "wall_band darf nicht dünner als wall sein.");
-assert(hook_over - hook_t >= sup_xy_gap, "Stützturm käme der Rückwand zu nahe.");
 assert(len(search(label_h, [6, 9, 12, 19, 24])) > 0, "label_h muss 6, 9, 12, 19 oder 24 sein.");
 assert(!label_on || fw <= W, "Etikett breiter als die Box.");
 assert(!label_on || fz_bot > ft, "Etikett zu hoch für die Box.");
@@ -241,30 +231,11 @@ module label_holder() {
     }
 }
 
-// Freistehender Stützturm hinter der Box: steht auf dem Druckbett,
-// berührt die Box an keiner Stelle, trägt nur die Hakenlippe über einen Luftspalt.
-// Nach dem Druck einfach wegnehmen – nichts abzubrechen.
-module hook_support_tower() {
-    zl = H - hook_top - hook_drop;         // Unterkante Hakenlippe
-    zt = zl - sup_gap;                     // Oberkante Turm
-    y1c = hook_t;                          // vordere Turmkante = Innenseite Lippe
-    ya = -sup_back;
-    d  = y1c - ya;
-    nr = max(0, floor(W / sup_rib_pitch) - 1);
-    // Fuß
-    translate([-sup_foot, ya - sup_foot, 0])
-        cube([W + 2*sup_foot, d + sup_foot, sup_foot_h]);
-    // Hohlprofil mit Querrippen
-    difference() {
-        translate([0, ya, 0]) cube([W, d, zt - sup_top]);
-        translate([sup_wall_t, ya + sup_wall_t, sup_foot_h])
-            cube([W - 2*sup_wall_t, d - 2*sup_wall_t, zt]);
-    }
-    if (nr > 0) for (i = [1 : nr])
-        translate([i*W/(nr+1) - sup_wall_t/2, ya, 0])
-            cube([sup_wall_t, d, zt - sup_top]);
-    // Decke: trägt die Lippe
-    translate([0, ya, zt - sup_top]) cube([W, d, sup_top]);
+// Bereich für Stützen unter der Hakenlippe (in der 3MF ein Support-Enforcer):
+// Die Lippe beginnt frei in der Luft, nur dort soll der Slicer Stützen bis zum Bett bauen.
+// Der Quader liegt um die Lippenunterkante (Z) und über der Lippenfläche (X, Y).
+module support_zone() {
+    translate([0, -0.5, zl - 1]) cube([W, hook_t + 1, 2]);
 }
 
 module box() {
@@ -277,7 +248,6 @@ module box() {
 }
 
 if (part == "box") box();
-else if (part == "tower") hook_support_tower();
-else if (part == "assembly") { box(); hook_support_tower(); }
 else if (part == "modifier") modifier_volume();
-else assert(false, "part muss box, tower, assembly oder modifier sein.");
+else if (part == "support_zone") support_zone();
+else assert(false, "part muss box, modifier oder support_zone sein.");

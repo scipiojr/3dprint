@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Zeichnet den Längsschnitt (Mitte der Box) aus den STL-Dateien: bilder/schnitt.png
 
-Aufruf: bild_schnitt.py [kleinteilebox_2x3.stl] [kleinteilebox_2x3_stuetzturm.stl] [aus.png]
-Tragzone (Modifier-Bereich) rot hinterlegt, Stützturm blau, Wandsteg schematisch gestrichelt.
+Aufruf: bild_schnitt.py [kleinteilebox_2x3.stl] [aus.png]
+Tragzone (Modifier-Bereich) rot hinterlegt, Stützbereich (Support-Enforcer) blau, Wandsteg schematisch gestrichelt.
 Braucht numpy und matplotlib.
 """
 import sys
@@ -39,10 +39,9 @@ def schnitt(tri, x0):
 def main():
     wurzel = Path(__file__).resolve().parent.parent
     box = Path(sys.argv[1]) if len(sys.argv) > 1 else wurzel / 'kleinteilebox_2x3.stl'
-    turm = Path(sys.argv[2]) if len(sys.argv) > 2 else wurzel / 'kleinteilebox_2x3_stuetzturm.stl'
-    aus = Path(sys.argv[3]) if len(sys.argv) > 3 else wurzel / 'bilder' / 'schnitt.png'
+    aus = Path(sys.argv[2]) if len(sys.argv) > 2 else wurzel / 'bilder' / 'schnitt.png'
     p = parameter()
-    tb, tt = lade(box), lade(turm)
+    tb = lade(box)
     x0 = (tb[:, :, 0].min() + tb[:, :, 0].max()) / 2 + 0.3
     H = p['H']
     hook_over = p['hook_t'] + p['rail_t'] + p['hook_clear']
@@ -52,7 +51,9 @@ def main():
     fig, ax = plt.subplots(figsize=(15, 6.2), dpi=110)
     ax.axhspan(zb, H + 0.4, color='tomato', alpha=0.13, lw=0)
     ax.add_collection(LineCollection(schnitt(tb, x0), colors='#222222', linewidths=1.8))
-    ax.add_collection(LineCollection(schnitt(tt, x0), colors='#2c6fb7', linewidths=1.4))
+    zl = H - p['hook_top'] - p['hook_drop']       # Unterkante Hakenlippe
+    ax.add_patch(plt.Rectangle((-0.5, zl - 1), p['hook_t'] + 1, 2, color='#2c6fb7', alpha=0.85, lw=0))
+    ax.add_patch(plt.Rectangle((-0.5, 0), p['hook_t'] + 1, zl - 1, color='#2c6fb7', alpha=0.18, lw=0))
     # Wandsteg schematisch (Höhe unbekannt, nur die obersten 12 mm)
     zr = H - p['hook_top']
     ax.add_patch(plt.Rectangle((p['hook_t'], zr - 12), p['rail_t'], 12, fill=False, ls='--', ec='#777777', lw=1.2))
@@ -64,13 +65,13 @@ def main():
             ha='center', va='center', color='#333333', fontsize=10)
     ax.annotate('Hakenlippe', (p['hook_t'] / 2, H - p['hook_top'] - p['hook_drop'] / 2), xytext=(12, H - 34),
                 fontsize=9, arrowprops=dict(arrowstyle='->'))
-    ax.annotate('Stützturm (nach Druck weg)', (-6, 30), xytext=(-48, 18), fontsize=9, color='#2c6fb7',
-                arrowprops=dict(arrowstyle='->', color='#2c6fb7'))
+    ax.annotate('Stützbereich (Enforcer):\nder Slicer baut hier Stützen\nbis zum Druckbett', (0.8, zl), xytext=(-52, 30),
+                fontsize=9, color='#2c6fb7', arrowprops=dict(arrowstyle='->', color='#2c6fb7'))
     ax.annotate('Etiketten-\neinschub', (ymax - 1, H - 15), xytext=(ymax - 8, H - 33), fontsize=9, ha='center',
                 arrowprops=dict(arrowstyle='->'))
     ax.annotate('Boden (automatisch\naus Traglast)', (ymax / 2, 0.6), xytext=(ymax / 2, 14), fontsize=9, ha='center',
                 arrowprops=dict(arrowstyle='->'))
-    ax.set_xlim(-60, ymax + 12)
+    ax.set_xlim(-62, ymax + 12)
     ax.set_ylim(-4, H + 6)
     ax.set_aspect('equal')
     ax.set_xlabel('Tiefe von der Wand [mm]  (links Wandseite mit Haken, rechts Vorderseite)')

@@ -2,7 +2,7 @@
 
 Sortierboxen für Schrauben und andere Kleinteile. Jede Box passt **liegend lückenlos in eine Eurobox 60 × 40 × 8 cm** und lässt sich **an eine Einhängewand mit Stegen hängen**. Länge und Breite stellt man im festen Raster ein, Höhe und Haken sind bei allen Größen identisch, sodass jede Box an jeden Steg passt. Gedruckt wird aufrecht in PETG auf einem Anycubic (3MF für Anycubic Slicer Next liegt bei).
 
-![Ansicht: Box grau, Tragzone rot, Stützturm blau](bilder/ansicht.png)
+![Ansicht: Box grau, Tragzone rot, Stützbereich blau](bilder/ansicht.png)
 
 ## Prinzip
 
@@ -19,8 +19,8 @@ Sortierboxen für Schrauben und andere Kleinteile. Jede Box passt **liegend lüc
 | Datei | Inhalt |
 |---|---|
 | `kleinteilebox.scad` | **Quelle** (OpenSCAD 2021.01 oder neuer). Alle Parameter oben, `part` wählt das Ausgabeteil |
-| `kleinteilebox_2x3.stl` / `_stuetzturm.stl` / `.3mf` | Box 79,5 × 119,5 × 70 mm, Stützturm einzeln, Druckdatei für Anycubic Slicer Next |
-| `kleinteilebox_1x2.stl` / `_stuetzturm.stl` / `.3mf` | kleinste Box 39,5 × 79,5 × 70 mm, gut als **Probedruck** für den Sitz am Steg |
+| `kleinteilebox_2x3.stl` / `.3mf` | Box 79,5 × 119,5 × 70 mm; die 3MF ist die Druckdatei für Anycubic Slicer Next (Box + Tragzone + Stützbereich) |
+| `kleinteilebox_1x2.stl` / `.3mf` | kleinste Box 39,5 × 79,5 × 70 mm, gut als **Probedruck** für den Sitz am Steg |
 | `bilder/` | Ansicht und Längsschnitt (`werkzeuge/bilder.sh`) |
 | `werkzeuge/export.sh` | erzeugt STL und 3MF für beliebige Größen: `werkzeuge/export.sh 4x3 3x3` |
 | `werkzeuge/traglast.py` | Traglastrechnung, liest die Maße aus der SCAD-Datei |
@@ -44,7 +44,7 @@ Andere Größen: `werkzeuge/export.sh 4x3` (Breite × Tiefe in Einheiten). Eigen
 | `label_h`, `label_w`, `label_open_left/right` | 12, 0 (= Breite − 20), je true | Etikett: Höhe (6/9/12/19/24), Breite, seitlich offene Seiten |
 | `n_laengs`, `n_quer`, `div_h` | 0, 0, 60 | gleichmäßig verteilte Trennwände (längs / quer) und deren Höhe |
 | `support_rib` | false | Abstützleiste unten hinten bis zur Wandebene (Wandanlage ohne Neigung) |
-| `part` | box | `box`, `tower` (Stützturm), `assembly` (beides), `modifier` (Tragzone für den Slicer) |
+| `part` | box | `box`, `modifier` (Tragzone), `support_zone` (Stützbereich); die beiden letzten sind nur für den Slicer |
 
 ## Leichtbau und Tragrahmen
 
@@ -80,16 +80,17 @@ Ergebnis für die 2×3-Box: Rückwand 28-fache und Tragrahmen 56-fache Reserve, 
 
 ## Drucken (Anycubic Slicer Next)
 
-1. `kleinteilebox_2x3.3mf` öffnen. Es ist **ein Objekt mit drei Teilen**: Box, Stützturm (steht frei hinter der Box) und Tragzone (Modifier, nur Einstellungen). Die Box steht aufrecht, der Haken ist oben.
-2. In der 3MF stehen: Schichthöhe 0,2 mm, 3 Wände, 5 % Gyroid, oben/unten 4 Lagen, keine Stützen, kein Brim. Tragzone: 6 Wände, 100 % Füllung, nur in den obersten 20 mm. Der Turm hat 2 Wände, 0 % Füllung. **Temperatur und Lüfter stehen im Filamentprofil**, nicht in der 3MF (im Repo sonst für PETG auf dem Kobra S1: 240–245 °C, Lüfter 30–40 %).
-3. **Schichthöhe 0,2 mm beibehalten**: Der Turm endet 0,2 mm unter der Hakenlippe (`sup_gap`). Bei anderer Schichthöhe `sup_gap` gleich der Schichthöhe setzen und neu exportieren. Klebt die Lippe am Turm, `sup_gap` auf 0,3 setzen.
-4. Nach dem Druck den Turm einfach wegnehmen. Er berührt die Box nirgends (4,1 mm Abstand zur Rückwand, 0,2 mm Luft unter der Lippe), es muss nichts abgebrochen werden.
+1. `kleinteilebox_2x3.3mf` öffnen. Es ist **ein Objekt mit drei Teilen**: Box, Tragzone (Modifier, nur Einstellungen) und **Stützbereich** (Support-Enforcer, nur ein Markierungsquader). Die Box steht aufrecht, der Haken ist oben.
+2. In der 3MF stehen: Schichthöhe 0,2 mm, 3 Wände, 5 % Gyroid, oben/unten 4 Lagen, kein Brim. Tragzone: 6 Wände, 100 % Füllung, nur in den obersten 20 mm. **Temperatur und Lüfter stehen im Filamentprofil**, nicht in der 3MF (im Repo sonst für PETG auf dem Kobra S1: 240–245 °C, Lüfter 30–40 %).
+3. **Stützen:** Die Hakenlippe beginnt frei in der Luft (Z = 58 mm). Dort sitzt der Stützbereich, ein flacher Quader (79,5 × 3 × 2 mm, Z 57 bis 59 mm) direkt an der Lippenunterkante. Die Objekt-Einstellung steht auf Stützen „normal (manuell)“ und „nur auf dem Druckbett“, der Slicer baut also **nur dort** Stützen, und zwar von der Lippe bis zum Bett (im Schnittbild blau). Die Stütze ist nur ca. 2 mm breit und 58 mm hoch. Wird sie wackelig, im Slicer die Stützen breiter aufziehen (Expansion) oder auf „Baum (manuell)“ stellen.
+4. Nach dem Druck die Stütze von der Lippe abbrechen. Die Abstände zur Lippe (Z-Abstand, Grenzfläche) sind die Slicer-Einstellungen für Stützen, bei Bedarf dort anpassen.
 5. Falls der Slicer den Modifier **nicht** übernimmt: Rechtsklick auf das Objekt, Modifier hinzufügen (Quader), über den Boxgrundriss legen (Z 48,8 bis 70,4 mm) und dort 6 Wände, 100 % Füllung einstellen.
-6. Etikett von der Seite einschieben. Zu locker: `label_gap` verkleinern oder eine Seite schließen (`label_open_left/right = false`).
+6. Erscheinen **keine** Stützen unter der Lippe, hat der Slicer den Stützbereich nicht als Enforcer übernommen. Dann im Slicer Stützen aktivieren (Typ „normal (manuell)“, nur Druckbett) und die Lippenunterkante mit dem Stützen-Enforcer markieren (Quader Z 57 bis 59 mm, über die Lippe).
+7. Etikett von der Seite einschieben. Zu locker: `label_gap` verkleinern oder eine Seite schließen (`label_open_left/right = false`).
 
 ## Stand und offene Punkte (14.11.2026)
 
-- **Nichts davon ist gedruckt.** Alle STL sind wasserdicht, die 3MF ist strukturell geprüft (Teile, Platzierung, Einstellungen), aber **nicht im Anycubic Slicer Next geöffnet**. Erster Schritt: die 1×2-Box als Probedruck, Sitz am Steg prüfen.
+- **Nichts davon ist gedruckt.** Alle STL sind wasserdicht, die 3MF ist strukturell geprüft (Teile, Platzierung, Einstellungen), aber **nicht im Anycubic Slicer Next geöffnet**. Ob der Slicer den Stützbereich als Enforcer übernimmt und wie die Stütze unter der Lippe ausfällt, ist unbestätigt. Erster Schritt: die 1×2-Box als Probedruck, Sitz am Steg prüfen.
 - **Nachmessen:** Innenmaße der Eurobox am Boden und Innenhöhe (`eb_x`, `eb_y`, `eb_h`), Steg-Dicke (`rail_t`), Abstand Steg–Wand (für `hook_t`).
 - Annahmen der Traglast (Schüttdichte, zulässige Spannungen für PETG) sind nicht gemessen. Ein Belastungsversuch mit einer gedruckten Box zeigt, ob sie stimmen.
 - Bei dauerhaft hoher Last PETG verwenden, PLA kriecht (vor allem warm) und hat eine schlechtere Schichthaftung.

@@ -22,6 +22,8 @@ Sortierboxen für Schrauben und andere Kleinteile. Jede Box passt **liegend lüc
 | `kleinteilebox_2x3.stl` / `.3mf` | Box 79,5 × 119,5 × 70 mm; die 3MF ist die Druckdatei für Anycubic Slicer Next (Box + Tragzone + Stützbereich) |
 | `kleinteilebox_1x2.stl` / `.3mf` | kleinste Box 39,5 × 79,5 × 70 mm, gut als **Probedruck** für den Sitz am Steg |
 | `bilder/` | Ansicht und Längsschnitt (`werkzeuge/bilder.sh`) |
+| `kleinteilebox_2x3.step` / `kleinteilebox_1x2.step` | echtes CAD-Volumenmodell (STEP AP214, keine Dreiecke) für CAD, Fertigungsangebote und Upload-Formulare; nur die Box, ohne Slicer-Teile |
+| `werkzeuge/erzeuge_step.py` | baut das STEP mit build123d nach (`pip install build123d`), liest die Parameter aus der SCAD-Datei: `python3 -I werkzeuge/erzeuge_step.py 4x3` |
 | `werkzeuge/export.sh` | erzeugt STL und 3MF für beliebige Größen: `werkzeuge/export.sh 4x3 3x3` |
 | `werkzeuge/traglast.py` | Traglastrechnung, liest die Maße aus der SCAD-Datei |
 | `werkzeuge/erzeuge_3mf.py`, `stl_werkzeug.py`, `bild_schnitt.py`, `bilder.sh` | 3MF-Bau, STL-Prüfung (wasserdicht, Volumen), Bilder |

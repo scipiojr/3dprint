@@ -7,7 +7,7 @@ Arbeitsanweisung und Projektstand für KI-Agenten. Sprache mit dem Nutzer: **Deu
 - Projektordner: `kleinteilebox-einhaengwand/` im Repository `scipiojr/3dprint` (Branch `main`). Andere Projektordner nicht anfassen.
 - Wie in den anderen Projekten: **jede Änderung committen und nach `origin/main` pushen**, ohne Rückfrage, solange der Nutzer nichts anderes sagt. Vor dem Push `git pull --rebase origin main`.
 - Commit-Messages auf Deutsch, Betreffzeile im Imperativ (≤ 72 Zeichen), darunter kurz *was* und *warum*; Trailer wie in den vorhandenen Commits (`Co-Authored-By: …`, `Claude-Session: …`).
-- **Die SCAD-Datei ist die Quelle.** STL und 3MF werden eingecheckt. Nach jeder Geometrieänderung: `werkzeuge/export.sh` (erzeugt 1x2 und 2x3), `werkzeuge/bilder.sh`, `python3 -I werkzeuge/traglast.py --md` (Tabelle im README aktuell halten), dann alles mitcommitten. Andere Größen nur bei Bedarf einchecken.
+- **Die SCAD-Datei ist die Quelle.** STL und 3MF werden eingecheckt. Nach jeder Geometrieänderung: `werkzeuge/export.sh` (erzeugt 1x2 und 2x3), `python3 -I werkzeuge/erzeuge_step.py`, `werkzeuge/bilder.sh`, `python3 -I werkzeuge/traglast.py --md` (Tabelle im README aktuell halten), dann alles mitcommitten. Andere Größen nur bei Bedarf einchecken.
 - **Versionierung nur über Git:** neue Stände überschreiben die gleichnamige Datei, keine `_v2`-Kopien.
 - Werkzeuge: OpenSCAD 2021.01 (alle Exporte zusammen ca. 3 s), Python mit `numpy` und `matplotlib` (`pip install --break-system-packages …`), `xvfb-run` für die Vorschau. Python-Skripte mit `python3 -I` starten. `__pycache__` nicht einchecken. OpenSCADs `--render` ignoriert `color()`, Bilder mit Farbe nur im Vorschaumodus (siehe `bilder.sh`).
 - README und dieses Dokument aktuell halten, wenn sich Parameter, Teile oder Entscheidungen ändern.
@@ -23,6 +23,7 @@ Sammelboxen für Schrauben (Metall) und Kleinteile, die **liegend lückenlos in 
 | `kleinteilebox.scad` | Quelle. `part` = `box`, `modifier` (Tragzone), `support_zone` (Stützbereich/Enforcer). Koordinaten: X Breite (entlang der Wand), Y Tiefe (0 = Wandseite mit Haken), Z Höhe = Druckrichtung |
 | `kleinteilebox_BxT.stl`, `.3mf` | Ausgaben, eingecheckt für 1x2 und 2x3 |
 | `werkzeuge/export.sh` | `export.sh [BxT …]`: STL (box) + 3MF je Größe, STL-Prüfung |
+| `werkzeuge/erzeuge_step.py` | STEP-Volumenmodell per build123d (Nachbau der SCAD-Geometrie; OpenSCAD kann kein STEP). Bei Geometrieänderung in der SCAD-Datei **hier mitziehen**, danach Volumen gegen die STL prüfen (Soll: Abweichung < 0,1 cm³) |
 | `werkzeuge/erzeuge_3mf.py` | 3MF im Bambu/Orca-Format (wie `biomuell-einsatz/werkzeuge/korb_3mf.py`): **ein Objekt, drei Bauteile** (Box, Tragzone als `modifier_part`, Stützbereich als `support_enforcer`), Einstellungen in `Metadata/model_settings.config`, Plattenmitte 125/125 |
 | `werkzeuge/stl_werkzeug.py` | STL laden/prüfen (wasserdicht, Volumen, Körperzahl), nur numpy |
 | `werkzeuge/traglast.py` | Traglastrechnung; liest die Standardwerte aus der SCAD-Datei, Parameter per `name=wert` überschreibbar |

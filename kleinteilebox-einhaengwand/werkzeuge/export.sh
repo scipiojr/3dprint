@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Erzeugt STL, 3MF und Vorschaubilder für eine oder mehrere Boxgrößen.
-#   werkzeuge/export.sh            Standard: 1x2 und 2x3
+#   werkzeuge/export.sh            Standard: 1x2, 2x3, 2x6, 4x3, 6x3, 4x6
 #   werkzeuge/export.sh 4x3 3x3    beliebige Größen (Breite x Tiefe in Rastereinheiten)
 # Ergebnis im Projektordner: kleinteilebox_BxT.stl und kleinteilebox_BxT.3mf (Box + Tragzone + Stützbereich)
 # Alle weiteren Parameter stehen in kleinteilebox.scad; eigene Werte mit EXTRA="-D hook_t=3" übergeben.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 GROESSEN=("$@")
-[ ${#GROESSEN[@]} -eq 0 ] && GROESSEN=(1x2 2x3)
+[ ${#GROESSEN[@]} -eq 0 ] && GROESSEN=(1x2 2x3 2x6 4x3 6x3 4x6)
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 for g in "${GROESSEN[@]}"; do

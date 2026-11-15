@@ -2,12 +2,14 @@
 
 Arbeitsanweisung und Projektstand für KI-Agenten. Sprache mit dem Nutzer: **Deutsch**. Anwenderdoku: `README.md`.
 
+- **Stapelfuß (Nutzerwunsch 15.11.):** `stackable=true`: eingerückter Zapfen unten (3 mm + 45°-Rampe), greift in die Öffnung der Box darunter; Stapelabstand 66,2 mm; Zapfen hinten proportional weiter eingerückt (`sd_r = sd_s·wall_band/ts_top`), damit alle Seiten gleichzeitig aufsetzen. Per Schnitt-Test in OpenSCAD geprüft. Nicht kombinierbar mit `support_rib`. Varianten auf Basis 2×3: 2×6, 4×3, 6×3, 4×6 (Nutzer: Basis 2×3). Tiefe 6 Einheiten: Lippenreserve nur 0,5× -> nur teilweise füllen oder `hook_t=3`.
+
 ## Arbeitsweise in diesem Repository
 
 - Projektordner: `kleinteilebox-einhaengwand/` im Repository `scipiojr/3dprint` (Branch `main`). Andere Projektordner nicht anfassen.
 - Wie in den anderen Projekten: **jede Änderung committen und nach `origin/main` pushen**, ohne Rückfrage, solange der Nutzer nichts anderes sagt. Vor dem Push `git pull --rebase origin main`.
 - Commit-Messages auf Deutsch, Betreffzeile im Imperativ (≤ 72 Zeichen), darunter kurz *was* und *warum*; Trailer wie in den vorhandenen Commits (`Co-Authored-By: …`, `Claude-Session: …`).
-- **Die SCAD-Datei ist die Quelle.** STL und 3MF werden eingecheckt. Nach jeder Geometrieänderung: `werkzeuge/export.sh` (erzeugt 1x2 und 2x3), `python3 -I werkzeuge/erzeuge_step.py`, `werkzeuge/bilder.sh`, `python3 -I werkzeuge/traglast.py --md` (Tabelle im README aktuell halten), dann alles mitcommitten. Andere Größen nur bei Bedarf einchecken.
+- **Die SCAD-Datei ist die Quelle.** STL und 3MF werden eingecheckt. Nach jeder Geometrieänderung: `werkzeuge/export.sh` (erzeugt alle sechs Größen), `python3 -I werkzeuge/erzeuge_step.py`, `werkzeuge/bilder.sh`, `python3 -I werkzeuge/traglast.py --md` (Tabelle im README aktuell halten), dann alles mitcommitten. Weitere Größen nur bei Bedarf einchecken.
 - **Versionierung nur über Git:** neue Stände überschreiben die gleichnamige Datei, keine `_v2`-Kopien.
 - Werkzeuge: OpenSCAD 2021.01 (alle Exporte zusammen ca. 3 s), Python mit `numpy` und `matplotlib` (`pip install --break-system-packages …`), `xvfb-run` für die Vorschau. Python-Skripte mit `python3 -I` starten. `__pycache__` nicht einchecken. OpenSCADs `--render` ignoriert `color()`, Bilder mit Farbe nur im Vorschaumodus (siehe `bilder.sh`).
 - README und dieses Dokument aktuell halten, wenn sich Parameter, Teile oder Entscheidungen ändern.

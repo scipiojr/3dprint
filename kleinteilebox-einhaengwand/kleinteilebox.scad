@@ -53,6 +53,13 @@ hook_top   = 4.0; // Dicke des Hakendachs (Tragkante)
 support_rib = false; // Abstützleiste unten hinten (standardmäßig aus)
 rib_h      = 6;   // Höhe der Abstützleiste
 
+/* [Stapelbarkeit] */
+// Unten hat die Box einen eingerückten Zapfen (Standfuß), der in die Öffnung der Box darunter greift:
+// Die Box zentriert sich, die Rückwand sitzt auf dem Rand der unteren. Der Haken bleibt oben und stört nicht.
+stackable   = true;
+stack_h     = 3.0;  // Höhe des geraden Zapfens [mm]
+stack_clear = 0.4;  // Spiel Zapfen zur Innenwand der unteren Box, seitlich/vorne [mm]; hinten proportional größer (gleiche Aufsetzhöhe ringsum)
+
 /* [Trennwände (optional)] */
 n_laengs = 0;     // Anzahl Längswände (laufen von hinten nach vorne, teilen die Breite)
 n_quer   = 0;     // Anzahl Querwände  (laufen von links nach rechts, teilen die Länge)
@@ -105,6 +112,11 @@ q_f   = rho_bulk * 9.81e-6 * (H - 2);                // Bodendruck bei voller Bo
 t_req = pow(plate_a(as / bs) * q_f * pow(bs, 4) / (E_mod * sag_max), 1/3);
 ft    = floor_t > 0 ? floor_t : max(1.0, ceil(t_req / 0.2 - 0.001) * 0.2);   // Schichtraster 0,2
 
+ts_top  = band_ring ? wall_band : wall;              // Seiten-/Frontwand im Tragrahmen (= Innenkante der Öffnung oben)
+sd_s    = ts_top + stack_clear;                      // Zapfen-Einzug seitlich/vorne
+sd_r    = sd_s * wall_band / ts_top;                 // Zapfen-Einzug hinten (hinten dickere Wand -> gleiche Aufsetzhöhe)
+st_r    = sd_r;                                      // Höhe der 45°-Rampe vom Zapfen zur vollen Außenform
+st_top  = stackable ? stack_h + st_r : 0;            // ab dieser Höhe ist die Box voll breit
 zl    = H - hook_top - hook_drop;                    // Unterkante der Hakenlippe
 dr    = wall_band - wall;                            // Höhe des 45°-Übergangs zum Tragrahmen
 zb    = H - band_h - dr;                             // Beginn des Übergangs
@@ -124,6 +136,8 @@ assert(H <= rail_pitch, "Box ist höher als der Stegabstand – kollidiert mit d
 assert(L > 2*wall_band + 5, "Box zu kurz.");
 assert(band_h >= hook_top + hook_drop + 2, "Tragrahmen muss mindestens bis 2 mm unter die Hakenlippe reichen.");
 assert(zb > ft + 5, "Tragrahmen zu hoch für die Box (band_h verkleinern).");
+assert(!stackable || st_top + 2*ft < zb, "Stapelfuß zu hoch für die Box (stack_h verkleinern).");
+assert(!stackable || !support_rib, "support_rib passt nicht zum Stapelfuß (Rippe ragt über den Zapfen hinaus).");
 assert(wall_band >= wall, "wall_band darf nicht dünner als wall sein.");
 assert(len(search(label_h, [6, 9, 12, 19, 24])) > 0, "label_h muss 6, 9, 12, 19 oder 24 sein.");
 assert(!label_on || fw <= W, "Etikett breiter als die Box.");
@@ -147,19 +161,47 @@ module cavity2d(t_rear, t_side) {
     }
 }
 
+// Außenform: unten Zapfen (eingerückt), 45°-Rampe, darüber volle Größe
+module outer_solid() {
+    if (stackable) {
+        translate([0, y0, 0]) {
+            linear_extrude(stack_h) cavity2d(sd_r, sd_s);
+            hull() {
+                translate([0, 0, stack_h])        linear_extrude(0.01) cavity2d(sd_r, sd_s);
+                translate([0, 0, stack_h + st_r]) linear_extrude(0.01) footprint(W, L, r);
+            }
+            translate([0, 0, stack_h + st_r]) linear_extrude(H - stack_h - st_r) footprint(W, L, r);
+        }
+    } else {
+        translate([0, y0, 0]) linear_extrude(H) footprint(W, L, r);
+    }
+}
+
 module body() {
     ts = band_ring ? wall_band : wall;      // Seiten/Front im Tragrahmen
-    translate([0, y0, 0]) difference() {
-        linear_extrude(H) footprint(W, L, r);
-        // Hohlraum der leichten Box (dünne Wand)
-        translate([0, 0, ft]) linear_extrude(zb - ft + 0.01) cavity2d(wall, wall);
-        // 45°-Übergang zur dicken Wand (Hohlraum verjüngt sich nach oben, druckbar ohne Stütze)
-        hull() {
-            translate([0, 0, zb])      linear_extrude(0.01) cavity2d(wall, wall);
-            translate([0, 0, zb + dr]) linear_extrude(0.01) cavity2d(wall_band, ts);
+    difference() {
+        outer_solid();
+        translate([0, y0, 0]) {
+            if (stackable) {
+                // Boden im Zapfenbereich, darüber verengter Hohlraum mit 45°-Rampe zum normalen Hohlraum
+                translate([0, 0, ft]) linear_extrude(stack_h - ft + 0.01) cavity2d(sd_r + wall, sd_s + wall);
+                hull() {
+                    translate([0, 0, stack_h])        linear_extrude(0.01) cavity2d(sd_r + wall, sd_s + wall);
+                    translate([0, 0, stack_h + st_r]) linear_extrude(0.01) cavity2d(wall, wall);
+                }
+                translate([0, 0, stack_h + st_r]) linear_extrude(zb - stack_h - st_r + 0.01) cavity2d(wall, wall);
+            } else {
+                // Hohlraum der leichten Box (dünne Wand)
+                translate([0, 0, ft]) linear_extrude(zb - ft + 0.01) cavity2d(wall, wall);
+            }
+            // 45°-Übergang zur dicken Wand (Hohlraum verjüngt sich nach oben, druckbar ohne Stütze)
+            hull() {
+                translate([0, 0, zb])      linear_extrude(0.01) cavity2d(wall, wall);
+                translate([0, 0, zb + dr]) linear_extrude(0.01) cavity2d(wall_band, ts);
+            }
+            // Hohlraum im Tragrahmen (dicke Rückwand)
+            translate([0, 0, zb + dr]) linear_extrude(H) cavity2d(wall_band, ts);
         }
-        // Hohlraum im Tragrahmen (dicke Rückwand)
-        translate([0, 0, zb + dr]) linear_extrude(H) cavity2d(wall_band, ts);
     }
 }
 
@@ -181,7 +223,8 @@ module hook() {
 }
 
 // gleichmäßig verteilte Trennwände
-module dividers() {
+module dividers() { intersection() { dividers_raw(); outer_solid(); } }
+module dividers_raw() {
     iw = W - 2*wall;                 // Innenbreite
     il = L - 2*wall;                 // Innenlänge
     e  = 0.3;                        // Überlappung in die Außenwand

@@ -97,7 +97,8 @@ def rechne(uw, ul, p):
     res = {'Rückwand (Zug quer)': SIG_Z / s_wand, 'Tragrahmen (Zug quer)': SIG_Z / s_band,
            'Hakenlippe (Biegung quer)': SIG_Z / s_lippe, 'Steg-Pressung': P_ZUL / pr,
            'Boden (Biegung)': SIG_XY / s_boden, 'Seitenwand (Biegung)': SIG_XY / s_seite}
-    tilt = math.degrees(math.atan2(hook_over, z_lip))       # Neigung bis die Rückwandunterkante die Wand berührt (ohne Rippe)
+    z_anlage = (p['stack_h'] + (p['stack_h'] and (p['stack_clear'] + (wall_band if p['band_ring'] else wall)) * wall_band / (wall_band if p['band_ring'] else wall))) if p.get('stackable') else 0.0
+    tilt = math.degrees(math.atan2(hook_over, z_lip - z_anlage))  # Neigung bis die Rückwandkante die Wand berührt (ohne Rippe; mit Stapelfuß erst oberhalb der Rampe)
     return dict(W=W, Ltot=Ltot, L=L, ft=ft, t_req=t_req, vol=vol, m_voll=m_voll, F=F, T=T, T_F=T / F,
                 s_wand=s_wand, s_band=s_band, s_lippe=s_lippe, pr=pr, s_boden=s_boden, sag=sag,
                 s_seite=s_seite, res=res, sf=min(res.values()), kritisch=min(res, key=res.get), tilt=tilt)

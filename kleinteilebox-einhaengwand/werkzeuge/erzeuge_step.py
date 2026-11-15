@@ -2,7 +2,7 @@
 """Erzeugt ein STEP-Volumenmodell (echtes CAD, keine Dreiecke) der Kleinteilebox.
 
 Aufruf:  python3 -I werkzeuge/erzeuge_step.py [BxT ...] [name=wert ...]
-         (ohne Größe: 1x2 und 2x3; Parameter wie in kleinteilebox.scad überschreibbar)
+         (ohne Größe: 1x2, 2x3, 2x6, 4x3, 6x3, 4x6; Parameter wie in kleinteilebox.scad überschreibbar)
 Ergebnis: kleinteilebox_BxT.step im Projektordner.
 
 Voraussetzung: pip install build123d
@@ -69,13 +69,28 @@ def bauen(p, uw, ul):
     def ebene(z):
         return Plane.XY.offset(z)
 
+    # --- Stapelfuß (wie in der SCAD-Datei) ---
+    stackable = bool(g('stackable'))
+    ts_top = wb if g('band_ring') else wall
+    sd_s = ts_top + g('stack_clear')
+    sd_r = sd_s * wb / ts_top
+    sh = g('stack_h')
+    st_top = sh + sd_r if stackable else 0
+
     # --- Körper ---
+    cav = lambda tr, tside, z: grundriss(tside, W - tside, y0 + tr, yf - tside, max(r - tside, 0.01), ebene(z))
     with BuildPart() as bp:
-        # Außenform (Grundriss in Weltkoordinaten: y0..yf)
-        extrude(grundriss(0, W, y0, yf, r, ebene(0)), amount=H)
-        # Hohlraum (dünne Wand) bis zum Beginn des Übergangs
-        cav = lambda tr, tside, z: grundriss(tside, W - tside, y0 + tr, yf - tside, max(r - tside, 0.01), ebene(z))
-        extrude(cav(wall, wall, ft), amount=zb - ft, mode=Mode.SUBTRACT)
+        if stackable:
+            extrude(cav(sd_r, sd_s, 0), amount=sh)
+            loft([cav(sd_r, sd_s, sh).face(), grundriss(0, W, y0, yf, r, ebene(st_top)).face()], ruled=True)
+            extrude(grundriss(0, W, y0, yf, r, ebene(st_top)), amount=H - st_top)
+            # Boden im Zapfenbereich, verengter Hohlraum, 45°-Rampe, normaler Hohlraum
+            extrude(cav(sd_r + wall, sd_s + wall, ft), amount=sh - ft, mode=Mode.SUBTRACT)
+            loft([cav(sd_r + wall, sd_s + wall, sh).face(), cav(wall, wall, st_top).face()], ruled=True, mode=Mode.SUBTRACT)
+            extrude(cav(wall, wall, st_top), amount=zb - st_top, mode=Mode.SUBTRACT)
+        else:
+            extrude(grundriss(0, W, y0, yf, r, ebene(0)), amount=H)
+            extrude(cav(wall, wall, ft), amount=zb - ft, mode=Mode.SUBTRACT)
         # 45°-Übergang zur dicken Rückwand
         loft([cav(wall, wall, zb).face(), cav(wb, ts, zb + dr).face()], ruled=True, mode=Mode.SUBTRACT)
         # Hohlraum im Tragrahmen
@@ -88,6 +103,15 @@ def bauen(p, uw, ul):
     if g('support_rib'):
         teil += quader(0, 0, 0, W, hook_over + wall, g('rib_h'))
 
+    # Außenform inkl. Zapfen: begrenzt die Trennwände (sie dürfen nicht in die Zapfen-Einkerbung ragen)
+    with BuildPart() as ap:
+        if stackable:
+            extrude(cav(sd_r, sd_s, 0), amount=sh)
+            loft([cav(sd_r, sd_s, sh).face(), grundriss(0, W, y0, yf, r, ebene(st_top)).face()], ruled=True)
+            extrude(grundriss(0, W, y0, yf, r, ebene(st_top)), amount=H - st_top)
+        else:
+            extrude(grundriss(0, W, y0, yf, r, ebene(0)), amount=H)
+    huelle = ap.part
     # --- Trennwände ---
     dh = min(g('div_h'), H)
     dt = g('div_t')
@@ -96,11 +120,11 @@ def bauen(p, uw, ul):
     if nl > 0:
         c = (iw - nl * dt) / (nl + 1)
         for i in range(1, nl + 1):
-            teil += quader(wall + i * c + (i - 1) * dt, y0 + wall - 0.3, 0, dt, il + 0.6, dh)
+            teil += quader(wall + i * c + (i - 1) * dt, y0 + wall - 0.3, 0, dt, il + 0.6, dh) & huelle
     if nq > 0:
         c = (il - nq * dt) / (nq + 1)
         for i in range(1, nq + 1):
-            teil += quader(wall - 0.3, y0 + wall + i * c + (i - 1) * dt, 0, iw + 0.6, dt, dh)
+            teil += quader(wall - 0.3, y0 + wall + i * c + (i - 1) * dt, 0, iw + 0.6, dt, dh) & huelle
 
     # --- Etiketteneinschub (oben geschlossen, seitlich offen) ---
     if label_on:
@@ -139,6 +163,7 @@ def bauen(p, uw, ul):
 def main():
     p = _tl.parameter()
     p.setdefault('label_on', True)
+    p.setdefault('stackable', True)
     groessen = []
     for a in sys.argv[1:]:
         if '=' in a:
@@ -146,7 +171,7 @@ def main():
             p[k] = (v == 'true') if v in ('true', 'false') else float(v)
         else:
             groessen.append(a)
-    for gr in groessen or ['1x2', '2x3']:
+    for gr in groessen or ['1x2', '2x3', '2x6', '4x3', '6x3', '4x6']:
         uw, ul = (int(x) for x in gr.split('x'))
         p['units_w'], p['units_l'] = uw, ul
         teil, info = bauen(p, uw, ul)

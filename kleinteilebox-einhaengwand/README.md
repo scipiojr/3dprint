@@ -19,10 +19,8 @@ Sortierboxen für Schrauben und andere Kleinteile. Jede Box passt **liegend lüc
 | Datei | Inhalt |
 |---|---|
 | `kleinteilebox.scad` | **Quelle** (OpenSCAD 2021.01 oder neuer). Alle Parameter oben, `part` wählt das Ausgabeteil |
-| `kleinteilebox_2x3.stl` / `.3mf` | Box 79,5 × 119,5 × 70 mm; die 3MF ist die Druckdatei für Anycubic Slicer Next (Box + Tragzone + Stützbereich) |
-| `kleinteilebox_1x2.stl` / `.3mf` | kleinste Box 39,5 × 79,5 × 70 mm, gut als **Probedruck** für den Sitz am Steg |
+| `kleinteilebox_BxT.stl` / `.3mf` / `.step` | je Größe: STL, 3MF (Druckdatei für Anycubic Slicer Next: Box + Tragzone + Stützbereich) und STEP. Größen: **1×2** (Probedruck), **2×3** (Basis), **2×6** (doppelte Länge), **4×3** (doppelte Breite), **6×3** (dreifache Breite), **4×6** (doppelte Länge + doppelte Breite). B = Breite entlang der Wand, T = Tiefe von der Wand weg |
 | `bilder/` | Ansicht und Längsschnitt (`werkzeuge/bilder.sh`) |
-| `kleinteilebox_2x3.step` / `kleinteilebox_1x2.step` | echtes CAD-Volumenmodell (STEP AP214, keine Dreiecke) für CAD, Fertigungsangebote und Upload-Formulare; nur die Box, ohne Slicer-Teile |
 | `werkzeuge/erzeuge_step.py` | baut das STEP mit build123d nach (`pip install build123d`), liest die Parameter aus der SCAD-Datei: `python3 -I werkzeuge/erzeuge_step.py 4x3` |
 | `werkzeuge/export.sh` | erzeugt STL und 3MF für beliebige Größen: `werkzeuge/export.sh 4x3 3x3` |
 | `werkzeuge/traglast.py` | Traglastrechnung, liest die Maße aus der SCAD-Datei |
@@ -45,8 +43,18 @@ Andere Größen: `werkzeuge/export.sh 4x3` (Breite × Tiefe in Einheiten). Eigen
 | `rail_t`, `hook_clear`, `hook_drop`, `hook_t`, `hook_top` | 2 / 2,1 / 8 / 2 / 4 | Steg- und Hakenmaße. **`rail_t` nachmessen**, `hook_t` siehe Traglast |
 | `label_h`, `label_w`, `label_open_left/right` | 12, 0 (= Breite − 20), je true | Etikett: Höhe (6/9/12/19/24), Breite, seitlich offene Seiten |
 | `n_laengs`, `n_quer`, `div_h` | 0, 0, 60 | gleichmäßig verteilte Trennwände (längs / quer) und deren Höhe |
+| `stackable`, `stack_h`, `stack_clear` | true, 3, 0,4 | Stapelfuß (siehe unten) |
 | `support_rib` | false | Abstützleiste unten hinten bis zur Wandebene (Wandanlage ohne Neigung) |
 | `part` | box | `box`, `modifier` (Tragzone), `support_zone` (Stützbereich); die beiden letzten sind nur für den Slicer |
+
+## Stapeln
+
+Die Box hat unten einen **eingerückten Zapfen** (3 mm gerade, danach 45°-Rampe zur vollen Außenform) und oben die normale Öffnung. Der Zapfen greift in die Öffnung der Box darunter: die obere Box **zentriert sich selbst** (Rampe läuft am Innenrand der unteren auf), die Wände stehen aufeinander, der Haken oben stört nicht. Gestapelt wird auf dem Tisch oder im Regal, **nicht in der Wand** (dort hängen die Boxen im Stegabstand 76 mm).
+
+- **Aufsetzhöhe:** Die obere Box sitzt 3,8 mm tief in der unteren, der Stapelabstand beträgt also **66,2 mm** statt 70 mm (geprüft: ab 66,2 mm berühren sich die Teile, tiefer überlappen sie, bei 66,5 mm ist Luft). Hinten ist die Rückwand dicker, deshalb ist der Zapfen dort etwas weiter eingerückt, damit die Box ringsum gleichzeitig aufsetzt und nicht kippelt.
+- **Kosten:** 1 cm³ weniger Material (der Zapfen ist schmaler als die Box); der Innenraum ist in den untersten 6 mm etwas schmaler. Gedruckt wird ohne Stützen (Rampe maximal 45°).
+- **Gleiche Größen stapeln sich untereinander.** Unterschiedliche Größen passen nicht, weil der Zapfen zur Öffnung der Box darunter passen muss. Tragen die Boxen Gewicht, belastet das die Wände auf Druck entlang der Schichten, das ist unkritisch (2,3 kg auf 457 mm² Wandfläche, unter 0,1 MPa).
+- Ausschalten: `stackable = false`. `support_rib = true` geht nicht zusammen mit dem Stapelfuß (Assertion).
 
 ## Leichtbau und Tragrahmen
 
@@ -63,21 +71,21 @@ Rechnung: `python3 werkzeuge/traglast.py` (Handrechnung mit Balken- und Plattent
 - Zulässig bei Dauerlast in PETG: **10 MPa quer zu den Schichten** (Schichthaftung ca. 20 MPa, halbiert wegen Kriechen und Streuung), **15 MPa in der Schichtebene**, 5 MPa Pressung auf dem Steg.
 - Gewicht hängt **allein am Haken**. Reibung an der Wand wird nicht angesetzt.
 
-**Was die Wand trägt:** Die Wand nimmt kein Gewicht ab, aber das **Kippmoment**. Der Schwerpunkt der Füllung liegt vor dem Haken, die Box will sich unten zur Wand drehen. Dagegen drückt die Rückwandunterkante an die Wand (ohne Leiste nach ca. 5,6° Neigung, mit `support_rib = true` sofort) und die Lippe hält oben gegen. Das entlastet den Haken nur von einem Teil, **die Horizontalkraft an der Lippe beträgt trotzdem etwa das 0,95-Fache der Gewichtskraft** (2×3, voll). Sie wirkt als Biegung an der Lippenwurzel, also **quer zu den Schichten**: Das ist die schwächste Stelle der ganzen Box.
+**Was die Wand trägt:** Die Wand nimmt kein Gewicht ab, aber das **Kippmoment**. Der Schwerpunkt der Füllung liegt vor dem Haken, die Box will sich unten zur Wand drehen. Dagegen drückt die Rückwandunterkante an die Wand (ohne Leiste nach ca. 6° Neigung, mit `support_rib = true` sofort) und die Lippe hält oben gegen. Das entlastet den Haken nur von einem Teil, **die Horizontalkraft an der Lippe beträgt trotzdem etwa das 0,95-Fache der Gewichtskraft** (2×3, voll). Sie wirkt als Biegung an der Lippenwurzel, also **quer zu den Schichten**: Das ist die schwächste Stelle der ganzen Box.
 
 | Größe | außen B×T×H [mm] | Boden [mm] | Inhalt [l] | voll [kg] | Lippe quer [MPa] | Boden [MPa] / Durchb. [mm] | kleinste Reserve | empf. max. Füllung [kg] | kritisch |
 |---|---|---|---|---|---|---|---|---|---|
 | 1x2 | 39.5 × 79.5 × 70 | 1.0 | 0.18 | 0.7 | 2.0 | 3.2 / 0.3 | **4.7×** | 0.7 | Boden (Biegung) |
 | 2x3 | 79.5 × 119.5 × 70 | 1.4 | 0.58 | 2.3 | 4.8 | 5.5 / 1.5 | **2.1×** | 2.3 | Hakenlippe (Biegung quer) |
-| 3x3 | 119.5 × 119.5 × 70 | 1.8 | 0.87 | 3.5 | 4.9 | 4.7 / 1.8 | **2.1×** | 3.5 | Hakenlippe (Biegung quer) |
+| 2x6 | 79.5 × 239.5 × 70 | 1.6 | 1.21 | 4.8 | 20.5 | 6.6 / 1.7 | **0.5×** | 1.2 | Hakenlippe (Biegung quer) |
 | 4x3 | 159.5 × 119.5 × 70 | 2.2 | 1.16 | 4.6 | 4.9 | 4.6 / 1.6 | **2.1×** | 4.6 | Hakenlippe (Biegung quer) |
-| 4x4 | 159.5 × 159.5 × 70 | 2.8 | 1.57 | 6.3 | 8.8 | 3.5 / 1.6 | **1.1×** | 3.6 | Hakenlippe (Biegung quer) |
-| 6x4 | 239.5 × 159.5 × 70 | 3.2 | 2.36 | 9.4 | 8.8 | 4.5 / 2.0 | **1.1×** | 5.3 | Hakenlippe (Biegung quer) |
+| 6x3 | 239.5 × 119.5 × 70 | 2.4 | 1.74 | 7.0 | 4.9 | 5.2 / 1.7 | **2.1×** | 7.0 | Hakenlippe (Biegung quer) |
+| 4x6 | 159.5 × 239.5 × 70 | 3.4 | 2.39 | 9.6 | 20.3 | 4.0 / 1.9 | **0.5×** | 2.4 | Hakenlippe (Biegung quer) |
 
 Ergebnis für die 2×3-Box: Rückwand 28-fache und Tragrahmen 56-fache Reserve, Steg-Pressung 23-fach, Seitenwände 15-fach, Boden 2,7-fach (1,5 mm Durchbiegung bei voller Box). **Die Lippe ist mit 2,1-facher Reserve das schwächste Glied.**
 
-- **Tiefe Boxen (4 Einheiten und mehr) nicht voll füllen:** Die Kippkraft wächst mit dem Quadrat der Tiefe, die Reserve sinkt auf 1,1×. Die Tabelle nennt die empfohlene Maximalfüllung für 2-fache Reserve.
-- **Lippe dicker machen hilft am meisten:** Die Spannung sinkt mit 1/Dicke². `hook_t = 3` statt 2 mm hebt 4×4 und 6×4 auf **2,6-fache Reserve** (`python3 werkzeuge/traglast.py hook_t=3 4x4`). Ob das geht, hängt vom **Abstand zwischen Steg und Wand** ab: Die Lippe sitzt dort. Bitte nachmessen, dann `hook_t` setzen. Der Haken wird dadurch 1 mm länger, der Boxkörper entsprechend kürzer.
+- **Tiefe Boxen nicht voll füllen:** Die Kippkraft wächst mit dem Quadrat der Tiefe, die Reserve sinkt ab 4 Einheiten auf 1,1×. **Bei 2×6 und 4×6 (6 Einheiten tief) liegt sie bei 0,5×: voll gefüllt würde die Lippe rechnerisch versagen.** Diese beiden Größen nur bis zur empfohlenen Maximalfüllung der Tabelle füllen (2×6 ca. 1,2 kg, 4×6 ca. 2,4 kg) oder `hook_t = 3` setzen (dann 1,1×, empfohlen 2,7 bzw. 5,3 kg). Die Tabelle nennt die empfohlene Maximalfüllung für 2-fache Reserve.
+- **Lippe dicker machen hilft am meisten:** Die Spannung sinkt mit 1/Dicke². `hook_t = 3` statt 2 mm hebt 4×4 auf **2,6-fache Reserve** (`python3 werkzeuge/traglast.py hook_t=3 4x4`). Ob das geht, hängt vom **Abstand zwischen Steg und Wand** ab: Die Lippe sitzt dort. Bitte nachmessen, dann `hook_t` setzen. Der Haken wird dadurch 1 mm länger, der Boxkörper entsprechend kürzer.
 - Der Boden wird aus der Durchbiegung bemessen (höchstens 2 mm bei voller Box, allseitig gelenkig gerechnet, also vorsichtig), nicht aus der Festigkeit.
 
 ## Drucken (Anycubic Slicer Next)

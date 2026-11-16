@@ -41,6 +41,7 @@ Abluft-Anschluss für einen Laser-Cutter: Eine 5 mm dicke Plexiglasscheibe häng
 | `adapter_ventilator_140_100.stl` | Ventilator-Adapter: Muffe für den 140-mm-Ventilatoranschluss → Trichter → 100er-Magnetflansch, mit 4 Schraublöchern |
 | `dichtung_150_plexiglas_tpu.stl` | TPU-Ring zwischen Scheibe und Plexiglas (ID 156,4 / AD 164,4 mm) – 2 Stück |
 | `dichtung_150_anschluss_tpu.stl` | TPU-Ring für 150er-Anschlussflächen (ID 147 / AD 155 mm) |
+| `dn110_muffe_magnet_100.stl` | **DN110-Muffenanschluss:** Rohrstumpf ø109/ø100 × 36 mm (in die Muffe eines DN110-Rohrs gesteckt) mit 6er-Magnetflansch (siehe DN110-Muffenanschluss) |
 | `dichtung_100_anschluss_tpu.stl` | TPU-Ring für alle Schlauch-Magnetflächen (bei `hose_nom=100`: ID 97 / AD 105 mm, Schnur 4 mm, Nut r 48,4–52,6 mm): Flansch der Verjüngung, Ventilator-Adapter und 100er-Schlauchanschluss haben dieselbe Nut. Bei `hose_nom=110`: ID 107 / AD 115 |
 | `schraubkappe_110_auf_100.stl` | Reduzierer: wird auf den Stutzen des vorhandenen **110er**-Schlauchanschlusses geschraubt und endet in einem 100er-Schlauchstutzen mit Wulsten (siehe Schraubkappe) |
 | `dichtung_stutzenende_tpu.stl` | TPU-O-Ring (Schnur 2,5 mm, ID 101,5 / AD 106,5) für die Dichtfläche zwischen Stutzenende des 110er-Anschlusses und Schraubkappe |
@@ -234,6 +235,18 @@ Variante des Doppelbogens für den Einbau unter einer waagerechten Arbeitsplatte
 - **Übergangskegel:** Am oberen Rohrende verjüngt sich die Bohrung auf 15 mm Länge von Ø100 auf Ø90 (`wk_kegel_l`).
 - Teile (alle wasserdicht, passen in 240×240×250): Teil 1 191 × 157 × 109, Teil 2 109 × 203 × 145, Teil 3 153 × 153 × 23, Teil 4 153 × 153 × 5 mm. Export: `werkzeuge/export_dn110_arbeitsplatte.sh` → `dn110_arbeitsplatte/`.
 - Annahmen: Plattendicke 30 mm, Biegung nach links (`wk_links`). Offen: Standard-Rohrbogen statt Teil 1 (Schenkellänge fehlt); Polung von Ring/Deckel nur nach Regel, nicht erprobt.
+
+## DN110-Muffenanschluss (`abluft_dn110_muffe.scad`)
+
+Gerader Anschluss für die **Muffenseite** eines DN110-Rohrs: ein Rohrstumpf (ø109 außen / ø100 innen, `mf_len` 36 mm, Maße wie bei Verjüngung und Doppelbogen) wird in die Muffe gesteckt, am anderen Ende sitzt der **6er-Magnetflansch** (Muster des 100er-Schlauchanschlusses, Flansch 8 mm, Magnetfläche mit Dichtungsnut, Bohrung ø90). Darauf passt der Schlauchanschluss, der Ventilator-Adapter oder jeder andere Anschluss des Systems mit 6 Magneten.
+
+- **Anschlag:** Die Rückseite des Flanschs (ø153 × 135) ist größer als die Muffe (AD ca. 128 mm) und dient als Anschlag für die Stirnfläche der Muffe.
+- **Innen:** Die Flanschbohrung ø90 geht über einen 10 mm langen Kegel (`mf_kegel_l`) auf ø100 des Stumpfs über (Wand am Stumpfende 4,5 mm). Der Kegel weitet sich nach oben und ist beim Druck nicht überhängend.
+- **Druckpose:** Magnetfläche auf dem Bett, Stumpf nach oben, **ohne Stützen**; Maße 153 × 135 × 44 mm, ca. 106 cm³. Dichtung der Magnetfläche: `dichtung_100_anschluss_tpu.stl`.
+- **Magnete:** 6 (zusammen mit dem restlichen System entsprechend einplanen). Die Polung folgt der Regel „Kerbe auf Kerbe stößt ab“ (siehe Magnete und Polung), Gegenfläche in 60°-Schritten gedreht auflegen.
+- **Abdichtung zur Muffe:** keine eigene Dichtung modelliert; die Gummilippe der KG-Muffe dichtet gegen den glatten Stumpf, bei Bedarf zusätzlich mit Alu-Klebeband abkleben. Stumpf-AD `mf_od` bei zu strammem oder losem Sitz anpassen.
+- Parameter: `mf_od`, `mf_id`, `mf_len`, `mf_fase`, `mf_kegel_l`, `mf_t`, `mf_nut`; `ausgabe` = `druck` | `montiert` | `info`. Export: `werkzeuge/export_dn110_muffe.sh` → `dn110_muffe_magnet_100.stl`.
+- Geprüft: wasserdicht, Magnettaschen und Nut im selben Muster wie der Ring des Doppelbogens (gleicher `mag_flange`-Aufruf wie beim Ventilator-Adapter). **Nicht gedruckt getestet:** Sitz in der Muffe (ø109 nominal), Dichtheit.
 
 ## Filterkasten (`abluft_filterkasten.scad`)
 

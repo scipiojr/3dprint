@@ -3,7 +3,7 @@
 //  OpenSCAD 2021.01 oder neuer.
 //
 //  Ein einziges, gerades Druckteil:
-//    Rohrstumpf (steckt in die Muffe des DN110-Rohrs, Stumpf wie bei Verjuengung/Doppelbogen: ø109 / ø100, 36 mm)
+//    Rohrstumpf (steckt in die Muffe des DN110-Rohrs, ø109 / ø100, 24 mm bei ca. 25 mm Muffentiefe)
 //    + Magnetflansch (6 Magnete, Muster des 100er Schlauchanschlusses, Magnetflaeche mit Dichtungsnut).
 //  Die Rueckseite des Flanschs ist der Anschlag fuer die Stirnflaeche der Muffe (Muffe AD ca. 128 mm < Flansch).
 //  Innen geht die Bohrung des Flanschs (ø90) ueber einen kurzen Kegel auf den Innendurchmesser des Stumpfs (ø100) ueber.
@@ -25,8 +25,8 @@ ausgabe = "druck";               // ["druck", "montiert", "info"]
 // mf_od / mf_id: Aussen-/Innendurchmesser des Stumpfs (wie Rohrstumpf der Verjuengung: 109 / 100)
 mf_od = 109;
 mf_id = 100;
-// mf_len: Laenge des Stumpfs ab der Rueckseite des Flanschs (= Einstecktiefe in die Muffe)
-mf_len = 36;                     // [20:1:70]
+// mf_len: Laenge des Stumpfs ab der Rueckseite des Flanschs (= Einstecktiefe); kuerzer als die Muffentiefe, damit der Flansch buendig auf der Muffe aufliegt
+mf_len = 24;                     // [15:1:70]  (Muffentiefe ca. 25 mm, 1 mm Reserve: Flansch liegt plan auf der Muffe auf)
 // mf_fase: Einfuehrfase am Stumpfende (aussen), mm
 mf_fase = 1.0;                   // [0:0.5:3]
 // mf_kegel_l: Laenge des inneren Uebergangskegels (Bohrung des Flanschs -> mf_id), mm; 0 = Absatz

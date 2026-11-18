@@ -17,6 +17,8 @@ Arbeitsanweisung und Projektstand für KI-Agenten. Sprache mit dem Nutzer: **Deu
 - Größe automatisch aus dem Kopfmaß 220 mm + 2 × 15 mm Luft + Wand → Faktor ≈ 300,7 (Modelleinheiten → mm).
 - Drucker: Anycubic Kobra 4, 260 × 260 × 260 mm, Rand 5 mm → 2 × 2 × 2 = 8 Teile.
 
+- Mini-Variante (`PRESET = "mini"` oder `-- mini`): 59,2 mm Höhe → 45 × 59 × 60 mm, Waben 2,6 mm, Stege 0,9 mm, nur Lage A mit `WIRE_OFFSET_A = 0` (Ohren sind dort nur 0,6–1 mm dick), zusätzlich eine massive Figur (`VOLLKOERPER`). Ausgabe in `druck/mini/`.
+
 ## Technik
 
 - Gitter A: Decimate (Collapse, X-Symmetrie) auf ca. 8 mm Kantenlänge → Geometry-Nodes-Dual-Mesh → Wireframe 2,4 mm, Offset −1 (nach innen), `use_even_offset = False` (sonst Spitzen an Wabenecken).

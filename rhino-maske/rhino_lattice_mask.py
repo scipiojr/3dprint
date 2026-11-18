@@ -42,6 +42,22 @@ from mathutils.bvhtree import BVHTree
 #  PARAMETER (alle Maße in mm)
 # =============================================================================
 
+# ---- VARIANTE ------------------------------------------------------------------
+# "tragbar" = Maske zum Aufsetzen (Werte unten), "mini" = Figur mit ca. 60 mm Kantenlänge.
+# Auch per Kommandozeile:  blender -b -P rhino_lattice_mask.py -- mini
+PRESET            = "tragbar"
+PRESETS = {
+    "mini": dict(
+        MASKE_HOEHE=59.2,                 # größte Kante ≈ 60 mm (Stege stehen 0,45 mm über)
+        ZELLE_A=2.6, STEG_A=0.9,          # feines Gitter, Stege ≥ 2 Düsenbahnen (0,4 mm)
+        LAGE_B=False,                     # bei 1 mm Wand nur eine Lage
+        WIRE_OFFSET_A=0.0,                # Stege mittig auf der Fläche (dünne Ohren!)
+        KRAGEN_HOEHE=2.0, WANDSTAERKE=1.2, AUGE_WAND=1.2,
+        TRAGBAR=False, TEILEN=False, VOLLKOERPER=True,
+        EXPORT_PFAD="druck/mini/rhino_mini_gitter.stl",
+    ),
+}
+
 # ---- HIER EINTRAGEN: Maskengröße und Drucker ---------------------------------
 MASKE_HOEHE       = 0.0     # fertige Höhe in mm (Halsrand bis Ohrspitze).
                             # 0 = automatisch: so klein wie möglich, damit der Kopf
@@ -49,6 +65,8 @@ MASKE_HOEHE       = 0.0     # fertige Höhe in mm (Halsrand bis Ohrspitze).
 DRUCKRAUM         = (260.0, 260.0, 260.0)   # Druckraum X, Y, Z in mm (Anycubic Kobra 4)
 DRUCKRAND         = 5.0     # Sicherheitsabstand pro Achse (mm)
 TEILEN            = True    # Maske automatisch in druckraumgerechte Teile zerlegen
+TRAGBAR           = True    # Kopföffnung gegen KOPF_DURCHMESSER prüfen
+VOLLKOERPER       = False   # zusätzlich die geschlossene Form (unten plan) als STL
 # -------------------------------------------------------------------------------
 
 SKALIERUNG        = 1.0     # (prozedurale Form) wird aus MASKE_HOEHE berechnet
@@ -68,6 +86,8 @@ STEG_A            = 2.4     # Stegdicke (>= 2 mm für FDM empfohlen)
 ZELLE_B           = 10.0
 STEG_B            = 2.0
 GITTER_UEBERLAPP  = 0.5     # radiale Überlappung der Lagen (Verschmelzung)
+LAGE_B            = True    # zweite (innere) Gitterlage
+WIRE_OFFSET_A     = -1.0    # -1 = Stege innerhalb der Außenfläche, 0 = mittig
 
 # Augen
 AUGE_RADIUS       = 33.0
@@ -490,8 +510,8 @@ def kopfoeffnung(surf):
     innen_x, innen_y = bx - 2 * WANDSTAERKE, by - 2 * WANDSTAERKE
     soll = KOPF_DURCHMESSER + 2 * KOPF_SPIEL
     log(f"     Öffnung außen {bx:.0f} x {by:.0f} mm, innen ≈ {innen_x:.0f} x {innen_y:.0f} mm "
-        f"(Soll ≥ {soll:.0f} mm)")
-    if min(innen_x, innen_y) < soll:
+        + (f"(Soll ≥ {soll:.0f} mm)" if TRAGBAR else "(Figur, nicht tragbar)"))
+    if TRAGBAR and min(innen_x, innen_y) < soll:
         log("     WARNUNG: Öffnung kleiner als Soll – MASKE_HOEHE erhöhen (oder 0 = automatisch)!")
 
 
@@ -626,10 +646,10 @@ def decimieren_auf(ob, kante):
     bm_nach(bm, ob)
 
 
-def wireframe(ob, dicke):
+def wireframe(ob, dicke, offset=-1.0):
     w = ob.modifiers.new("Wireframe", 'WIREFRAME')
     w.thickness = dicke
-    w.offset = -1.0                  # -1: Stege liegen INNERHALB der Außenfläche
+    w.offset = offset                # -1: Stege liegen INNERHALB der Außenfläche
     w.use_even_offset = False        # True erzeugt Spikes an spitzen Wabenecken
     w.use_relative_offset = False
     w.use_boundary = True
@@ -648,7 +668,7 @@ def gitter_quelle(surf, augen_zentren, col):
         c = f.calc_center_median()
         if lay is not None and f[lay]:
             weg.append(f)
-        elif c.z < SCHNITT_Z + KRAGEN_HOEHE - 4.0:
+        elif c.z < SCHNITT_Z + KRAGEN_HOEHE - min(4.0, 0.4 * KRAGEN_HOEHE):
             weg.append(f)
         elif any((c - z).length < r + AUGE_FREISTELLUNG for z, r in augen_zentren):
             weg.append(f)
@@ -683,8 +703,12 @@ def gitter(surf, augen_zentren, col):
     gn = a.modifiers.new("DualMesh", 'NODES')
     gn.node_group = dual_mesh_nodegroup()
     modifier_anwenden(a)
-    wireframe(a, STEG_A)
+    wireframe(a, STEG_A, WIRE_OFFSET_A)
     log(f"     Lage A: {len(a.data.polygons):,} Faces")
+
+    if not LAGE_B:
+        bpy.data.objects.remove(quelle, do_unlink=True)
+        return a, None
 
     # --- Lage B: nach innen versetzt, Dreiecksnetz
     b = kopie(quelle, "Gitter_B", col)
@@ -838,8 +862,34 @@ def teilen(maske, col):
     return teile
 
 
+def preset_anwenden():
+    import sys
+    name = PRESET
+    if "--" in sys.argv[1:]:
+        rest = sys.argv[sys.argv.index("--") + 1:]
+        if rest:
+            name = rest[0]
+    if name in PRESETS:
+        globals().update(PRESETS[name])
+        log(f"Variante: {name}")
+    elif name != "tragbar":
+        raise RuntimeError(f"Unbekannte Variante '{name}' – möglich: tragbar, {', '.join(PRESETS)}")
+
+
+def vollkoerper(surf, col):
+    """Geschlossene Form: Modell mit planer Unterseite (für eine massive Figur)."""
+    v = kopie(surf, "Rhino_Vollkoerper", col)
+    bm = bm_aus(v)
+    rand = [e for e in bm.edges if e.is_boundary]
+    neu = bmesh.ops.holes_fill(bm, edges=rand, sides=0)["faces"]
+    bmesh.ops.triangulate(bm, faces=neu)
+    bm_nach(bm, v)
+    return v
+
+
 def main():
     global SKALIERUNG
+    preset_anwenden()
     if not IMPORT_PFAD:
         SKALIERUNG = MASKE_HOEHE / _PROZ_HOEHE_S1 if MASKE_HOEHE > 0 else 1.0
     col = szene_vorbereiten()
@@ -853,7 +903,7 @@ def main():
     k = kragen(surf, col)
 
     log("5/5  Zusammenführen …")
-    maske = zusammenfuehren([a, b, k, augen_ob], "Rhino_Maske_LATTICE", col)
+    maske = zusammenfuehren([o for o in (a, b, k, augen_ob) if o], "Rhino_Maske_LATTICE", col)
     if FINAL_VOXEL_FUSE > 0:
         log(f"     Voxel-Fusion mit {FINAL_VOXEL_FUSE} mm – das dauert …")
         rm = maske.modifiers.new("Fuse", 'REMESH')
@@ -870,6 +920,8 @@ def main():
         f"{len(maske.data.polygons):,} Faces")
     if EXPORT_STL:
         exportieren(maske)
+    if VOLLKOERPER and EXPORT_STL:
+        exportieren(vollkoerper(surf, col), os.path.basename(pfad(EXPORT_PFAD)).replace("gitter", "massiv"))
     if TEILEN:
         log("6/6  Aufteilen für den Druckraum …")
         teile = teilen(maske, col)

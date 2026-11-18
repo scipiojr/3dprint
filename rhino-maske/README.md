@@ -27,6 +27,7 @@ Tragbare Nashorn-Kopfmaske als offene, zweilagige Gitterstruktur. Durch das Gitt
 | `druck/rhino_maske_kobra4.3mf` | Alle 8 Teile in einer 3MF (mm), je Teil eine Druckplatte vorgesehen |
 | `druck/stl/rhino_maske_teil_XX_von_08.stl` | Die 8 Teile einzeln |
 | `druck/rhino_maske_komplett.stl` | Ganze Maske am Stück (zum Ansehen oder für große Drucker) |
+| `druck/mini/` | Mini-Figur, ca. 60 mm: Gitter, massiv und beides als 3MF |
 | `rhino_lattice_mask.py` | Generator für Blender 4.x (bpy). **Quelle** für alles in `druck/` |
 | `modell/meshy_rhino.obj` | Ausgangsform (Meshy AI, Image-to-3D), wasserdicht |
 | `werkzeuge/stl_to_3mf.py` | Packt STL-Teile in eine 3MF |
@@ -42,6 +43,22 @@ Tragbare Nashorn-Kopfmaske als offene, zweilagige Gitterstruktur. Durch das Gitt
    - **Baumstützen (Tree)**, automatisch, nur auf dem Druckbett; Überhangwinkel ca. 45°. Die Kuppel am Hinterkopf und die Unterseite der Schnauze hängen über
    - Brim bei hohen, schmalen Teilen (Ohren, Horn)
 4. Vor dem Druck die Vorschau prüfen: Bei sehr dünnen Stellen (Ohrränder) zeigt der Slicer, ob alle Stege mitgedruckt werden.
+
+## Mini-Version (ca. 60 mm)
+
+![Mini](bilder/mini.png)
+
+45 × 59 × 60 mm, ein Teil, nicht tragbar. Beim einfachen Verkleinern wären die Stege nur noch 0,3 mm dick. Deshalb hat die Mini-Version ein eigenes Gitter: Waben ca. 2,6 mm, Stege 0,9 mm (zwei Düsenbahnen mit 0,4 mm), eine Lage, die Stege mittig auf der Fläche (sonst stechen sie an den dünnen Ohren durch). Augen und Kragen sind massiv, 1,2 mm.
+
+| Datei | Inhalt |
+|---|---|
+| `druck/mini/rhino_mini_gitter.stl` | Gitter-Figur |
+| `druck/mini/rhino_mini_massiv.stl` | Massive Figur, unten plan |
+| `druck/mini/rhino_mini_kobra4.3mf` | Beide als 3MF, je eine Platte |
+
+Druck: Die Gitter-Figur gelingt am besten auf einem **Resin-Drucker**. Auf dem Kobra 4 geht sie mit 0,12 mm Schichthöhe, langsamen Außenwänden und Baumstützen. Die Stützen im Inneren unter dem Schädeldach lassen sich durch die Halsöffnung aber nur mühsam entfernen. Die massive Figur druckt problemlos stehend auf dem Halsrand mit wenigen Stützen unter Schnauze und Horn.
+
+Neu erzeugen: `blender -b -P rhino_lattice_mask.py -- mini` (oder `PRESET = "mini"`), danach die 3MF wie oben mit `stl_to_3mf.py` packen.
 
 ## Zusammenbau
 

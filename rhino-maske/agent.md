@@ -17,11 +17,14 @@ Arbeitsanweisung und Projektstand für KI-Agenten. Sprache mit dem Nutzer: **Deu
 - Größe automatisch aus dem Kopfmaß 220 mm + 2 × 15 mm Luft + Wand → Faktor ≈ 300,7 (Modelleinheiten → mm).
 - Drucker: Anycubic Kobra 4, 260 × 260 × 260 mm, Rand 5 mm → 2 × 2 × 2 = 8 Teile.
 
-- Mini-Variante (`PRESET = "mini"` oder `-- mini`): 59,1 mm Höhe → 45 × 59 × 60 mm, Waben 2 mm, Stege 1 mm (Wunsch des Nutzers; feiner schließen sich die Löcher auf FDM, siehe Tabelle im Chat: 1,6/0,9 ist die Grenze), nur Lage A mit `WIRE_OFFSET_A = 0` (Ohren sind dort nur 0,6–1 mm dick), zusätzlich eine massive Figur (`VOLLKOERPER`). Ausgabe in `druck/mini/`.
+- Mini-Variante (`PRESET = "mini"` oder `-- mini`): 59,5 mm Höhe → 45 × 60 × 60 mm, Lochnetz Maschen 1,6 mm, Stege 0,8 mm, Tiefe 0,8 mm mittig (`NETZ_OFFSET = 0`), Löcher ca. 0,8 mm (Grenze für 0,4-mm-Düse), nur Lage A mit `WIRE_OFFSET_A = 0` (Ohren sind dort nur 0,6–1 mm dick), zusätzlich eine massive Figur (`VOLLKOERPER`). Ausgabe in `druck/mini/`.
+
+- **Zweck des Netzes (vom Nutzer):** Die Maske soll massiv wirken, ist es aber nicht; der Träger sieht hinaus, man sieht nicht hinein. Deshalb `GITTER_MODUS = "lochnetz"`: kleine Löcher (groß ca. 1,6 mm, Mini ca. 0,8 mm). Das frühere offene Stabgitter (`"stabgitter"`, Waben 8 mm, zwei Lagen) passt dazu nicht und ist nur noch als Option da.
 
 ## Technik
 
-- Gitter A: Decimate (Collapse, X-Symmetrie) auf ca. 8 mm Kantenlänge → Geometry-Nodes-Dual-Mesh → Wireframe 2,4 mm, Offset −1 (nach innen), `use_even_offset = False` (sonst Spitzen an Wabenecken).
+- Lochnetz: `quadriflow_remesh` (Zielmaschen = Fläche / ZELLE² × 1,15) → Maschen mit Innenradius > STEG/2 + MIN_LOCH/2 per `inset_individual` (STEG/2, nicht „even“) einrücken und löschen → Solidify `NETZ_TIEFE` (nicht „even“, sonst Spitzen). Decimate + Dual Mesh ergab sehr ungleiche Löcher (p10 0,1 mm, p90 2,3 mm) und ist nur der Ersatzweg. Große Maske: ca. 100 000 Maschen, 1,2 Mio. Faces, Lauf ca. 4,5 min; Komplett-STL 120 MB (nicht eingecheckt, `.gitignore`), 3MF 31 MB.
+- Stabgitter (alt) A: Decimate (Collapse, X-Symmetrie) auf ca. 8 mm Kantenlänge → Geometry-Nodes-Dual-Mesh → Wireframe 2,4 mm, Offset −1 (nach innen), `use_even_offset = False` (sonst Spitzen an Wabenecken).
 - Gitter B: Fläche um 1,9 mm nach innen versetzt, Dreiecke ca. 10 mm, Wireframe 2,0 mm. Überlappung mit A: 0,5 mm. In dünnen Bereichen (Ohrränder, Dicke < ca. 8 mm) gibt es keine Lage B, sonst sticht sie auf der Gegenseite durch.
 - `aufraeumen()` entfernt Fliegen-Vertices und kleine Inseln vor dem Wireframe; sonst entstehen nicht-manifolde Kanten.
 - Teilen: `bisect_plane` je Achse, Schnittflächen mit `holes_fill`; Problemstellen werden bis zu 4× freigeschnitten und neu geschlossen. Ergebnis: 0 offene Kanten je Teil.

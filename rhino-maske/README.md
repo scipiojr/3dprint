@@ -1,12 +1,12 @@
 # Rhino-Gittermaske (tragbar)
 
-Tragbare Nashorn-Kopfmaske als offene, zweilagige Gitterstruktur. Durch das Gitter kann man sehen und atmen. Die Form stammt 1:1 aus dem Meshy-Modell in `modell/`. Es wird nicht geglättet und nicht umgebaut. Das Skript fügt nur hinzu, was eine Maske braucht: die Kopföffnung unten am Hals, das Gitter, die soliden Augen und das Aufteilen für den Druckraum.
+Tragbare Nashorn-Kopfmaske als feines **Sichtgitter**: Von außen wirkt die Maske wie eine geschlossene Fläche, weil die Löcher nur ca. 1,6 mm groß sind. Der Träger hat das Netz direkt vor den Augen und sieht hindurch, ähnlich wie bei einem Fliegengitter oder einem Maskottchenkopf. Atmen geht ebenfalls durch das Netz. Die Form stammt 1:1 aus dem Meshy-Modell in `modell/`. Es wird nicht geglättet und nicht umgebaut. Das Skript fügt nur hinzu, was eine Maske braucht: die Kopföffnung unten am Hals, das Gitter, die soliden Augen und das Aufteilen für den Druckraum.
 
 ![Vorschau](bilder/vorschau.jpg)
 
-| Augen (aus dem Modell, solide) | Aufteilung für den Kobra 4 |
+| Netz aus der Nähe | Aufteilung für den Kobra 4 |
 |---|---|
-| ![Auge](bilder/auge_detail.png) | ![Teile](bilder/teile.png) |
+| ![Netz](bilder/netz_detail.png) | ![Teile](bilder/teile.png) |
 
 ## Eckdaten
 
@@ -14,24 +14,34 @@ Tragbare Nashorn-Kopfmaske als offene, zweilagige Gitterstruktur. Durch das Gitt
 |---|---|
 | Größe | 371 × 493 × 497 mm (B × T × H) |
 | Kopföffnung | innen ca. 293 × 251 mm (Kopf 22 cm + 15 mm Luft rundum) |
-| Gitter | außen Waben ca. 8 mm, Stege 2,4 mm; innen Dreiecke ca. 10 mm, Stege 2,0 mm; Wand ca. 4 mm |
+| Netz | Maschenweite 2,5 mm, Stege 0,9 mm breit und 2,0 mm tief, Löcher ca. 1,6 mm (rund 40 % offen) |
 | Augen | Augenwölbungen des Modells, solide, 5 mm Wand |
 | Rand | massiver Kragen, 10 mm hoch, an der Kopföffnung |
 | Teile | 8 Stück für 260 × 260 × 260 mm (Anycubic Kobra 4) |
-| Material | ca. 0,6–0,7 kg PLA (obere Schätzung) |
+| Material | ca. 0,75 kg PLA |
 
 ## Dateien
 
 | Datei | Inhalt |
 |---|---|
 | `druck/rhino_maske_kobra4.3mf` | Alle 8 Teile in einer 3MF (mm), je Teil eine Druckplatte vorgesehen |
+| (`druck/rhino_maske_komplett.stl`) | Ganze Maske am Stück – wird vom Skript erzeugt, ist mit ca. 120 MB aber zu groß für GitHub und deshalb nicht eingecheckt |
 | `druck/stl/rhino_maske_teil_XX_von_08.stl` | Die 8 Teile einzeln |
-| `druck/rhino_maske_komplett.stl` | Ganze Maske am Stück (zum Ansehen oder für große Drucker) |
 | `druck/mini/` | Mini-Figur, ca. 60 mm: Gitter, massiv und beides als 3MF |
 | `rhino_lattice_mask.py` | Generator für Blender 4.x (bpy). **Quelle** für alles in `druck/` |
 | `modell/meshy_rhino.obj` | Ausgangsform (Meshy AI, Image-to-3D), wasserdicht |
 | `werkzeuge/stl_to_3mf.py` | Packt STL-Teile in eine 3MF |
 | `bilder/` | Vorschaubilder |
+
+## Wie das Sichtgitter funktioniert
+
+Das Skript legt ein gleichmäßiges Vierecksnetz (QuadriFlow) über die Originalfläche, dessen Maschen der Form folgen wie ein Gewebe. Jede Masche wird um die halbe Stegbreite eingerückt und ausgestanzt. Der verbleibende Rahmen wird nach innen auf 2 mm Tiefe gebracht. Die Stege sind also schmal (kleine Löcher, die Fläche wirkt von außen geschlossen) und tief (steif genug für eine große Maske).
+
+So wirkt es am besten:
+
+- **Außen hell, innen dunkel.** Mit dunklem Filament drucken und die Außenseite nur von außen und schräg hell lackieren. Oder hell drucken und die Innenseite schwarz sprühen. Auf einer hellen Außenfläche bleibt der dunkle Innenraum unsichtbar.
+- Licht von außen, nicht innen: Bei Tageslicht oder Bühnenlicht sieht man nicht hinein, der Träger sieht aber gut hinaus.
+- Stellschrauben: `ZELLE_A` (Maschenweite), `STEG_A` (Stegbreite), `NETZ_TIEFE`. Loch ≈ `ZELLE_A − STEG_A`. Tiefere Stege machen die Maske steifer, verengen aber den Blickwinkel durch jedes Loch (2 mm Tiefe bei 1,6 mm Loch: etwa ±38°).
 
 ## Druck auf dem Anycubic Kobra 4
 
@@ -39,16 +49,16 @@ Tragbare Nashorn-Kopfmaske als offene, zweilagige Gitterstruktur. Durch das Gitt
 2. Ausrichtung so lassen, wie sie geladen werden. Die oberen Teile stehen auf ihrer ebenen Schnittfläche, die unteren auf dem Kragen.
 3. Empfohlene Einstellungen:
    - PLA oder PETG, Düse 0,4 mm, Schichthöhe 0,2 mm
-   - 2 Wandlinien, 15 % Füllung (die Stege bestehen praktisch nur aus Wänden)
+   - 2 Wandlinien (die 0,9-mm-Stege bestehen genau aus zwei Bahnen), „Dünne Wände erkennen“ an
    - **Baumstützen (Tree)**, automatisch, nur auf dem Druckbett; Überhangwinkel ca. 45°. Die Kuppel am Hinterkopf und die Unterseite der Schnauze hängen über
    - Brim bei hohen, schmalen Teilen (Ohren, Horn)
-4. Vor dem Druck die Vorschau prüfen: Bei sehr dünnen Stellen (Ohrränder) zeigt der Slicer, ob alle Stege mitgedruckt werden.
+4. Vor dem Druck die Vorschau prüfen: Alle Stege müssen als zwei Bahnen erscheinen. Rückzug (Retraction) und „Wipe“ einschalten, damit keine Fäden in den Löchern hängen bleiben.
 
 ## Mini-Version (ca. 60 mm)
 
 ![Mini](bilder/mini.png)
 
-45 × 59 × 60 mm, ein Teil, nicht tragbar. Beim einfachen Verkleinern wären die Stege nur noch 0,3 mm dick. Deshalb hat die Mini-Version ein eigenes Gitter: Waben ca. 2 mm, Stege 1 mm, Löcher ca. 1 mm, eine Lage, die Stege mittig auf der Fläche (sonst stechen sie an den dünnen Ohren durch). Augen und Kragen sind massiv, 1,2 mm.
+45 × 60 × 60 mm, ein Teil, nicht tragbar. Gleiches Sichtgitter wie bei der großen Maske, aber an die Düse angepasst: Maschenweite 1,6 mm, Stege 0,8 mm (zwei Bahnen), Löcher ca. 0,8 mm. Das Netz ist 0,8 mm tief und liegt mittig auf der Fläche, sonst stäche es an den dünnen Ohren durch. Augen und Kragen sind massiv, 1,2 mm. Bei dieser Größe gibt das Netz feine Details wie Ohrspitzen und Hornspitze nur auf etwa 1,5 mm genau wieder.
 
 | Datei | Inhalt |
 |---|---|
@@ -62,7 +72,7 @@ Neu erzeugen: `blender -b -P rhino_lattice_mask.py -- mini` (oder `PRESET = "min
 
 ## Zusammenbau
 
-Die Schnittflächen sind eben und geschlossen. Erst mit Sekundenkleber heften, dann von innen mit 2K-Epoxid oder Heißkleber verstärken. Alternativ mit einem 3D-Stift verschweißen. Reihenfolge: zuerst je zwei Teile zu einer Hälfte (links/rechts), dann die Hälften, zum Schluss oben und unten.
+Die Schnittflächen sind eben und geschlossen (Teil 03 hat 8 offene Kanten an einer Schnittstelle, die der Slicer automatisch repariert). Erst mit Sekundenkleber heften, dann von innen mit 2K-Epoxid oder Heißkleber verstärken. Alternativ mit einem 3D-Stift verschweißen. Reihenfolge: zuerst je zwei Teile zu einer Hälfte (links/rechts), dann die Hälften, zum Schluss oben und unten.
 
 ## Anpassen und neu erzeugen
 

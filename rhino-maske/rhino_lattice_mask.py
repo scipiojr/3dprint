@@ -48,10 +48,10 @@ from mathutils.bvhtree import BVHTree
 PRESET            = "tragbar"
 PRESETS = {
     "mini": dict(
-        MASKE_HOEHE=59.1,                 # größte Kante ≈ 60 mm (Stege stehen 0,5 mm über)
-        ZELLE_A=2.0, STEG_A=1.0,          # feines Gitter: Waben 2 mm, Stege 1 mm (Löcher ≈ 1 mm)
-        LAGE_B=False,                     # bei 1 mm Wand nur eine Lage
-        WIRE_OFFSET_A=0.0,                # Stege mittig auf der Fläche (dünne Ohren!)
+        MASKE_HOEHE=59.5,                 # größte Kante ≈ 60 mm (Netz steht 0,4 mm über)
+        ZELLE_A=1.6, STEG_A=0.8,          # Löcher ≈ 0,8 mm – Grenze für 0,4-mm-Düse
+        NETZ_TIEFE=0.8, NETZ_OFFSET=0.0,  # mittig, sonst sticht es an den dünnen Ohren durch
+        MIN_LOCH=0.4,
         KRAGEN_HOEHE=2.0, WANDSTAERKE=1.2, AUGE_WAND=1.2,
         TRAGBAR=False, TEILEN=False, VOLLKOERPER=True,
         EXPORT_PFAD="druck/mini/rhino_mini_gitter.stl",
@@ -79,14 +79,19 @@ KOPF_DURCHMESSER  = 220.0   # zur Kontrolle der Öffnung
 KOPF_SPIEL        = 15.0    # gewünschte Luft rundum (Durchmesser + 2*Spiel)
 KRAGEN_HOEHE      = 10.0    # massiver Ring an der Öffnung
 
-# Gitter Lage A (außen, Waben / Voronoi-artig)
-ZELLE_A           = 8.0     # mittlere Zellgröße
-STEG_A            = 2.4     # Stegdicke (>= 2 mm für FDM empfohlen)
+# Gitter
+GITTER_MODUS      = "lochnetz"  # "lochnetz" = Sichtgitter: wirkt geschlossen, Träger sieht hinaus
+                                # "stabgitter" = offenes Stabwerk (zwei Lagen, frühere Variante)
+ZELLE_A           = 2.5     # Maschenweite (Mitte zu Mitte); Loch ≈ ZELLE_A - STEG_A
+STEG_A            = 0.9     # Stegbreite an der Oberfläche (>= 2 Düsenbahnen)
+NETZ_TIEFE        = 2.0     # Stegtiefe nach innen (Steifigkeit; tiefer = engerer Sichtwinkel)
+NETZ_OFFSET       = -1.0    # -1 = Netz liegt innerhalb der Außenfläche, 0 = mittig
+MIN_LOCH          = 0.5     # kleinere Löcher werden nicht ausgestanzt (Zelle bleibt zu)
 # Gitter Lage B (innen, Dreiecke, versetzt)
 ZELLE_B           = 10.0
 STEG_B            = 2.0
 GITTER_UEBERLAPP  = 0.5     # radiale Überlappung der Lagen (Verschmelzung)
-LAGE_B            = True    # zweite (innere) Gitterlage
+LAGE_B            = True    # zweite (innere) Gitterlage (nur GITTER_MODUS "stabgitter")
 WIRE_OFFSET_A     = -1.0    # -1 = Stege innerhalb der Außenfläche, 0 = mittig
 
 # Augen
@@ -632,6 +637,13 @@ def decimieren_auf(ob, kante):
     """Collapse-Decimate auf eine mittlere Dreieckskantenlänge -> organische Zellen."""
     ziel = flaeche_mm2(ob) / (0.433 * kante * kante)
     akt = sum(len(p.vertices) - 2 for p in ob.data.polygons)
+    while akt < ziel * 1.5:                   # Ausgangsnetz zu grob -> linear unterteilen
+        bm = bm_aus(ob)                        # (keine Glättung, Form bleibt exakt)
+        bmesh.ops.triangulate(bm, faces=bm.faces)
+        bmesh.ops.subdivide_edges(bm, edges=bm.edges, cuts=1, use_grid_fill=True)
+        bmesh.ops.triangulate(bm, faces=bm.faces)
+        bm_nach(bm, ob)
+        akt = len(ob.data.polygons)
     d = ob.modifiers.new("Decimate", 'DECIMATE')
     d.decimate_type = 'COLLAPSE'
     d.ratio = max(min(ziel / akt, 1.0), 0.0005)
@@ -693,7 +705,68 @@ def kragen(surf, col):
     return k
 
 
+def quadriflow(ob, kante):
+    """Gleichmäßiges Vierecksnetz mit Kantenlänge ≈ kante, das der Fläche folgt
+    (Maschen laufen wie ein Gewebe entlang der Form)."""
+    ziel = int(flaeche_mm2(ob) / kante ** 2 * 1.15)
+    bpy.context.view_layer.objects.active = ob
+    for o in bpy.context.view_layer.objects:
+        o.select_set(o == ob)
+    try:
+        with bpy.context.temp_override(object=ob, active_object=ob, selected_objects=[ob],
+                                       selected_editable_objects=[ob]):
+            r = bpy.ops.object.quadriflow_remesh(target_faces=ziel, use_preserve_boundary=True,
+                                                 use_mesh_symmetry=False, seed=1, mode='FACES')
+    except Exception as e:                      # noqa: BLE001
+        log(f"     QuadriFlow-Fehler: {e}")
+        return False
+    if 'FINISHED' not in r or not ob.data.polygons:
+        return False
+    log(f"     QuadriFlow: {len(ob.data.polygons):,} Maschen")
+    return True
+
+
+def gitter_lochnetz(surf, augen_zentren, col):
+    """Sichtgitter: gelochte Haut auf der Originalfläche. Maschen (QuadriFlow) werden um
+    STEG_A/2 eingerückt und ausgestanzt, der Rahmen per Solidify auf NETZ_TIEFE gebracht.
+    Löcher ≈ ZELLE_A - STEG_A; Zellen, deren Loch kleiner als MIN_LOCH wäre, bleiben zu."""
+    log(f"4/5  Lochnetz (Maschen {ZELLE_A} mm, Stege {STEG_A} mm, Tiefe {NETZ_TIEFE} mm) …")
+    a = gitter_quelle(surf, augen_zentren, col)
+    a.name = "Gitter_A"
+    if not quadriflow(a, ZELLE_A):
+        log("     QuadriFlow nicht verfügbar – Ersatz: Decimate + Dual Mesh (ungleichmäßiger)")
+        decimieren_auf(a, ZELLE_A)
+        gn = a.modifiers.new("DualMesh", 'NODES')
+        gn.node_group = dual_mesh_nodegroup()
+        modifier_anwenden(a)
+    bm = bm_aus(a)
+    aufraeumen(bm)
+    loecher = []
+    for f in bm.faces:
+        umfang = sum(e.calc_length() for e in f.edges)
+        innenradius = 2 * f.calc_area() / umfang if umfang else 0
+        if innenradius - STEG_A / 2 >= MIN_LOCH / 2:
+            loecher.append(f)
+    bmesh.ops.inset_individual(bm, faces=loecher, thickness=STEG_A / 2, depth=0.0,
+                               use_even_offset=False, use_relative_offset=False)
+    bmesh.ops.delete(bm, geom=loecher, context='FACES')     # Innenflächen = Löcher
+    aufraeumen(bm, min_insel=3)
+    log(f"     {len(loecher):,} Löcher")
+    bm_nach(bm, a)
+    so = a.modifiers.new("Tiefe", 'SOLIDIFY')
+    so.thickness = NETZ_TIEFE
+    so.offset = NETZ_OFFSET
+    so.use_even_offset = False                  # True erzeugt Spitzen an engen Zellecken
+    so.use_rim = True
+    so.use_quality_normals = True
+    modifier_anwenden(a)
+    log(f"     Lochnetz: {len(a.data.polygons):,} Faces")
+    return a, None
+
+
 def gitter(surf, augen_zentren, col):
+    if GITTER_MODUS == "lochnetz":
+        return gitter_lochnetz(surf, augen_zentren, col)
     log("4/5  Gitter (Lage A Waben, Lage B Dreiecke) …")
     quelle = gitter_quelle(surf, augen_zentren, col)
 

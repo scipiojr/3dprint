@@ -48,8 +48,8 @@ from mathutils.bvhtree import BVHTree
 PRESET            = "tragbar"
 PRESETS = {
     "mini": dict(
-        MASKE_HOEHE=58.9,                 # größte Kante ≈ 60 mm (Stege stehen 0,6 mm über)
-        ZELLE_A=2.6, STEG_A=1.25,         # feines Gitter, kräftige Stege (≈ 3 Düsenbahnen à 0,4 mm)
+        MASKE_HOEHE=59.1,                 # größte Kante ≈ 60 mm (Stege stehen 0,5 mm über)
+        ZELLE_A=2.0, STEG_A=1.0,          # feines Gitter: Waben 2 mm, Stege 1 mm (Löcher ≈ 1 mm)
         LAGE_B=False,                     # bei 1 mm Wand nur eine Lage
         WIRE_OFFSET_A=0.0,                # Stege mittig auf der Fläche (dünne Ohren!)
         KRAGEN_HOEHE=2.0, WANDSTAERKE=1.2, AUGE_WAND=1.2,

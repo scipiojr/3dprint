@@ -48,7 +48,7 @@ Tragbare Nashorn-Kopfmaske als offene, zweilagige Gitterstruktur. Durch das Gitt
 
 ![Mini](bilder/mini.png)
 
-45 × 60 × 60 mm, ein Teil, nicht tragbar. Beim einfachen Verkleinern wären die Stege nur noch 0,3 mm dick. Deshalb hat die Mini-Version ein eigenes Gitter: Waben ca. 2,6 mm, Stege 1,25 mm (etwa drei Düsenbahnen mit 0,4 mm), eine Lage, die Stege mittig auf der Fläche (sonst stechen sie an den dünnen Ohren durch). Augen und Kragen sind massiv, 1,2 mm.
+45 × 59 × 60 mm, ein Teil, nicht tragbar. Beim einfachen Verkleinern wären die Stege nur noch 0,3 mm dick. Deshalb hat die Mini-Version ein eigenes Gitter: Waben ca. 2 mm, Stege 1 mm, Löcher ca. 1 mm, eine Lage, die Stege mittig auf der Fläche (sonst stechen sie an den dünnen Ohren durch). Augen und Kragen sind massiv, 1,2 mm.
 
 | Datei | Inhalt |
 |---|---|

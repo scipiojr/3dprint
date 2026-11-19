@@ -67,6 +67,7 @@ module part_adapter140() {
 
 part = "adapter140";    // adapter140 | oring_fan | oring110   (muss nach dem include stehen)
 if (part == "adapter140") part_adapter140();
-else if (part == "oring110") translate([0, 0, 1.975]) oring(gr110);
+else if (part == "oring110") dichtung_flach(gr110, groove_depth_mag, groove_depth_mag);
+else if (part == "oring110_test") dichtung_flach(gr110, groove_depth_mag, groove_depth_mag, 40);   // 40-Grad-Probestueck zum Pruefen der Passung
 else if (part == "oring_fan") translate([0, 0, fan_oring_d / 2 - 0.025]) oring(fan_socket_d / 2 + fan_groove_depth - fan_oring_d / 2, fan_oring_d);
 

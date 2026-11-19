@@ -18,7 +18,7 @@ TEILE = [
     ("dn110_arbeitsplatte/dn110_arbeitsplatte_teil_2.stl", "2 Rohr 2 (Bogen nach oben + Gewinde), mit Stuetzen", SUPPORT),
     ("dn110_arbeitsplatte/dn110_arbeitsplatte_teil_3.stl", "3 Flanschring d153 (Magnetflaeche unten), ohne Stuetzen", {}),
     ("dn110_arbeitsplatte/dn110_arbeitsplatte_teil_4.stl", "4 Magnetdeckel d153", {}),
-    ("dichtung_100_anschluss_tpu.stl", "5 O-Ring 110er Flansch - TPU, separat drucken", {"filament_type": "TPU", "perimeters": "2", "top_solid_layers": "3", "bottom_solid_layers": "3", "fill_density": "100%", "temperature": "225", "bed_temperature": "50", "first_layer_bed_temperature": "50", "min_fan_speed": "100", "max_fan_speed": "100", "perimeter_speed": "20", "external_perimeter_speed": "20", "infill_speed": "20", "solid_infill_speed": "20", "bridge_speed": "15", "travel_speed": "150"}),
+    ("dichtung_100_anschluss_tpu.stl", "5 Dichtring 110er Flansch (U-Profil) - TPU, separat drucken", {"filament_type": "TPU", "perimeters": "2", "top_solid_layers": "3", "bottom_solid_layers": "3", "fill_density": "100%", "temperature": "225", "bed_temperature": "50", "first_layer_bed_temperature": "50", "min_fan_speed": "100", "max_fan_speed": "100", "perimeter_speed": "20", "external_perimeter_speed": "20", "infill_speed": "20", "solid_infill_speed": "20", "bridge_speed": "15", "travel_speed": "150"}),
 ]
 ABSTAND = 280
 SPALTEN = 3
@@ -72,7 +72,7 @@ Teile in der gezeigten Pose drucken (nicht drehen). Stuetzen NUR an Teil 1 und 2
  Duese 240 Grad, Bett 80 Grad, Luefter 30-50 % (Bruecken 100 %), Brim 0.
  Teile: 1 Rohr 1, 2 Rohr 2 (Halbwand-Steckverbindung zu Teil 1, 0,25 mm Klebespalt: verkleben), 3 Flanschring (Gewinde auf Rohr 2 schrauben, 6 Magnete 15x3,
  zwei Stiftloecher d4,5), 4 Magnetdeckel (6 Magnete, Polung: Kerbe auf glatt zieht an, Deckel in 60-Grad-Schritten drehen), 5 O-Ring aus TPU (separater Druck,
- anderes Filament; liegt in der Nut des Flanschrings; bei 95A TPU kann der Ring in der Nut zu hoch sein: siehe agent.md, offener Punkt).
+ anderes Filament; liegt in der Nut des Flanschrings; U-Profil 4,0 x 3,2 mm, offene Seite nach oben drucken, Probestueck dichtung_100_anschluss_tpu_probe.stl vorab drucken).
  Einbau: Senkung d155 x 10 mm und Loch d120 in der 30-mm-Arbeitsplatte, Flanschmitte 237 mm vor der Schnittkante Dach/Platte; Adapter Hose_Adapter_Angled_v42 auf den Ring.
  Nicht gedruckt oder erprobt: Passung, Dichtheit, Polung, Stuetzbarkeit der Bogenunterseiten.
 """

@@ -12,7 +12,7 @@ Abluft-Anschluss für einen Laser-Cutter: Eine 5 mm dicke Plexiglasscheibe häng
   - Auf **beiden Außenflächen** sitzen 8 Magnete (15 × 3 mm) und eine Dichtungsnut, und auf der **Plexiglasseite** jeder Scheibe sitzt eine zweite Nut für eine TPU-Dichtung.
 - **Verjüngung 150 → 110:** Magnetflansch (150) → Trichter (35 mm, ca. 30° Halbwinkel) → am 110er-Ende ein Magnetflansch im Muster der 110er-Referenz. Darauf passt der Schlauchanschluss mit 110-mm-Stutzen. Als Varianten gibt es statt des Flanschs einen festen Schlauchstutzen mit Wulsten oder einen glatten Rohrstumpf (ø109 × 36 mm, zum Überstülpen der Muffe eines 110er-KG-Rohrs), wahlweise gerade oder gewinkelt.
 - **Lastpfad (Dachfenster, Schlauch hängt innen):** Schlauch und Kupplung hängen über die **Magnete** an der Innenscheibe. Die Innenscheibe hängt über das **Gewinde** an der Halteplatte. Die Halteplatte liegt auf dem Plexiglas. Das Gewinde steht also dauerhaft unter Zug; Seitenkräfte gehen über den Zentrierbund ins Plexiglas.
-- **Abdichtung:** TPU-Rundschnüre (Ø 4 mm) in Nuten. Auf den Magnetflächen liegt jeweils **ein** Ring in den beiden gegenüberliegenden Nuten. Die Plexiglas-Ringe dichten Scheibe gegen Plexiglas. Gewinde und Zwischenräume liegen im abgeschlossenen Totraum innerhalb der Plexiglas-Ringe, die Dichtung hängt nicht am Gewinde.
+- **Abdichtung:** Flache TPU-Dichtringe mit **U-Profil** (Öffnung zur Gegenseite, Lippen 1,2 mm, Breite 4,0 mm, Höhe aus den Nuttiefen: 3,2 mm für 100/110er, 4,4 mm für 150er, 3,8 mm gegen Plexiglas) in den bestehenden Nuten (Nuten und Gegenseite unverändert; `oring_profil = "rund"` liefert wieder Ø4-Rundringe). Die Lippen biegen sich, deshalb komprimiert der Ring auch aus 95A TPU; das Rundprofil stand 2,7 mm über der 1,3-mm-Nut. Auf den Magnetflächen liegt jeweils **ein** Ring in den beiden gegenüberliegenden Nuten. Die Plexiglas-Ringe dichten Scheibe gegen Plexiglas. Gewinde und Zwischenräume liegen im abgeschlossenen Totraum innerhalb der Plexiglas-Ringe, die Dichtung hängt nicht am Gewinde.
 - **Magnetlappen sind um 22,5° gedreht** (`lobe_offset150`): Das Plexiglas hat in der Ecke nur etwa 20 mm Rand ab der Ausschnittkante. Die Scheiben reichen nur 95,7 mm vom Mittelpunkt (frei sind 97,5 mm). Anschlussteile mit 8 Magneten werden deshalb **um 22,5° gedreht** aufgesetzt, damit die Magnete übereinanderliegen.
 
 ![Magnetflächen](bilder/magnetflaechen.png)
@@ -42,7 +42,7 @@ Abluft-Anschluss für einen Laser-Cutter: Eine 5 mm dicke Plexiglasscheibe häng
 | `dichtung_150_plexiglas_tpu.stl` | TPU-Ring zwischen Scheibe und Plexiglas (ID 156,4 / AD 164,4 mm) – 2 Stück |
 | `dichtung_150_anschluss_tpu.stl` | TPU-Ring für 150er-Anschlussflächen (ID 147 / AD 155 mm) |
 | `dn110_muffe_magnet_100.stl` | **DN110-Muffenanschluss:** Rohrstumpf ø109/ø100 × 24 mm (in die Muffe eines DN110-Rohrs gesteckt) mit 6er-Magnetflansch (siehe DN110-Muffenanschluss) |
-| `dichtung_100_anschluss_tpu.stl` | TPU-Ring für alle Schlauch-Magnetflächen (bei `hose_nom=100`: ID 97 / AD 105 mm, Schnur 4 mm, Nut r 48,4–52,6 mm): Flansch der Verjüngung, Ventilator-Adapter und 100er-Schlauchanschluss haben dieselbe Nut. Bei `hose_nom=110`: ID 107 / AD 115 |
+| `dichtung_100_anschluss_tpu.stl` | TPU-Ring für alle Schlauch-Magnetflächen, **U-Profil** 4,0 × 3,2 mm (bei `hose_nom=100`: ID 97 / AD 105 mm, Nut r 48,4–52,6 mm); `dichtung_100_anschluss_tpu_probe.stl` ist ein 40°-Probestück zum Prüfen der Passung in der Nut: Flansch der Verjüngung, Ventilator-Adapter und 100er-Schlauchanschluss haben dieselbe Nut. Bei `hose_nom=110`: ID 107 / AD 115 |
 | `schraubkappe_110_auf_100.stl` | Reduzierer: wird auf den Stutzen des vorhandenen **110er**-Schlauchanschlusses geschraubt und endet in einem 100er-Schlauchstutzen mit Wulsten (siehe Schraubkappe) |
 | `dichtung_stutzenende_tpu.stl` | TPU-O-Ring (Schnur 2,5 mm, ID 101,5 / AD 106,5) für die Dichtfläche zwischen Stutzenende des 110er-Anschlusses und Schraubkappe |
 | `dichtung_ventilator_muffe_tpu.stl` | TPU-O-Ring für die Nut in der Muffenwand des Ventilator-Adapters (Schnur 3 mm, ID 143,6 / AD 149,6 mm) |
@@ -143,7 +143,7 @@ Damit der vorhandene 110er-Schlauchanschluss weiter nutzbar ist: Die Kappe wird 
 
 - Alle Teile liegen mit der **Magnetfläche auf dem Druckbett**, ohne Stützen. Die Taschen werden überbrückt.
 - Innenscheibe und Halteplatte mit **100 % Füllung oder mindestens 5 Wänden** drucken, damit Gewinde und Rohr unter Dauerzug nicht kriechen. Bei dauerhaft warmer Abluft (PETG erweicht ab etwa 70 °C) sind ASA oder ABS sicherer.
-- Dichtungen aus TPU (Shore 95A oder weicher) liegend drucken. Das Profil hat wie die mitgelieferten O-Ring-Vorlagen kleine Abflachungen oben und unten.
+- Dichtungen aus TPU (Shore 95A oder weicher) liegend drucken, die offene Seite des U-Profils zeigt nach oben (keine Überhänge, keine Stützen). Beim Einbau zeigt die offene Seite zur Gegenfläche. Mit `oring_profil = "rund"` entstehen Rundringe mit kleinen Abflachungen.
 - Das Gewinde ist feiner als die erste Fassung: Radialspiel 0,35 mm, Flankenspiel 0,03 Steigung je Seite (`thread_clear`, `thread_widen`). Im Rechenmodell bleibt ein freier Drehwinkel von etwa 50° (0,56 mm axial). Wenn die Teile nach dem Druck zu streng laufen, `thread_clear` vergrößern.
 
 ## Montage
@@ -165,7 +165,7 @@ Jedes Bauteil hat **seine eigenen Parameter in seiner eigenen Datei**; nur gemei
 |---|---|
 | `mag_d`, `mag_h`, `mag_clear`, `crush_ribs`, `polarity_marks` | Magnetmaße, Spiel, Klemmnasen, Polungskerbe |
 | `n_mag_150`, `n_mag_110` | Magnetzahl je Fläche (Referenzumrisse nur für 8 bzw. 6; sonst runder Fallback-Umriss) |
-| `oring_d`, `groove_w`, `groove_depth_mag`, `groove_depth_150` | Dichtschnur, Nutbreite und Nuttiefen auf den Magnetflächen |
+| `oring_d`, `oring_profil`, `oring_u_w/_wall/_base/_zug/_frei`, `groove_w`, `groove_depth_mag`, `groove_depth_150` | Dichtschnur (Rund), U-Profil des flachen Rings, Nutbreite und Nuttiefen auf den Magnetflächen |
 | `hole_d`, `plate_t` | Ausschnitt und Plattendicke des Fensters |
 | `bore_d`, `R150`, `adapter_t`, `lobe_offset_funnel`, `use_ref_outline` | 150er Flanschmuster: Luftkanal, Teilkreis, Flanschdicke, Drehlage |
 | `thread_pitch`, `thread_depth`, `thr_hr`, `thr_hc`, `thread_clear`, `thread_widen` | Gewindeprofil (Durchführung, Doppelbogen, Schraubkappe) |
@@ -235,7 +235,7 @@ Variante des Doppelbogens für den Einbau unter einer waagerechten Arbeitsplatte
 - **Übergangskegel:** Am oberen Rohrende verjüngt sich die Bohrung auf 15 mm Länge von Ø100 auf Ø90 (`wk_kegel_l`).
 - Teile (alle wasserdicht, passen in 240×240×250): Teil 1 191 × 157 × 109, Teil 2 109 × 203 × 145, Teil 3 153 × 153 × 23, Teil 4 153 × 153 × 5 mm. Export: `werkzeuge/export_dn110_arbeitsplatte.sh` → `dn110_arbeitsplatte/`.
 - Annahmen: Plattendicke 30 mm, Biegung nach links (`wk_links`). Offen: Standard-Rohrbogen statt Teil 1 (Schenkellänge fehlt); Polung von Ring/Deckel nur nach Regel, nicht erprobt.
-- **Druck und 3MF:** `dn110_arbeitsplatte/dn110_arbeitsplatte_alle.3mf` (Erzeugung: `werkzeuge/export_dn110_arbeitsplatte_3mf.py`) enthält Teil 1 bis 4 und den TPU-Ring `dichtung_100_anschluss_tpu.stl` (nur der Flanschring hat die Dichtungsnut, der Deckel liegt auf dem Ring) mit empfohlenen Einstellungen (PETG 240/80 °C, 0,28 mm Schicht, 3 Umrisse, 15 % Gyroid) und **je Objekt gesetzten Stützen für Teil 1 und 2** (automatisch, Schwelle 50°); Teil 3 und 4 ohne Stützen, der TPU-Ring mit eigenen langsamen Einstellungen. Hinweis: Die Stützbarkeit der Bogenunterseiten ist nicht erprobt; der TPU-Ring (Ø4) kann bei 95A in der 1,3-mm-Nut zu hoch sein (siehe agent.md).
+- **Druck und 3MF:** `dn110_arbeitsplatte/dn110_arbeitsplatte_alle.3mf` (Erzeugung: `werkzeuge/export_dn110_arbeitsplatte_3mf.py`) enthält Teil 1 bis 4 und den TPU-Ring `dichtung_100_anschluss_tpu.stl` (nur der Flanschring hat die Dichtungsnut, der Deckel liegt auf dem Ring) mit empfohlenen Einstellungen (PETG 240/80 °C, 0,28 mm Schicht, 3 Umrisse, 15 % Gyroid) und **je Objekt gesetzten Stützen für Teil 1 und 2** (automatisch, Schwelle 50°); Teil 3 und 4 ohne Stützen, der TPU-Ring mit eigenen langsamen Einstellungen. Hinweis: Die Stützbarkeit der Bogenunterseiten ist nicht erprobt; der TPU-Ring ist jetzt ein U-Profil (Höhe 3,2 mm), der Rundring war bei 95A zu hoch. Die Passung des U-Rings ist nicht erprobt, `dichtung_100_anschluss_tpu_probe.stl` ist ein Probestück.
 
 ## DN110-Muffenanschluss (`abluft_dn110_muffe.scad`)
 

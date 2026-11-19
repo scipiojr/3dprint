@@ -38,7 +38,13 @@ n_mag_110    = 6;       // Magnete pro 110er-Flaeche (Referenz = 6)
 polarity_marks = true;  // Kerbe am Lappenrand bei jedem 2. Magnet (gleiche Polung nach aussen)
 
 /* [Dichtung] */
-oring_d      = 4.0;     // O-Ring-Schnurdurchmesser (TPU)
+oring_d      = 4.0;     // O-Ring-Schnurdurchmesser (TPU), Rundprofil
+oring_profil = "u";     // Profil der flachen TPU-Dichtringe (Magnetflaechen): "u" = U-Profil (Lippen biegen sich, komprimiert auch bei 95A) | "rund" = Vollkreis wie bisher
+oring_u_w    = 4.0;     // Breite des U-Profils (Nut 4,2 mm)
+oring_u_wall = 1.2;     // Lippendicke des U-Profils
+oring_u_base = 1.0;     // Bodendicke des U-Profils
+oring_u_zug  = 0.6;     // Zugabe zur Summe beider Nuttiefen (Anpressung)
+oring_u_frei = 1.0;     // Ueberstand ueber der Nut gegen eine ebene Gegenflaeche
 groove_w     = 4.2;     // Nutbreite
 groove_depth_mag   = 1.3;  // Nuttiefe auf Magnetflaechen (wie Referenz)
 
@@ -185,6 +191,15 @@ module thread_nut_ring(L, rout) {
 
 function stub_r(z) = stub_r0 - stub_taper * z / stub_len;     // z ab Stutzenanfang
 function arc_pts(zc, rc, br) = [for (a = [-80 : 20 : 80]) [rc + br * cos(a), zc + br * sin(a)]];
+// Flacher TPU-Dichtring fuer Nuten auf Magnetflaechen: U-Profil (offene Seite nach oben, liegend druckbar, ohne Ueberhang, z ab 0) oder Rundprofil.
+// gd_own = Tiefe der eigenen Nut, gd_mate = Tiefe der Gegennut (0 = ebene Gegenflaeche); ang < 360 liefert nur einen Ausschnitt (Probestueck)
+module dichtung_flach(rc, gd_own, gd_mate = 0, ang = 360) {
+    h = gd_own + (gd_mate > 0 ? gd_mate + oring_u_zug : oring_u_frei);
+    if (oring_profil == "rund") translate([0, 0, oring_d / 2 - 0.025]) oring(rc, oring_d);
+    else rotate_extrude(angle = ang, $fn = 240) translate([rc, 0]) offset(r = -0.0) polygon([
+        [-oring_u_w/2, 0], [oring_u_w/2, 0], [oring_u_w/2, h], [oring_u_w/2 - oring_u_wall, h], [oring_u_w/2 - oring_u_wall, oring_u_base],
+        [-oring_u_w/2 + oring_u_wall, oring_u_base], [-oring_u_w/2 + oring_u_wall, h], [-oring_u_w/2, h]]);
+}
 // TPU-O-Ring: liegend druckbar (kleine Abflachung oben/unten wie in deinen Vorlagen)
 module oring(rc, d = oring_d) {
     h = d / 2 - 0.025;      // Abflachung oben/unten (Druckauflage)

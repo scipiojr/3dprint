@@ -23,6 +23,7 @@ TEILE=(
   "dichtung_150_plexiglas_tpu.stl|abluft_durchfuehrung.scad|oring150_plexi|"
   "dichtung_150_anschluss_tpu.stl|abluft_verjuengung.scad|oring150_face|"
   "dichtung_100_anschluss_tpu.stl|abluft_ventilator_adapter.scad|oring110|"
+  "dichtung_100_anschluss_tpu_probe.stl|abluft_ventilator_adapter.scad|oring110_test|"
   "magnetring_150.stl|abluft_magnetring.scad|ring150|"
   "magnetring_100.stl|abluft_magnetring.scad|ring100|"
 )

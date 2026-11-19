@@ -74,7 +74,7 @@ module part_nut() {
 part = "assembly";      // inner | nut | oring150_plexi | assembly   (muss nach dem include stehen)
 if (part == "inner") part_inner();
 else if (part == "nut") part_nut();
-else if (part == "oring150_plexi") translate([0, 0, 1.975]) oring(gr150);
+else if (part == "oring150_plexi") dichtung_flach(gr150, groove_depth_plexi, 0);
 else if (part == "assembly") {
     color("steelblue") part_inner();
     color("lightblue", 0.35) translate([-200, -200, disc_t]) difference() {

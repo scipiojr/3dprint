@@ -101,6 +101,6 @@ module part_funnel() {
 
 part = "funnel";        // funnel | oring150_face | assembly   (muss nach dem include stehen)
 if (part == "funnel") part_funnel();
-else if (part == "oring150_face") translate([0, 0, 1.975]) oring(gr150_face);
+else if (part == "oring150_face") dichtung_flach(gr150_face, groove_depth_150, groove_depth_150);
 else if (part == "assembly") part_funnel();
 

@@ -250,6 +250,16 @@ Gerader Anschluss für die **Muffenseite** eines DN110-Rohrs: ein Rohrstumpf (ø
 - Parameter: `mf_od`, `mf_id`, `mf_len`, `mf_fase`, `mf_kegel_l`, `mf_t`, `mf_nut`; `ausgabe` = `druck` | `montiert` | `info`. Export: `werkzeuge/export_dn110_muffe.sh` → `dn110_muffe_magnet_100.stl`.
 - Geprüft: wasserdicht, Magnettaschen und Nut im selben Muster wie der Ring des Doppelbogens (gleicher `mag_flange`-Aufruf wie beim Ventilator-Adapter). **Nicht gedruckt getestet:** Sitz in der Muffe (ø109 nominal), Dichtheit.
 
+### Arbeitsplatten-Durchlass bündig (Version 2, `abluft_dn110_durchlass_buendig.scad`)
+
+Der Ring verschwindet komplett in der Platte, der Deckel liegt plan auf (nur 4,6 mm); **Befestigung nur von unten, keine Oberfräse nötig**. Voraussetzung: Platte 30 mm, ein **durchgehendes Loch ø155**.
+
+- **Ring** (Teil 3 im 3MF): Teller ø153 × 5 mit Magnetfläche **bündig mit der Plattenoberseite** (gleiches Lochbild, Nut, Stiftlöcher wie bisher), langer Hals (35,5 mm) mit Innengewinde für Rohr 2 und **Außengewinde am unteren Ende**; 6 Rippen (45°, ohne Stützen druckbar) stützen den Teller gegen den Hals.
+- **Halteflansch** (Teil 4): flache Scheibe mit 6 Armen (r 86, Senkschrauben 4 mm), wird von unten auf den Hals geschraubt und flach an die Plattenunterseite geschraubt. Durch Drehen des Rings stellst du die Höhe ein, bis die Magnetfläche bündig ist. Gewindeeingriff nur 5 mm (Gewinde per Software geprüft: greift ohne Überlappung), bei Bedarf zusätzlich mit Silikon/Kleber sichern.
+- **Deckel** (Teil 5): ø168 × 4,6, **2 Magnete** (120° auseinander, gleiche Polung, in 60°-Schritten drehen bis er anzieht), Dichtungsnut unten für den TPU-Ring. **Klapplasche** in einem Stück: freigeschnittene Zunge (24 × 25 mm) mit **Filmscharnier** (0,8 mm, unten durchgehend), Fingermulde am freien Ende. Lasche hochklappen, ziehen. Nicht erprobt: Lebensdauer des Filmscharniers in PETG.
+- **Rohr 2** ist 5 mm höher (Senkrechte 29,3 mm), Rohr 1 unverändert. Der Winkeladapter (Schlauchstutzen oder Rohrstumpf) sitzt auf dem Ring wie bisher (Flansch 5 mm höher: 237 mm Flanschabstand passen weiter, bei der Muffenvariante ca. 13 mm Luft zum Dach).
+- 3MF: `dn110_arbeitsplatte_buendig/dn110_buendig_alle.3mf` (8 Objekte: Rohr 1, Rohr 2, Ring, Halteflansch, Deckel, beide Winkeladapter, TPU-Ring). Export: `werkzeuge/export_dn110_buendig.sh` und `werkzeuge/export_dn110_buendig_3mf.py`.
+
 ## Filterkasten (`abluft_filterkasten.scad`)
 
 ![Filterkasten montiert: Längsschnitt, Draufsicht-Schnitt, Querschnitt](bilder/filterkasten.png)

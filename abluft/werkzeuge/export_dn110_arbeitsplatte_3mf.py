@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Packt die Teile des DN110-Durchlasses durch die Arbeitsplatte (abluft_dn110_arbeitsplatte.scad) mit empfohlenen Druckeinstellungen
-in eine 3MF (PrusaSlicer-Projektformat; OrcaSlicer/Bambu Studio/Cura lesen die Geometrie). Stuetzen sind je Objekt gesetzt (Teil 1, 2).
+in eine 3MF (PrusaSlicer-Projektformat; OrcaSlicer/Bambu Studio/Cura lesen die Geometrie). Stuetzen sind je Objekt gesetzt (Teil 1, 2, 5).
 Aufruf (aus abluft/):  python3 -I werkzeuge/export_dn110_arbeitsplatte_3mf.py [ausgabe.3mf]
 Voraussetzung: STL aus werkzeuge/export_dn110_arbeitsplatte.sh (Ordner dn110_arbeitsplatte/) und dichtung_100_anschluss_tpu.stl."""
 import sys, zipfile
@@ -18,12 +18,13 @@ TEILE = [
     ("dn110_arbeitsplatte/dn110_arbeitsplatte_teil_2.stl", "2 Rohr 2 (Bogen nach oben + Gewinde), mit Stuetzen", SUPPORT),
     ("dn110_arbeitsplatte/dn110_arbeitsplatte_teil_3.stl", "3 Flanschring d153 (Magnetflaeche unten), ohne Stuetzen", {}),
     ("dn110_arbeitsplatte/dn110_arbeitsplatte_teil_4.stl", "4 Magnetdeckel d153", {}),
-    ("dichtung_100_anschluss_tpu.stl", "5 Dichtring 110er Flansch (U-Profil) - TPU, separat drucken", {"filament_type": "TPU", "perimeters": "2", "top_solid_layers": "3", "bottom_solid_layers": "3", "fill_density": "100%", "temperature": "225", "bed_temperature": "50", "first_layer_bed_temperature": "50", "min_fan_speed": "100", "max_fan_speed": "100", "perimeter_speed": "20", "external_perimeter_speed": "20", "infill_speed": "20", "solid_infill_speed": "20", "bridge_speed": "15", "travel_speed": "150"}),
+    ("dn110_arbeitsplatte/dn110_winkeladapter.stl", "5 Winkeladapter (Magnetflansch unten, Stutzen 60 Grad), mit Stuetzen", SUPPORT),
+    ("dichtung_100_anschluss_tpu.stl", "6 Dichtring 110er Flansch (U-Profil) - TPU, separat drucken", {"filament_type": "TPU", "perimeters": "2", "top_solid_layers": "3", "bottom_solid_layers": "3", "fill_density": "100%", "temperature": "225", "bed_temperature": "50", "first_layer_bed_temperature": "50", "min_fan_speed": "100", "max_fan_speed": "100", "perimeter_speed": "20", "external_perimeter_speed": "20", "infill_speed": "20", "solid_infill_speed": "20", "bridge_speed": "15", "travel_speed": "150"}),
 ]
 ABSTAND = 280
 SPALTEN = 3
 
-CONFIG = """; Empfohlene Einstellungen Arbeitsplatten-Durchlass (PETG, 0,4-mm-Duese; Stuetzen nur an Teil 1 und 2 je Objekt)
+CONFIG = """; Empfohlene Einstellungen Arbeitsplatten-Durchlass (PETG, 0,4-mm-Duese; Stuetzen nur an Teil 1, 2, 5 je Objekt)
 ; layer_height = 0.28
 ; first_layer_height = 0.28
 ; perimeters = 3
@@ -66,14 +67,14 @@ CONFIG = """; Empfohlene Einstellungen Arbeitsplatten-Durchlass (PETG, 0,4-mm-Du
 ; travel_speed = 150
 """
 README = """Arbeitsplatten-Durchlass DN110 - empfohlene Druckeinstellungen (PETG, 0,4-mm-Duese)
-Teile in der gezeigten Pose drucken (nicht drehen). Stuetzen NUR an Teil 1 und 2 (unter dem Rohr bzw. dem oberen Bogen; im Projekt je Objekt gesetzt:
+Teile in der gezeigten Pose drucken (nicht drehen). Stuetzen NUR an Teil 1, 2 und 5 (unter dem Rohr bzw. dem oberen Bogen / unter und im Stutzen des Winkeladapters; im Projekt je Objekt gesetzt:
  automatisch, Schwelle 50 Grad, Z-Abstand 0,2 mm, Schnittstelle 2 Schichten). Teil 3 und 4 ohne Stuetzen (Magnettaschen werden ueberbrueckt).
  Schicht 0,28 mm (0,24 mm fuer sauberes Gewinde an Teil 2/3), 3 Umrisse (Arachne), 4 Deckel-/Bodenschichten, Fuellung 15 % Gyroid,
  Duese 240 Grad, Bett 80 Grad, Luefter 30-50 % (Bruecken 100 %), Brim 0.
  Teile: 1 Rohr 1, 2 Rohr 2 (Halbwand-Steckverbindung zu Teil 1, 0,25 mm Klebespalt: verkleben), 3 Flanschring (Gewinde auf Rohr 2 schrauben, 6 Magnete 15x3,
- zwei Stiftloecher d4,5), 4 Magnetdeckel (6 Magnete, Polung: Kerbe auf glatt zieht an, Deckel in 60-Grad-Schritten drehen), 5 O-Ring aus TPU (separater Druck,
+ zwei Stiftloecher d4,5), 4 Magnetdeckel (6 Magnete, Polung: Kerbe auf glatt zieht an, Deckel in 60-Grad-Schritten drehen), 6 O-Ring aus TPU (separater Druck,
  anderes Filament; liegt in der Nut des Flanschrings; U-Profil 4,0 x 3,2 mm, offene Seite nach oben drucken, Probestueck dichtung_100_anschluss_tpu_probe.stl vorab drucken).
- Einbau: Senkung d155 x 10 mm und Loch d120 in der 30-mm-Arbeitsplatte, Flanschmitte 237 mm vor der Schnittkante Dach/Platte; Adapter Hose_Adapter_Angled_v42 auf den Ring.
+ Einbau: Senkung d155 x 10 mm und Loch d120 in der 30-mm-Arbeitsplatte, Flanschmitte 237 mm vor der Schnittkante Dach/Platte; Winkeladapter (Teil 5, Magnetflaeche nach unten, Stutzen zeigt nach vorn/oben parallel zum Dach) auf den Ring.
  Nicht gedruckt oder erprobt: Passung, Dichtheit, Polung, Stuetzbarkeit der Bogenunterseiten.
 """
 

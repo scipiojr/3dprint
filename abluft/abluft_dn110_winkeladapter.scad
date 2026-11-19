@@ -13,15 +13,26 @@ part = "keiner";
 wa_winkel = 60;                  // [20:5:90]
 // wa_r: Biegeradius der Mittellinie (mindestens Stutzenaussenradius + 5)
 wa_r = 70;                       // [56:2:120]
+// wa_ende: "stutzen" = Schlauchstutzen ø100 mit Wulsten | "rohr" = glatter Rohrstumpf ø109/100 (DN110-Rohr mit Muffe wird darueber geschoben)
+wa_ende = "stutzen";             // ["stutzen", "rohr"]
+// wa_rohr_od / wa_rohr_id / wa_rohr_len: Aussen-/Innendurchmesser und Laenge des Rohrstumpfs (wie Stumpf von Verjuengung/Doppelbogen: 109 / 100 / 36)
+wa_rohr_od = 109;
+wa_rohr_id = 100;
+wa_rohr_len = 36;
+wa_rohr_fase = 1.0;
 // wa_np: Punkte je Ringquerschnitt
 wa_np = 180;
 
 wa_T  = flange110_t;                    // Flanschdicke
 wa_z0 = wa_T - 1;                       // Beginn des Bogens (1 mm im Flansch)
-assert(wa_r >= stub_r0 + 5, "wa_r zu klein");
+wa_ro = wa_ende == "rohr" ? wa_rohr_od / 2 : stub_r0;     // Aussenradius im Bogen
+wa_ri = wa_ende == "rohr" ? wa_rohr_id / 2 : stub_bore_r;  // Bohrung am Bogenende (Flanschbohrung bleibt ø90)
+assert(wa_r >= wa_ro + 5, "wa_r zu klein");
 
 // Ringe entlang des Pfades: [Mittelpunkt, e1 (in der Biegeebene), Radius]; Radiusprofil: aussen (Wulste) oder Bohrung
-function wa_prof_aussen() =
+function wa_prof_aussen() = wa_ende == "rohr" ?
+    [[0, wa_ro], [wa_rohr_len - wa_rohr_fase, wa_ro], [wa_rohr_len, wa_ro - wa_rohr_fase]] : wa_prof_stutzen();
+function wa_prof_stutzen() =
     let(beads = [for (k = [0 : bead_n - 1]) bead_first + k * bead_pitch])
     concat([[0, stub_r(0)]],
            [for (k = [0 : bead_n - 1]) each concat(
@@ -29,14 +40,14 @@ function wa_prof_aussen() =
                [for (a = [-80 : 20 : 80]) [beads[k] + bead_r * sin(a), stub_r(beads[k]) + bead_r * cos(a)]],
                [[beads[k] + bead_r, stub_r(beads[k] + bead_r)]])],
            [[stub_len - 1.5, stub_r(stub_len)], [stub_len, stub_r(stub_len) - 1.2]]);
-function wa_prof_bohrung(ext) = [[0, stub_bore_r], [stub_len + ext, stub_bore_r]];
-function wa_pfad(zs, prof, rbend) =
+function wa_prof_bohrung(ext) = [[0, wa_ri], [(wa_ende == "rohr" ? wa_rohr_len : stub_len) + ext, wa_ri]];
+function wa_pfad(zs, prof, r0, r1) =
     let(a = wa_winkel, nb = max(2, ceil(a / 4)),
         E = [wa_r * (1 - cos(a)), 0, wa_z0 + wa_r * sin(a)],
         t = [sin(a), 0, cos(a)], e1 = [cos(a), 0, -sin(a)])
-    concat([[[0, 0, zs], [1, 0, 0], rbend]],
-           zs < wa_z0 ? [[[0, 0, wa_z0], [1, 0, 0], rbend]] : [],
-           [for (k = [1 : nb]) let(f = a * k / nb) [[wa_r * (1 - cos(f)), 0, wa_z0 + wa_r * sin(f)], [cos(f), 0, -sin(f)], rbend]],
+    concat([[[0, 0, zs], [1, 0, 0], r0]],
+           zs < wa_z0 ? [[[0, 0, wa_z0], [1, 0, 0], r0]] : [],
+           [for (k = [1 : nb]) let(f = a * k / nb) [[wa_r * (1 - cos(f)), 0, wa_z0 + wa_r * sin(f)], [cos(f), 0, -sin(f)], r0 + (r1 - r0) * k / nb]],
            [for (p = prof) [E + t * p[0], e1, p[1]]]);
 module wa_sweep(ringe) {
     K = len(ringe); NP = wa_np;
@@ -55,9 +66,9 @@ module winkeladapter() {
     difference() {
         union() {
             mag_flange(wa_T, n_mag_110, R110, lobe110, body110_r, 0, gr110, groove_depth_mag, stub_bore_r - 1, 0, 0, false, 0, 0, pr110);
-            wa_sweep(wa_pfad(wa_z0, wa_prof_aussen(), stub_r0));
+            wa_sweep(wa_pfad(wa_z0, wa_prof_aussen(), wa_ro, wa_ro));
         }
-        wa_sweep(wa_pfad(-1, wa_prof_bohrung(1), stub_bore_r));
+        wa_sweep(wa_pfad(-1, wa_prof_bohrung(1), stub_bore_r, wa_ri));
     }
 }
 if (part == "keiner") winkeladapter();

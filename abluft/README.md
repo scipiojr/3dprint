@@ -235,6 +235,7 @@ Variante des Doppelbogens für den Einbau unter einer waagerechten Arbeitsplatte
 - **Übergangskegel:** Am oberen Rohrende verjüngt sich die Bohrung auf 15 mm Länge von Ø100 auf Ø90 (`wk_kegel_l`).
 - Teile (alle wasserdicht, passen in 240×240×250): Teil 1 191 × 157 × 109, Teil 2 109 × 203 × 145, Teil 3 153 × 153 × 23, Teil 4 153 × 153 × 5 mm. Export: `werkzeuge/export_dn110_arbeitsplatte.sh` → `dn110_arbeitsplatte/`.
 - Annahmen: Plattendicke 30 mm, Biegung nach links (`wk_links`). Offen: Standard-Rohrbogen statt Teil 1 (Schenkellänge fehlt); Polung von Ring/Deckel nur nach Regel, nicht erprobt.
+- **Druck und 3MF:** `dn110_arbeitsplatte/dn110_arbeitsplatte_alle.3mf` (Erzeugung: `werkzeuge/export_dn110_arbeitsplatte_3mf.py`) enthält Teil 1 bis 4 und den TPU-Ring `dichtung_100_anschluss_tpu.stl` (nur der Flanschring hat die Dichtungsnut, der Deckel liegt auf dem Ring) mit empfohlenen Einstellungen (PETG 240/80 °C, 0,28 mm Schicht, 3 Umrisse, 15 % Gyroid) und **je Objekt gesetzten Stützen für Teil 1 und 2** (automatisch, Schwelle 50°); Teil 3 und 4 ohne Stützen, der TPU-Ring mit eigenen langsamen Einstellungen. Hinweis: Die Stützbarkeit der Bogenunterseiten ist nicht erprobt; der TPU-Ring (Ø4) kann bei 95A in der 1,3-mm-Nut zu hoch sein (siehe agent.md).
 
 ## DN110-Muffenanschluss (`abluft_dn110_muffe.scad`)
 

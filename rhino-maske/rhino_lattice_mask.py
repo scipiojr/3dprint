@@ -61,11 +61,11 @@ PRESETS = {
 # ---- HIER EINTRAGEN: Maskengröße und Drucker ---------------------------------
 MASKE_HOEHE       = 0.0     # fertige Höhe in mm (Halsrand bis Ohrspitze).
                             # 0 = automatisch: so klein wie möglich, damit der Kopf
-                            #     (KOPF_DURCHMESSER + 2*KOPF_SPIEL) durch die Öffnung passt
+                            #     (KOPF_BREITE x KOPF_LAENGE + KOPF_SPIEL rundum) durch Öffnung UND Hals passt
 DRUCKRAUM         = (260.0, 260.0, 260.0)   # Druckraum X, Y, Z in mm (Anycubic Kobra 4)
-DRUCKRAND         = 5.0     # Sicherheitsabstand pro Achse (mm)
+DRUCKRAND         = 2.0     # Sicherheitsabstand pro Achse (mm)
 TEILEN            = True    # Maske automatisch in druckraumgerechte Teile zerlegen
-TRAGBAR           = True    # Kopföffnung gegen KOPF_DURCHMESSER prüfen
+TRAGBAR           = True    # Durchgang für den Kopf prüfen (und ggf. automatisch vergrößern)
 VOLLKOERPER       = False   # zusätzlich die geschlossene Form (unten plan) als STL
 # -------------------------------------------------------------------------------
 
@@ -75,8 +75,11 @@ VOXEL_BASIS       = 2.5     # Auflösung der Basisoberfläche
 # Kopföffnung / Hülle
 SCHNITT_Z         = 0.0     # Höhe der Schnittebene an der Halsunterseite
 WANDSTAERKE       = 4.5     # Stärke der soliden Referenzhülle + Kragen
-KOPF_DURCHMESSER  = 220.0   # zur Kontrolle der Öffnung
-KOPF_SPIEL        = 15.0    # gewünschte Luft rundum (Durchmesser + 2*Spiel)
+KOPF_BREITE       = 170.0   # großer Erwachsenenkopf (95. Perzentil) von Ohr zu Ohr
+KOPF_LAENGE       = 230.0   # Hinterkopf bis Nasenspitze
+KOPF_SPIEL        = 10.0    # Mindestluft rundum, an JEDER Höhe des Durchgangs
+KOPF_PRUEF_BIS    = 250.0   # bis zu dieser Höhe (mm über der Öffnung) muss der Kopf ganz durch
+KOPF_DURCHMESSER  = KOPF_LAENGE   # (für die erste Größenschätzung)
 KRAGEN_HOEHE      = 10.0    # massiver Ring an der Öffnung
 
 # Gitter
@@ -513,11 +516,100 @@ def kopfoeffnung(surf):
     by = max(c.y for c in rand) - min(c.y for c in rand)
     bm_nach(bm, surf)
     innen_x, innen_y = bx - 2 * WANDSTAERKE, by - 2 * WANDSTAERKE
-    soll = KOPF_DURCHMESSER + 2 * KOPF_SPIEL
+    soll = KOPF_BREITE + 2 * KOPF_SPIEL
     log(f"     Öffnung außen {bx:.0f} x {by:.0f} mm, innen ≈ {innen_x:.0f} x {innen_y:.0f} mm "
-        + (f"(Soll ≥ {soll:.0f} mm)" if TRAGBAR else "(Figur, nicht tragbar)"))
+        + ("" if TRAGBAR else "(Figur, nicht tragbar)"))
     if TRAGBAR and min(innen_x, innen_y) < soll:
         log("     WARNUNG: Öffnung kleiner als Soll – MASKE_HOEHE erhöhen (oder 0 = automatisch)!")
+
+
+def _schnitt_polygon(bm_quelle, z):
+    """Größte geschlossene Schnittkontur der Fläche bei Höhe z als (N,2)-Array."""
+    import numpy as np
+    bm = bm_quelle.copy()
+    r = bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:],
+                               plane_co=(0, 0, z), plane_no=(0, 0, 1))
+    kanten = [e for e in r["geom_cut"] if isinstance(e, bmesh.types.BMEdge)]
+    nach = {}
+    for e in kanten:
+        a, b = e.verts
+        nach.setdefault(a, []).append(b)
+        nach.setdefault(b, []).append(a)
+    gesehen, beste = set(), None
+    for start in nach:
+        if start in gesehen:
+            continue
+        kette, prev, cur = [start], None, start
+        gesehen.add(start)
+        while True:
+            nxt = [v for v in nach[cur] if v is not prev and v not in gesehen]
+            if not nxt:
+                break
+            prev, cur = cur, nxt[0]
+            gesehen.add(cur)
+            kette.append(cur)
+        if len(kette) > 8:
+            P = np.array([v.co[:2] for v in kette])
+            flaeche = 0.5 * abs(np.dot(P[:, 0], np.roll(P[:, 1], 1)) - np.dot(P[:, 1], np.roll(P[:, 0], 1)))
+            if beste is None or flaeche > beste[0]:
+                beste = (flaeche, P)
+    bm.free()
+    return None if beste is None else beste[1]
+
+
+def kopf_durchgang(surf):
+    """Kleinste Luft (mm) zwischen Kopf-Ellipse (KOPF_BREITE x KOPF_LAENGE) und der
+    Innenseite der Maske über alle Höhen 0..KOPF_PRUEF_BIS. Rückgabe (luft, z)."""
+    import numpy as np
+    bm = bm_aus(surf)
+    a, b = KOPF_BREITE / 2, KOPF_LAENGE / 2
+    schlechteste = (1e9, None)
+    for z in np.arange(SCHNITT_Z + 2, SCHNITT_Z + KOPF_PRUEF_BIS, 5.0):
+        P = _schnitt_polygon(bm, z)
+        if P is None:
+            continue
+        netz = NETZ_TIEFE if GITTER_MODUS == "lochnetz" else STEG_A - GITTER_UEBERLAPP + STEG_B
+        wand = WANDSTAERKE if z < SCHNITT_Z + KRAGEN_HOEHE else netz
+        # dicht abtasten
+        Q = []
+        for p, q in zip(P, np.roll(P, -1, axis=0)):
+            n = max(int(np.linalg.norm(q - p) / 2.0), 1)
+            Q.append(p + (q - p) * np.linspace(0, 1, n, endpoint=False)[:, None])
+        Q = np.vstack(Q)
+        beste = -1e9
+        (x0, y0), (x1, y1) = Q.min(0), Q.max(0)
+        for cx in np.arange(x0 + a, x1 - a + 0.1, 4.0):
+            for cy in np.arange(y0 + b, y1 - b + 0.1, 4.0):
+                d = Q - (cx, cy)
+                r = np.hypot(d[:, 0], d[:, 1])
+                ct, st = d[:, 0] / np.maximum(r, 1e-9), d[:, 1] / np.maximum(r, 1e-9)
+                r_ell = 1.0 / np.sqrt((ct / a) ** 2 + (st / b) ** 2)
+                luft = (r - r_ell).min() - wand
+                beste = max(beste, luft)
+        if beste < schlechteste[0]:
+            schlechteste = (beste, z)
+    bm.free()
+    return schlechteste
+
+
+def kopf_einpassen(surf):
+    """Prüft den Durchgang für den Kopf durch Öffnung und Hals. Bei MASKE_HOEHE = 0 wird
+    die Maske so weit vergrößert, bis überall mindestens KOPF_SPIEL Luft ist."""
+    for runde in range(4):
+        luft, z = kopf_durchgang(surf)
+        log(f"     Kopfdurchgang ({KOPF_BREITE:.0f} x {KOPF_LAENGE:.0f} mm): engste Stelle "
+            f"{z - SCHNITT_Z:.0f} mm über der Öffnung, {luft:.1f} mm Luft rundum")
+        if luft >= KOPF_SPIEL - 0.3 or MASKE_HOEHE > 0:
+            break
+        # Engstelle hat Innenmaß ≈ KOPF_LAENGE + 2*luft -> passend skalieren
+        k = (KOPF_LAENGE + 2 * KOPF_SPIEL + 2 * NETZ_TIEFE + 1.0) / (KOPF_LAENGE + 2 * luft + 2 * NETZ_TIEFE)
+        k = max(k, 1.005)
+        surf.data.transform(Matrix.Translation((0, 0, SCHNITT_Z)) @ Matrix.Scale(k, 4)
+                            @ Matrix.Translation((0, 0, -SCHNITT_Z)))
+        surf.data.update()
+        log(f"     -> Maske um {100 * (k - 1):.1f} % vergrößert")
+    if luft < KOPF_SPIEL - 0.3:
+        log(f"     WARNUNG: nur {luft:.1f} mm Luft – Kopf passt eng oder gar nicht (MASKE_HOEHE erhöhen)")
 
 
 def solide_huelle(surf, col):
@@ -970,6 +1062,8 @@ def main():
     if EXPORT_BASIS_STL:
         exportieren(surf, "rhino_basis_schritt1.stl", "stl")
     kopfoeffnung(surf)
+    if TRAGBAR:
+        kopf_einpassen(surf)
     huelle = solide_huelle(surf, col)
     augen_ob, zentren = augen(surf, col)
     a, b = gitter(surf, zentren, col)

@@ -14,8 +14,8 @@ Arbeitsanweisung und Projektstand für KI-Agenten. Sprache mit dem Nutzer: **Deu
 - **Form 1:1 aus dem Meshy-Modell** – nicht glätten, nicht remeshen, nichts „verbessern“. Das Modell ist wasserdicht, deshalb kein Voxel-Remesh (`IMPORT_VOXEL = 0`).
 - Einziger Eingriff in die Form: Die gerundete Halsunterseite wird waagerecht abgeschnitten (`IMPORT_ABSCHNITT_ANTEIL = 0.1326` der Modellhöhe), weil der Hals erst dort weit genug für den Kopf ist.
 - Augen = die Augenwölbungen des Modells (Flächenwachstum vom Augenmittelpunkt bis zum Knick, `AUGE_KANTENWINKEL = 14°`, stabil zwischen 10° und 17°), solidifiziert mit 5 mm. Eine angepasste Kugel passte nicht (die Augen sind oval) und hätte Gittermuster auf dem Auge gezeigt.
-- Größe automatisch aus dem Kopfmaß 220 mm + 2 × 15 mm Luft + Wand → Faktor ≈ 300,7 (Modelleinheiten → mm).
-- Drucker: Anycubic Kobra 4, 260 × 260 × 260 mm, Rand 5 mm → 2 × 2 × 2 = 8 Teile.
+- **Ein Erwachsenenkopf muss durch Öffnung UND Hals passen** (Nutzer). `kopf_einpassen()` schneidet die Fläche alle 5 mm bis 250 mm Höhe, sucht die beste Lage einer Kopf-Ellipse 170 × 230 mm (95. Perzentil inkl. Nase) und vergrößert die Maske, bis überall ≥ 10 mm Luft sind. Engstelle: 27 mm über der Öffnung (Halsinnentiefe). Ergebnis: Faktor 300,7 × 1,037, Maske 385 × 511 × 515 mm.
+- Drucker: Anycubic Kobra 4, 260 × 260 × 260 mm, Rand 2 mm (bei 5 mm wären es 12 statt 8 Teile) → 2 × 2 × 2 = 8 Teile, max. 192 × 255 × 258 mm.
 
 - Mini-Variante (`PRESET = "mini"` oder `-- mini`): 59,5 mm Höhe → 45 × 60 × 60 mm, Lochnetz Maschen 1,6 mm, Stege 0,8 mm, Tiefe 0,8 mm mittig (`NETZ_OFFSET = 0`), Löcher ca. 0,8 mm (Grenze für 0,4-mm-Düse), nur Lage A mit `WIRE_OFFSET_A = 0` (Ohren sind dort nur 0,6–1 mm dick), zusätzlich eine massive Figur (`VOLLKOERPER`). Ausgabe in `druck/mini/`.
 

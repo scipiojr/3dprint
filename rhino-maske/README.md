@@ -12,20 +12,20 @@ Tragbare Nashorn-Kopfmaske als feines **Sichtgitter**: Von außen wirkt die Mask
 
 | | |
 |---|---|
-| Größe | 371 × 493 × 497 mm (B × T × H) |
-| Kopföffnung | innen ca. 293 × 251 mm (Kopf 22 cm + 15 mm Luft rundum) |
+| Größe | 385 × 511 × 515 mm (B × T × H) |
+| Kopfdurchgang | Ein großer Erwachsenenkopf (95. Perzentil: 17 cm breit, 23 cm lang inkl. Nase) passt an **jeder** Höhe mit mindestens 10 mm Luft rundum durch Öffnung und Hals. Die engste Stelle liegt 27 mm über dem Rand. Das Skript prüft das automatisch. |
 | Netz | Maschenweite 2,5 mm, Stege 0,9 mm breit und 2,0 mm tief, Löcher ca. 1,6 mm (rund 40 % offen) |
 | Augen | Augenwölbungen des Modells, solide, 5 mm Wand |
 | Rand | massiver Kragen, 10 mm hoch, an der Kopföffnung |
-| Teile | 8 Stück für 260 × 260 × 260 mm (Anycubic Kobra 4) |
-| Material | ca. 0,75 kg PLA |
+| Teile | 8 Stück, max. 192 × 255 × 258 mm, für 260 × 260 × 260 mm (Anycubic Kobra 4) |
+| Material | ca. 0,8 kg PLA |
 
 ## Dateien
 
 | Datei | Inhalt |
 |---|---|
 | `druck/rhino_maske_kobra4.3mf` | Alle 8 Teile in einer 3MF (mm), je Teil eine Druckplatte vorgesehen |
-| (`druck/rhino_maske_komplett.stl`) | Ganze Maske am Stück – wird vom Skript erzeugt, ist mit ca. 120 MB aber zu groß für GitHub und deshalb nicht eingecheckt |
+| (`druck/rhino_maske_komplett.stl`) | Ganze Maske am Stück. Das Skript erzeugt sie, mit ca. 125 MB ist sie aber zu groß für GitHub und deshalb nicht eingecheckt |
 | `druck/stl/rhino_maske_teil_XX_von_08.stl` | Die 8 Teile einzeln |
 | `druck/mini/` | Mini-Figur, ca. 60 mm: Gitter, massiv und beides als 3MF |
 | `rhino_lattice_mask.py` | Generator für Blender 4.x (bpy). **Quelle** für alles in `druck/` |
@@ -78,7 +78,7 @@ Die Schnittflächen sind eben und geschlossen (Teil 03 hat 8 offene Kanten an ei
 
 Oben im Skript stehen die Einstellungen:
 
-- `MASKE_HOEHE` – fertige Höhe in mm. Mit `0` wählt das Skript die kleinste Größe, bei der der Kopf durch die Öffnung passt (`KOPF_DURCHMESSER`, `KOPF_SPIEL`).
+- `MASKE_HOEHE` – fertige Höhe in mm. Mit `0` wählt das Skript die kleinste Größe, bei der der Kopf (`KOPF_BREITE` × `KOPF_LAENGE`) bis `KOPF_PRUEF_BIS` mm Höhe überall mit `KOPF_SPIEL` Luft durch Öffnung und Hals passt. Bei fester Höhe meldet das Skript die Luft und warnt, wenn es zu eng wird.
 - `DRUCKRAUM`, `DRUCKRAND` – Druckraum des Druckers. Die Maske wird automatisch in passende Teile geschnitten.
 - `ZELLE_A/B`, `STEG_A/B` – Zellgröße und Stegdicke der beiden Gitterlagen.
 - `IMPORT_PFAD` – anderes Modell (STL/OBJ/GLB, Z oben, Schnauze nach −Y). Leer: die einfache, prozedural erzeugte Form.

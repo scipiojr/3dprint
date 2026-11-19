@@ -53,7 +53,7 @@ PRESETS = {
         NETZ_TIEFE=0.8, NETZ_OFFSET=0.0,  # mittig, sonst sticht es an den dünnen Ohren durch
         MIN_LOCH=0.4,
         KRAGEN_HOEHE=2.0, WANDSTAERKE=1.2, AUGE_WAND=1.2,
-        TRAGBAR=False, TEILEN=False, VOLLKOERPER=True,
+        TRAGBAR=False, TEILEN=False, VOLLKOERPER=True, AUSGLEICH=False,
         EXPORT_PFAD="druck/mini/rhino_mini_gitter.stl",
     ),
 }
@@ -90,6 +90,15 @@ STEG_A            = 0.9     # Stegbreite an der Oberfläche (>= 2 Düsenbahnen)
 NETZ_TIEFE        = 2.0     # Stegtiefe nach innen (Steifigkeit; tiefer = engerer Sichtwinkel)
 NETZ_OFFSET       = -1.0    # -1 = Netz liegt innerhalb der Außenfläche, 0 = mittig
 MIN_LOCH          = 0.5     # kleinere Löcher werden nicht ausgestanzt (Zelle bleibt zu)
+
+# Gewichtsausgleich: Schnauze ist schwer -> Hinterkopf-Netz innen tiefer machen, bis der
+# Schwerpunkt über der Kopfmitte des Trägers liegt (Front, Hals und Lochgröße bleiben gleich)
+AUSGLEICH         = True
+AUSGLEICH_ZIEL    = 5.0     # mm: Schwerpunkt so weit HINTER die Kopfmitte legen (Reserve gegen Vorkippen)
+AUSGLEICH_Z_AB    = 140.0   # erst ab dieser Höhe über dem Rand verstärken (Hals bleibt frei für den Kopf)
+AUSGLEICH_UEBERGANG = 60.0  # mm weicher Übergang von normaler zu verstärkter Tiefe
+NETZ_TIEFE_MAX    = 12.0    # maximale Stegtiefe am Hinterkopf
+PLA_DICHTE        = 1.24    # g/cm³
 # Gitter Lage B (innen, Dreiecke, versetzt)
 ZELLE_B           = 10.0
 STEG_B            = 2.0
@@ -131,6 +140,7 @@ EXPORT_PFAD       = "druck/rhino_maske_komplett.stl"   # relativ zum Skript; Tei
 # Metaball-Kalibrierung: sichtbarer Radius = 0.5745 * radius (Threshold 0.6, Stiffness 2)
 _MB_F = 0.5745
 _IMPORT_H, _IMPORT_UNTEN = 0.0, 0.0
+AUSGLEICH_ERGEBNIS = None
 _PROZ_HOEHE_S1 = 483.0      # Höhe der prozeduralen Maske bei SKALIERUNG = 1
 
 
@@ -592,6 +602,116 @@ def kopf_durchgang(surf):
     return schlechteste
 
 
+def _ellipsen_mitte(P, a, b, schritt=2.0):
+    import numpy as np
+    Q = []
+    for p, q in zip(P, np.roll(P, -1, axis=0)):
+        n = max(int(np.linalg.norm(q - p) / 2.0), 1)
+        Q.append(p + (q - p) * np.linspace(0, 1, n, endpoint=False)[:, None])
+    Q = np.vstack(Q)
+    beste = (-1e9, None)
+    (x0, y0), (x1, y1) = Q.min(0), Q.max(0)
+    for cx in np.arange(x0 + a, x1 - a + 0.1, schritt):
+        for cy in np.arange(y0 + b, y1 - b + 0.1, schritt):
+            d = Q - (cx, cy)
+            r = np.maximum(np.hypot(d[:, 0], d[:, 1]), 1e-9)
+            luft = (r - 1.0 / np.sqrt((d[:, 0] / r / a) ** 2 + (d[:, 1] / r / b) ** 2)).min()
+            if luft > beste[0]:
+                beste = (luft, (cx, cy))
+    return beste[1]
+
+
+def kopf_mitte(surf):
+    """Lage der Kopfachse des Trägers: Mitte der bestpassenden Kopf-Ellipse im Hals
+    (gemittelt über 30–100 mm Höhe). Rückgabe (x, y)."""
+    bm = bm_aus(surf)
+    m = []
+    for z in (30, 60, 100):
+        P = _schnitt_polygon(bm, SCHNITT_Z + z)
+        if P is not None:
+            c = _ellipsen_mitte(P, KOPF_BREITE / 2, KOPF_LAENGE / 2)
+            if c is not None:
+                m.append(c)
+    bm.free()
+    return (sum(c[0] for c in m) / len(m), sum(c[1] for c in m) / len(m))
+
+
+def volumen_moment(objs):
+    """Volumen (mm³) und erstes Moment (mm⁴) geschlossener Meshes inkl. Modifier."""
+    import numpy as np
+    dg = bpy.context.evaluated_depsgraph_get()
+    dg.update()
+    V, M = 0.0, np.zeros(3)
+    for o in objs:
+        me = bpy.data.meshes.new_from_object(o.evaluated_get(dg))
+        me.calc_loop_triangles()
+        co = np.empty(len(me.vertices) * 3)
+        me.vertices.foreach_get("co", co)
+        co = co.reshape(-1, 3)
+        tri = np.empty(len(me.loop_triangles) * 3, dtype=np.int64)
+        me.loop_triangles.foreach_get("vertices", tri)
+        t = co[tri.reshape(-1, 3)]
+        vol = np.einsum("ij,ij->i", t[:, 0], np.cross(t[:, 1], t[:, 2])) / 6.0
+        V += vol.sum()
+        M += (vol[:, None] * t.sum(1) / 4.0).sum(0)
+        bpy.data.meshes.remove(me)
+    return V, M
+
+
+def ausgleich(netz, andere, surf):
+    """Hinterkopf-Netz innen tiefer machen, bis der Schwerpunkt der ganzen Maske
+    AUSGLEICH_ZIEL mm hinter der Kopfmitte liegt. Front/Hals bleiben NETZ_TIEFE."""
+    import numpy as np
+    log("     Gewichtsausgleich …")
+    kx, ky = kopf_mitte(surf)
+    y_ziel = ky + AUSGLEICH_ZIEL
+    so = netz.modifiers["Tiefe"]
+    # Gewichte: 0 vorne / im Hals, 1 am Hinterkopf (weicher Übergang)
+    def glatt(t):
+        t = min(max(t, 0.0), 1.0)
+        return t * t * (3 - 2 * t)
+    g = netz.vertex_groups.new(name="Hinterkopf")
+    stufen = {}
+    for v in netz.data.vertices:
+        w = glatt((v.co.y - (ky + 20)) / AUSGLEICH_UEBERGANG) * \
+            glatt((v.co.z - SCHNITT_Z - AUSGLEICH_Z_AB) / 40.0)
+        stufen.setdefault(round(w, 2), []).append(v.index)
+    for w, idx in stufen.items():
+        g.add(idx, w, 'REPLACE')
+    so.vertex_group = "Hinterkopf"
+    so.thickness, so.thickness_vertex_group = NETZ_TIEFE, 1.0      # Ausgangszustand: überall gleich
+
+    V0, M0 = volumen_moment([netz] + andere)
+    y0 = M0[1] / V0
+    log(f"     vorher: {V0 / 1000 * PLA_DICHTE:.0f} g, Schwerpunkt {y0 - ky:+.0f} mm "
+        f"(− = vor der Kopfmitte), Kopfmitte y = {ky:.0f}")
+    def setze(tiefe):
+        so.thickness = tiefe
+        so.thickness_vertex_group = NETZ_TIEFE / tiefe
+    # Sekantenverfahren auf y_schwerpunkt(tiefe) = y_ziel
+    t_a, f_a = NETZ_TIEFE, y0 - y_ziel
+    t_b = NETZ_TIEFE + 3.0
+    for _ in range(6):
+        setze(t_b)
+        V, M = volumen_moment([netz] + andere)
+        f_b = M[1] / V - y_ziel
+        if abs(f_b) < 0.5 or t_b >= NETZ_TIEFE_MAX:
+            break
+        t_neu = t_b - f_b * (t_b - t_a) / (f_b - f_a)
+        t_a, f_a, t_b = t_b, f_b, min(max(t_neu, NETZ_TIEFE), NETZ_TIEFE_MAX)
+    setze(t_b)
+    V, M = volumen_moment([netz] + andere)
+    S = M / V
+    log(f"     nachher: Hinterkopf-Tiefe {t_b:.1f} mm, {V / 1000 * PLA_DICHTE:.0f} g, "
+        f"Schwerpunkt {S[1] - ky:+.0f} mm hinter der Kopfmitte, {S[2] - SCHNITT_Z:.0f} mm über dem Rand")
+    if abs(M[1] / V - y_ziel) > 2:
+        log("     WARNUNG: Ausgleich nicht ganz erreicht (NETZ_TIEFE_MAX erhöhen oder Zusatzgewicht hinten)")
+    modifier_anwenden(netz)
+    global AUSGLEICH_ERGEBNIS
+    AUSGLEICH_ERGEBNIS = dict(gewicht_g=V / 1000 * PLA_DICHTE, tiefe_hinten=t_b,
+                              schwerpunkt=tuple(S), kopfmitte=(kx, ky))
+
+
 def kopf_einpassen(surf):
     """Prüft den Durchgang für den Kopf durch Öffnung und Hals. Bei MASKE_HOEHE = 0 wird
     die Maske so weit vergrößert, bis überall mindestens KOPF_SPIEL Luft ist."""
@@ -851,6 +971,8 @@ def gitter_lochnetz(surf, augen_zentren, col):
     so.use_even_offset = False                  # True erzeugt Spitzen an engen Zellecken
     so.use_rim = True
     so.use_quality_normals = True
+    if AUSGLEICH:
+        return a, None                          # Tiefe wird in ausgleich() festgelegt
     modifier_anwenden(a)
     log(f"     Lochnetz: {len(a.data.polygons):,} Faces")
     return a, None
@@ -1068,6 +1190,8 @@ def main():
     augen_ob, zentren = augen(surf, col)
     a, b = gitter(surf, zentren, col)
     k = kragen(surf, col)
+    if AUSGLEICH and GITTER_MODUS == "lochnetz":
+        ausgleich(a, [k, augen_ob], surf)
 
     log("5/5  Zusammenführen …")
     maske = zusammenfuehren([o for o in (a, b, k, augen_ob) if o], "Rhino_Maske_LATTICE", col)

@@ -18,7 +18,8 @@ Tragbare Nashorn-Kopfmaske als feines **Sichtgitter**: Von außen wirkt die Mask
 | Augen | Augenwölbungen des Modells, solide, 5 mm Wand |
 | Rand | massiver Kragen, 10 mm hoch, an der Kopföffnung |
 | Teile | 8 Stück, max. 192 × 255 × 258 mm, für 260 × 260 × 260 mm (Anycubic Kobra 4) |
-| Material | ca. 0,8 kg PLA |
+| Gewicht | ca. 1,08 kg PLA (inkl. Gegengewicht am Hinterkopf) |
+| Schwerpunkt | 244 mm über dem Halsrand, 5 mm **hinter** der Kopfachse des Trägers → kippt nicht nach vorne |
 
 ## Dateien
 
@@ -42,6 +43,14 @@ So wirkt es am besten:
 - **Außen hell, innen dunkel.** Mit dunklem Filament drucken und die Außenseite nur von außen und schräg hell lackieren. Oder hell drucken und die Innenseite schwarz sprühen. Auf einer hellen Außenfläche bleibt der dunkle Innenraum unsichtbar.
 - Licht von außen, nicht innen: Bei Tageslicht oder Bühnenlicht sieht man nicht hinein, der Träger sieht aber gut hinaus.
 - Stellschrauben: `ZELLE_A` (Maschenweite), `STEG_A` (Stegbreite), `NETZ_TIEFE`. Loch ≈ `ZELLE_A − STEG_A`. Tiefere Stege machen die Maske steifer, verengen aber den Blickwinkel durch jedes Loch (2 mm Tiefe bei 1,6 mm Loch: etwa ±38°).
+
+## Sicht, Balance und Polster
+
+![Sicht und Schwerpunkt](bilder/sicht_und_schwerpunkt.png)
+
+- **Sicht:** Die Maske liegt mit dem Halsrand auf den Schultern. Die Augen des Trägers sind dann etwa 140–230 mm über dem Rand, je nach Körperbau. Die Maskenaugen sitzen höher (290–370 mm) und weiter außen; sie sind nicht im Blickfeld. Im ganzen Blickfeld (±60° seitlich, −45° bis +30° in der Höhe) schaut der Träger durch genau eine Lage Netz, geradeaus durch die Schnauzenfront in ca. 22 cm Abstand.
+- **Balance:** Ohne Ausgleich läge der Schwerpunkt weit vor der Kopfachse, die Maske würde nach vorne kippen. Deshalb ist das Netz am Hinterkopf (ab 140 mm über dem Rand) innen tiefer: 5,7 mm statt 2 mm, mit weichem Übergang. Löcher, Front und Hals bleiben unverändert. Das Skript rechnet das automatisch aus (`AUSGLEICH`, `AUSGLEICH_ZIEL`).
+- **Polster:** Die Kopfachse ist die Mitte des Kopfes im Hals (rote Linie). Polster so anbringen, dass der Kopf dort mittig sitzt: oben auf dem Scheitel tragen lassen (z. B. Bauhelm-Innenring oder Schaumstoff), dazu seitlich und hinten Schaumstoff gegen Verrutschen. Sitzt der Kopf weiter hinten, kippt die Maske nach vorne. Sitzt er weiter vorne, kippt sie nach hinten.
 
 ## Druck auf dem Anycubic Kobra 4
 

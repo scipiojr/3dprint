@@ -26,7 +26,7 @@ Klicker für den Schlüsselbund auf Basis eines MX-kompatiblen Tastaturschalters
 | `becher_mit_oese.stl`, `becher_fuenfecke_schwarz.stl`, `becher_fussball_mehrfarbig.3mf` | Becher (weiß) und Fünfecke (schwarz) |
 | `einsatz_schalterplatte.stl` | Schalteraufnahme, in den Becher geklebt |
 | `kappe_kolben_mit_zapfen.stl` | Kolben (Stempel) mit Kreuzaufnahme für den Stößel und zwei Zapfen für die Logoplatte, Drucklage Logoseite oben |
-| `kappe_kolben_ohne_zapfen.stl` | Derselbe Kolben mit glatter Deckfläche, die Logoplatte wird geklebt (die Sacklöcher in der Platte bleiben dann leer) |
+| `kappe_kolben_ohne_zapfen.stl` | Kolben mit glatter Deckfläche und ohne Stützrippen, die Logoplatte wird geklebt (die Sacklöcher in der Platte bleiben dann leer). Drucklage: Deckfläche auf dem Bett, Skirt oben |
 | `logoplatte_A_*`, `logoplatte_B_*` | Logoplatte je Farbe als STL und als Mehrfarb-3MF |
 | `clicker_komplett_A/B_..._nur_ansicht.3mf` | Zusammenbau mit Schalter, nur zur Ansicht |
 
@@ -40,7 +40,7 @@ Klicker für den Schlüsselbund auf Basis eines MX-kompatiblen Tastaturschalters
 ## Hinweise
 
 - Die Logoplatte sitzt mit zwei starren Zapfen (Ø 2,0 mm, 0,9 mm hoch) in Sacklöchern (Ø 2,1 mm, 1,0 mm tief) auf der Plattenunterseite. Sie hält durch Klemmung, notfalls ein Tropfen Kleber. Sie passt in zwei um 180° gedrehten Lagen.
-- Kappe mit der Logoseite nach oben drucken, 8 Rippen unter der Deckscheibe ersetzen Stützen. Skirt und Zapfen sind 4,5 mm lang, die Führung im Becher ist in Ruhe ca. 3,4 mm lang.
+- Kappe mit Zapfen: Logoseite nach oben drucken, die 8 Stützrippen unter der Deckscheibe verhindern eine Brücke über Ø 32 mm. Die Kappe ohne Zapfen hat keine Rippen und wird mit der Deckfläche nach unten gedruckt. Skirt und Zapfen sind 4,5 mm lang, die Führung im Becher ist in Ruhe ca. 3,4 mm lang.
 - Noch nicht gedruckt. Zuerst Kappe, Einsatz und eine Logoplatte als Test drucken (Zapfenpassung, Kreuzaufnahme, Gleitpassung im Becher).
 
 ## Neu erzeugen

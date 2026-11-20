@@ -219,9 +219,12 @@ cross = (m3.Manifold.cube((CROSS_L, CROSS_W1, CROSS_DEPTH + 1), True) +
          ).translate((0, 0, T_CARR + POST_L - CROSS_DEPTH / 2 + 0.5))
 carrier = carrier + rib + post - cross
 # Stützrippen unter der Deckscheibe (Kappe druckt mit der Logoseite oben): keine Brücke über Ø32
+carrier_norib = carrier
 carrier = carrier + union([m3.Manifold.cube((5.0, 1.0, SKIRT_L), False).translate((11.6, -0.5, T_CARR)).rotate((0, 0, 22.5 + 45 * k)) for k in range(8)])
 # Fase an der Skirt-Unterkante
-carrier = carrier ^ (cyl(R_CAP + 1, T_CARR + SKIRT_L - 0.5) + cyl(R_CAP + 1, 0.5, T_CARR + SKIRT_L - 0.5, r2=R_CAP - 0.5))
+FASE = (cyl(R_CAP + 1, T_CARR + SKIRT_L - 0.5) + cyl(R_CAP + 1, 0.5, T_CARR + SKIRT_L - 0.5, r2=R_CAP - 0.5))
+carrier = carrier ^ FASE
+carrier_norib = carrier_norib ^ FASE
 
 # Clips: Biegearm in der Deckscheibe (Schlitze), Nase mit Widerhaken ragt Richtung Logoplatte (lokal -z), bleibt unter deren Oberkante
 def to_local_xy(g):
@@ -231,9 +234,9 @@ def lp(c, u, v, a, b, zup):
     w = c + u * a + v * b
     return (w[0], -w[1], -zup)
 noses = [cyl(PEG_D / 2, NOSE_H + 0.15, -NOSE_H).translate((sx * R_NOSE, 0, 0)) for sx in (-1, 1)]   # starre Zapfen
-carrier_ohne = carrier
+carrier_ohne = carrier_norib
 carrier = carrier + union(noses)
-carrier_print_ohne = carrier_ohne.rotate((180, 0, 0)).translate((0, 0, T_CARR + SKIRT_L))
+carrier_print_ohne = carrier_ohne      # ohne Zapfen: Logoseite (z=0) liegt auf dem Bett, Skirt oben, keine Rippen nötig
 carrier_print = carrier.rotate((180, 0, 0)).translate((0, 0, T_CARR + SKIRT_L))   # Drucklage: Logoseite oben, Skirt/Zapfen unten auf dem Bett
 
 # ------------------------------------------------------------------ Einsatz (Schalterplatte)

@@ -231,7 +231,9 @@ def lp(c, u, v, a, b, zup):
     w = c + u * a + v * b
     return (w[0], -w[1], -zup)
 noses = [cyl(PEG_D / 2, NOSE_H + 0.15, -NOSE_H).translate((sx * R_NOSE, 0, 0)) for sx in (-1, 1)]   # starre Zapfen
+carrier_ohne = carrier
 carrier = carrier + union(noses)
+carrier_print_ohne = carrier_ohne.rotate((180, 0, 0)).translate((0, 0, T_CARR + SKIRT_L))
 carrier_print = carrier.rotate((180, 0, 0)).translate((0, 0, T_CARR + SKIRT_L))   # Drucklage: Logoseite oben, Skirt/Zapfen unten auf dem Bett
 
 # ------------------------------------------------------------------ Einsatz (Schalterplatte)
@@ -312,7 +314,8 @@ T["A_weiss"] = save(A_white, "logoplatte_A_buendig_weiss", WHITE)
 T["B_schwarz"] = save(B_black, "logoplatte_B_erhaben_schwarz", BLACK)
 T["B_rot"] = save(B_red, "logoplatte_B_erhaben_rot", RED)
 T["B_weiss"] = save(B_white, "logoplatte_B_erhaben_weiss", WHITE)
-T["kappe"] = save(carrier_print, "kappe_kolben", BLACK)
+T["kappe"] = save(carrier_print, "kappe_kolben_mit_zapfen", BLACK)
+T["kappe_ohne"] = save(carrier_print_ohne, "kappe_kolben_ohne_zapfen", BLACK)
 T["einsatz"] = save(insert, "einsatz_schalterplatte", BLACK)
 T["becher"] = save(cup, "becher_mit_oese", [240, 240, 240, 255])
 T["pent"] = save(inlays, "becher_fuenfecke_schwarz", BLACK)

@@ -16,7 +16,7 @@ sw=trimesh.boolean.union([
   box(4.0,1.2,PLATE_TOP+6.6,PLATE_TOP+10.6), box(1.2,4.0,PLATE_TOP+6.6,PLATE_TOP+10.6)],engine='manifold')
 sw.export(os.path.join(D,"schalter_attrappe_mx.stl"))
 cup=L("becher_mit_oese.stl"); pent=L("becher_fuenfecke_schwarz.stl")
-ins=flip(L("einsatz_schalterplatte.stl"),PLATE_TOP); cap=L("kappe_kolben.stl"); cap.apply_translation((0,0,ZC-5.7))
+ins=flip(L("einsatz_schalterplatte.stl"),PLATE_TOP); cap=L("kappe_kolben_mit_zapfen.stl"); cap.apply_translation((0,0,ZC-5.7))
 def logo(v):
     r=[]
     for c in ("schwarz","rot","weiss"):

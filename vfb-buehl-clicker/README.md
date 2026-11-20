@@ -25,7 +25,8 @@ Klicker für den Schlüsselbund auf Basis eines MX-kompatiblen Tastaturschalters
 |---|---|
 | `becher_mit_oese.stl`, `becher_fuenfecke_schwarz.stl`, `becher_fussball_mehrfarbig.3mf` | Becher (weiß) und Fünfecke (schwarz) |
 | `einsatz_schalterplatte.stl` | Schalteraufnahme, in den Becher geklebt |
-| `kappe_kolben.stl` | Kolben mit Kreuzaufnahme für den Stößel und zwei Zapfen für die Logoplatte, Drucklage Logoseite oben |
+| `kappe_kolben_mit_zapfen.stl` | Kolben (Stempel) mit Kreuzaufnahme für den Stößel und zwei Zapfen für die Logoplatte, Drucklage Logoseite oben |
+| `kappe_kolben_ohne_zapfen.stl` | Derselbe Kolben mit glatter Deckfläche, die Logoplatte wird geklebt (die Sacklöcher in der Platte bleiben dann leer) |
 | `logoplatte_A_*`, `logoplatte_B_*` | Logoplatte je Farbe als STL und als Mehrfarb-3MF |
 | `clicker_komplett_A/B_..._nur_ansicht.3mf` | Zusammenbau mit Schalter, nur zur Ansicht |
 

@@ -30,6 +30,19 @@ Klicker für den Schlüsselbund auf Basis eines MX-kompatiblen Tastaturschalters
 | `logoplatte_A_*`, `logoplatte_B_*` | Logoplatte je Farbe als STL und als Mehrfarb-3MF |
 | `clicker_komplett_A/B_..._nur_ansicht.3mf` | Zusammenbau mit Schalter, nur zur Ansicht |
 
+## Zweites Logo: SV Altschweier 1929 e.V.
+
+Blau auf weißem Grund, ebenfalls in beiden Varianten. Die Platten haben dieselben Maße und Sacklöcher und passen auf denselben Kolben.
+
+![SVA](bilder/sva_vorschau.png)
+
+| Datei | Inhalt |
+|---|---|
+| `logoplatte_SVA_A_buendig_weiss.stl`, `..._blau.stl`, `..._mehrfarbig.3mf` | Variante A: Logo bündig 0,6 mm eingelegt, Ø 35,6 mm |
+| `logoplatte_SVA_B_erhaben_weiss.stl`, `..._blau.stl`, `..._mehrfarbig.3mf` | Variante B: Logo 1,0 mm erhaben und verrundet. Das Logo ist hier auf Ø 34,4 mm verkleinert, damit der blaue Ring vollständig erhaben bleibt und nicht in die Fase der Platte läuft |
+
+Die Schrift hat nur ca. 0,6 mm Strichstärke. Mit 0,4-mm-Düse und 0,12–0,16 mm Schichthöhe drucken.
+
 ## Zusammenbau
 
 1. Schalter von oben in den Einsatz klicken.
@@ -49,6 +62,7 @@ Klicker für den Schlüsselbund auf Basis eines MX-kompatiblen Tastaturschalters
 pip install manifold3d trimesh shapely opencv-python pyvista numpy pillow
 SIMP=0.003 python3 build_clicker.py modell/logo.png druck
 python3 vorschau.py druck
+LOGO=sva SIMP=0.01 python3 build_clicker.py modell/logo_sva.jpg druck   # nur die SVA-Platten
 ```
 
 `build_clicker.py` ist die Quelle für alle Dateien in `druck/` (Parameter am Anfang der Datei). `vorschau.py` baut die Schalterattrappe, prüft Kollisionen und rendert die Bilder. Alle STL-Dateien sind nach dem Neuladen wasserdicht.

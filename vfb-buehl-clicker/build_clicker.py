@@ -9,6 +9,7 @@ import manifold3d as m3
 import trimesh
 
 IMG, OUT = sys.argv[1], sys.argv[2]
+LOGO = os.environ.get("LOGO", "vfb")      # "vfb" = schwarz/weiß/rot (ganzer Clicker), "sva" = blau auf weiß (nur Logoplatten)
 os.makedirs(OUT, exist_ok=True)
 
 # ------------------------------------------------------------------ Parameter
@@ -59,9 +60,14 @@ H_CUP = CAP_UNDER_REST - TRAVEL + T_CARR + T_PLATE - 0.3   # Kappe bündig+0.5 b
 # ------------------------------------------------------------------ Logo -> Polygone
 a = np.array(Image.open(IMG)).astype(np.float32) / 255.0
 a = a[:, :900]
-al = a[..., 3]
-red_s = al * np.clip(a[..., 0] - a[..., 1], 0, 1)
-wht_s = al * a[..., 1]
+if LOGO == "sva":                       # JPG ohne Alpha: Blau = Logo, Weiß = Grund
+    red_s = np.clip(1.0 - a[..., 0] * 1.0, 0, 1)
+    wht_s = np.zeros_like(red_s)
+    al = red_s
+else:
+    al = a[..., 3]
+    red_s = al * np.clip(a[..., 0] - a[..., 1], 0, 1)
+    wht_s = al * a[..., 1]
 ys, xs = np.where(al > 0.5)
 x0, x1, y0, y1 = xs.min(), xs.max() + 1, ys.min(), ys.max() + 1
 cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
@@ -200,7 +206,11 @@ inner = ellipse(A_E - CHAMF - 0.05, B_E - CHAMF - 0.05)
 def opened(g, d=0.04):
     # schmale Engstellen/Berührpunkte (zwei Flächen berühren sich nur an einer Kante) auflösen
     return g.buffer(-d, join_style=2, mitre_limit=5).buffer(d, join_style=2, mitre_limit=5).buffer(0)
-red_c, white_c = opened(red.intersection(inner)), opened(white.intersection(inner))
+KB = 1.0 if LOGO == "vfb" else (A_E - CHAMF - 0.1) / A_E      # SVA: Logo für die erhabene Variante bis an die Fase verkleinert, damit der Ring voll erhaben bleibt
+red_c = opened(affinity.scale(red, KB, KB, origin=(0, 0)).intersection(inner))
+white_c = opened(affinity.scale(white, KB, KB, origin=(0, 0)).intersection(inner))
+if LOGO != "vfb":
+    R_RED = 0.35
 B_black = env - dowels
 B_red_vfb = rounded(red_c, H_RED, R_RED, T_PLATE)                         # V F B
 B_white_full = rounded(white_c.buffer(0.08, join_style=2, mitre_limit=5), H_RED + H_WHITE, R_WHITE, T_PLATE)         # "Bühl", durchgehend vom Plattenrand
@@ -208,6 +218,22 @@ combined = B_red_vfb + B_white_full
 SPLIT = T_PLATE + H_RED                                                    # Farbwechsel Rot -> Weiß
 B_red = combined ^ m3.Manifold.cube((60, 60, SPLIT - T_PLATE + 1.0), False).translate((-30, -30, T_PLATE - 1.0))
 B_white = combined ^ m3.Manifold.cube((60, 60, 10), False).translate((-30, -30, SPLIT))
+
+if LOGO == "sva":
+    nm = "logoplatte_SVA_"
+    TS = {}
+    TS["A_weiss"] = save(A_black, nm + "A_buendig_weiss", WHITE)
+    TS["A_blau"] = save(A_red, nm + "A_buendig_blau", [0, 70, 170, 255])
+    TS["B_weiss"] = save(B_black, nm + "B_erhaben_weiss", WHITE)
+    TS["B_blau"] = save(combined, nm + "B_erhaben_blau", [0, 70, 170, 255])
+    for name, wt, wc, vol, size, nf in report:
+        print(f"{name:34s} dicht={wt} konsistent={wc} V={vol:8.1f} mm³  {size[0]:.2f} x {size[1]:.2f} x {size[2]:.2f}  ({nf} Dreiecke)")
+    for v in "AB":
+        sc = trimesh.Scene()
+        for k in ("weiss", "blau"):
+            sc.add_geometry(TS[f"{v}_{k}"], node_name=k, geom_name=k)
+        sc.export(os.path.join(OUT, nm + v + ("_buendig" if v == "A" else "_erhaben") + "_mehrfarbig.3mf"))
+    sys.exit(0)
 
 # ------------------------------------------------------------------ Kappe (Kolben)
 # lokal: z=0 Klebefläche zur Logoplatte, +z Richtung Schalter. Rippe bei -y (wird im Zusammenbau +y).

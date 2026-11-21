@@ -269,17 +269,17 @@ Zum Einbau in ein durchgehendes DN110-Rohr: Das Rohr wird aufgetrennt, beide gla
 
 - **Muffen:** Innendurchmesser 110,6 mm (`tm_rohr_ad` + 2 × `tm_spiel` 0,3), 40 mm tief, Wand 4 mm (AD 118,6), 1,5 mm Einführfase. Dahinter ein **Anschlagring** (ID 104, 45°-Kegel unten, damit er stützfrei druckbar ist), sodass das Rohr nicht in den Abgang rutscht. In jeder Muffe eine **O-Ring-Nut** (TPU-Schnur 3 mm, 20 mm vom Rand, Dach 45°, Profil wie beim Ventilator-Adapter); der Ring `dichtung_muffe_110_tpu.stl` (ID 107,8 / AD 113,8) wird 2× gebraucht. `tm_nut = false` lässt die Nuten weg.
 - **Abgangsstutzen:** Echtes Rohr vom Rohr bis zum Flansch, 20 mm lang (`tm_stutzen_l`), Außenradius 56 (`tm_stutzen_r`), innen ø90. Die Magnetfläche liegt 87,3 mm von der Rohrachse. Der Stutzen ist außen ein Kreis mit **45°-Spitze nach unten** (stützfrei) und innen ein Kreis ø90 mit **45°-Dach nach oben** (`tm_decke_z` 52: flache Decke nur ca. 23 mm breit, statt ca. 63 mm Bogenbrücke). Der Flansch sitzt auf dem Stutzen, der untere Lappen auf der Spitze.
-- **Maße:** 192,6 mm hoch (2 × 40 Muffe + 2 × Anschlagring + 100 mm Mittelstück `tm_mitte`), Abgangsachse in halber Höhe. Footprint 135 × 147 mm, Volumen 467 cm³.
-- **Lappen:** `tm_flansch_winkel` = 30 (je ein Lappen genau oben und unten, der untere sitzt auf der Stutzenspitze). Mit 0° hängen mehr Lappen frei (mehr Lappen hängen frei, die seitlichen Nasen stützen dann ggf. nicht alle).
+- **Maße:** 192,6 mm hoch (2 × 40 Muffe + 2 × Anschlagring + 100 mm Mittelstück `tm_mitte`), Abgangsachse in halber Höhe. Footprint 135 × 147 mm, Volumen 428 cm³.
+- **Lappen:** `tm_flansch_winkel` = 30 (je ein Lappen genau oben und unten, der untere sitzt auf der Stutzenspitze). Mit 0° hängen mehr Lappen frei (mehr Lappen hängen frei).
 - **Druckpose = Einbaulage:** Rohr senkrecht, Muffenmündung unten auf dem Bett, Abgang waagerecht nach +Y:
   - Beide Muffen stehen senkrecht: runde Bohrungen, Nuten (Dach 45°) und Anschlagringe (45°) sind stützfrei.
   - Der Flansch steht senkrecht, Taschen und Nut liegen seitlich (kurze Brücken, ø15 mm).
-  - **Stützrippe (Nase):** Eine gerundete Rippe sitzt mittig unter dem Abgang (`tm_nasen`, `tm_nase_r`). Sie wächst aus der Wand des unteren Rohrstücks, geht in die Unterkante des Stutzens und den unteren Flanschrand über (höchstens 45°, am Druckbett abgeschnitten). Sie ist Teil des Druckteils.
-  - **Untere Seitenlappen:** Sie hängen neben dem Stutzen frei. Je eine zusätzliche Nase aus der Rohrwand (`tm_nasen_seitlich`, Standard an, höchstens 45°) trägt sie, die Außenkontur druckt damit stützfrei. Übrig bleibt nur die Decke der ø15-Magnettaschen (3,2 mm tief).
+  - **Stützrippe (Nase):** Eine massive Rippe sitzt mittig unter dem Abgang (`tm_nasen`, `tm_nase_b` 14 mm breit, `tm_nase_r`). Sie ist **geschlossen** gegen die Rohrwand des unteren Durchgangs, gegen die Stutzenunterkante und den unteren Flanschrand, wächst aus dem unteren Rohrstück heraus und läuft mit 45° zum Flansch (am Druckbett abgeschnitten). Sie ist Teil des Druckteils.
+  - **Untere Seitenlappen:** Sie hängen neben dem Stutzen frei (kleine Überhänge von ca. 10 mm, ggf. minimale Slicer-Stützen). Seitliche Nasen aus dem Rohr (`tm_nasen_seitlich`) sind abschaltbar und standardmäßig aus, sie haben sich nicht bewährt.
   - **Brücken:** das flache Dach der Stutzenbohrung (ca. 23 mm) und die ø90-Bohrung im Flansch selbst (8 mm tief, wegen der Dichtungsnut keine Teardrop-Form möglich). Beides liegt im Luftweg, nicht auf einer Dichtfläche.
 - **Geprüft (Rechenmodell):** STL wasserdicht; zwei DN110-Rohrenden (AD 110 / ID 104) sitzen ohne Überlappung in den Muffen; 0,6 mm tiefer erreichen sie den Anschlag; Überhangauswertung mit `werkzeuge/ueberhang.py` (Brücken: Stutzendach, Flanschbohrung, Taschen).
 - **Nicht geprüft:** Druck, Passung der Muffe (Spiel 0,3 mm; Rohrtoleranz HT/KG prüfen, bei zu strammem Sitz `tm_spiel` erhöhen), Dichtheit, Steifigkeit des Abgangs unter Schlauchlast (Stutzen 20 mm, bei Bedarf `tm_stutzen_l`/`tm_stutzen_r` vergrößern und mehr Wände), Polung des Flanschs.
-- **Magnetbedarf:** 6. **Volumen** 467 cm³ (bis ca. 590 g bei Vollfüllung).
+- **Magnetbedarf:** 6. **Volumen** 428 cm³ (bis ca. 540 g bei Vollfüllung).
 - Export: `werkzeuge/export_dn110_tstueck.sh` → `dn110_tstueck/dn110_tstueck.stl` und `dichtung_muffe_110_tpu.stl`; Bild: `werkzeuge/bild_dn110_tstueck.py`.
 
 ## Filterkasten (`abluft_filterkasten.scad`)

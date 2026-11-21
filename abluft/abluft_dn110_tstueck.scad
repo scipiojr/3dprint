@@ -60,9 +60,10 @@ tm_decke_z = 52;                 // [46:0.5:54]
 // tm_nasen: eine gerundete Stuetznase mittig unter dem Abgang (Hull aus Kugeln): waechst aus der Wand des unteren Durchgangs, geht in die Unterkante
 // des Stutzens und den unteren Flanschrand ueber, hoechstens 45 Grad geneigt (stuetzfrei druckbar), am Druckbett abgeschnitten
 tm_nasen = true;
-tm_nase_r = 6;                   // Staerke der Nase am Rohrfuss (am Stutzen 5, am Flansch 2,8)
+tm_nase_r = 6;                   // Verrundung der Nase am Rohrfuss (am Stutzen 5, am Flansch 2,8)
+tm_nase_b = 14;                  // Breite (X) des massiven Kerns der Nase (geschlossen gegen Rohrwand, Stutzen und Flansch)
 // tm_nasen_seitlich: zusaetzlich je eine Nase aus dem Rohr unter den unteren Seitenlappen (diese haengen sonst frei neben dem Stutzen)
-tm_nasen_seitlich = true;
+tm_nasen_seitlich = false;
 
 // ---------------- abgeleitet ----------------
 rs   = (tm_rohr_ad + 2 * tm_spiel) / 2;    // Muffen-Innenradius
@@ -174,12 +175,19 @@ module nase_mitte() {
     S  = [0, yb - 10, zb + zstutzen(0) + 3];
     yB = ro - 1.5;
     zB = min(A[2] - (A[1] - yB), S[2] - (S[1] - yB));
+    zf = zb + zlow(0);                                  // tiefster Punkt des Flanschs
+    yv = yb + 1.8;                                      // vordere Kante (vor den Magnettaschen)
     intersection() {
         translate([-60, -1, 0]) cube([120, 200, 400]);          // am Druckbett abschneiden
-        hull() {
-            translate(A) sphere(r = ra, $fn = 32);
-            translate(S) sphere(r = rS, $fn = 32);
-            translate([0, yB, zB]) sphere(r = rB, $fn = 32);
+        union() {
+            hull() {
+                translate(A) sphere(r = ra, $fn = 32);
+                translate(S) sphere(r = rS, $fn = 32);
+                translate([0, yB, zB]) sphere(r = rB, $fn = 32);
+            }
+            // massiver Kern: Schnitt (y, z) vom Bett bis in Flansch und Stutzen, hinten in der Rohrwand, Schraege 45 Grad
+            translate([0, 0, 0]) rotate([90, 0, 90]) linear_extrude(height = tm_nase_b, center = true)
+                polygon([[yB, 0], [yv - zf, 0], [yv, zf], [yv, zf + 3], [yB, zf + 3]]);
         }
     }
 }

@@ -61,8 +61,8 @@ tm_decke_z = 52;                 // [46:0.5:54]
 // des Stutzens und den unteren Flanschrand ueber, hoechstens 45 Grad geneigt (stuetzfrei druckbar), am Druckbett abgeschnitten
 tm_nasen = true;
 tm_nase_r = 6;                   // Staerke der Nase am Rohrfuss (am Stutzen 5, am Flansch 2,8)
-// tm_nasen_seitlich: zusaetzlich je eine Nase unter den unteren Seitenlappen (nur noetig, wenn diese Lappen frei haengen)
-tm_nasen_seitlich = false;
+// tm_nasen_seitlich: zusaetzlich je eine Nase aus dem Rohr unter den unteren Seitenlappen (diese haengen sonst frei neben dem Stutzen)
+tm_nasen_seitlich = true;
 
 // ---------------- abgeleitet ----------------
 rs   = (tm_rohr_ad + 2 * tm_spiel) / 2;    // Muffen-Innenradius

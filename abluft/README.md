@@ -46,6 +46,7 @@ Abluft-Anschluss für einen Laser-Cutter: Eine 5 mm dicke Plexiglasscheibe häng
 | `schraubkappe_110_auf_100.stl` | Reduzierer: wird auf den Stutzen des vorhandenen **110er**-Schlauchanschlusses geschraubt und endet in einem 100er-Schlauchstutzen mit Wulsten (siehe Schraubkappe) |
 | `dichtung_stutzenende_tpu.stl` | TPU-O-Ring (Schnur 2,5 mm, ID 101,5 / AD 106,5) für die Dichtfläche zwischen Stutzenende des 110er-Anschlusses und Schraubkappe |
 | `dichtung_ventilator_muffe_tpu.stl` | TPU-O-Ring für die Nut in der Muffenwand des Ventilator-Adapters (Schnur 3 mm, ID 143,6 / AD 149,6 mm) |
+| `dn110_tstueck/` | DN110-T-Stück: zwei Muffen (ID 110,6, 40 mm tief, O-Ring-Nut, Anschlagring) und 6er-Magnetflansch im Abgang, stützenarme Druckpose (`dn110_tstueck.stl`), TPU-Ring für die Muffen-Nut (`dichtung_muffe_110_tpu.stl`, 2×) |
 | `bilder/` | Vorschaubilder, erzeugt mit `werkzeuge/bilder.py` |
 | `werkzeuge/` | `export_alle.sh` (alle STL aus der SCAD erzeugen), `pruefung.py` (Passungs- und Gewindeprüfung), `bilder.py` |
 | `agent.md` | Arbeitsstand, Entscheidungen und Arbeitsweise für KI-Agenten |
@@ -259,6 +260,27 @@ Der Ring verschwindet komplett in der Platte, der Deckel liegt plan auf (nur 4,6
 - **Deckel** (Teil 5): ø168 × 4,6, **2 Magnete** (120° auseinander, gleiche Polung, in 60°-Schritten drehen bis er anzieht), Dichtungsnut unten für den TPU-Ring. **Klapplasche** in einem Stück: freigeschnittene Zunge (24 × 25 mm) mit **Filmscharnier** (0,8 mm, unten durchgehend), Fingermulde am freien Ende. Lasche hochklappen, ziehen. Nicht erprobt: Lebensdauer des Filmscharniers in PETG.
 - **Rohr 2** ist 5 mm höher (Senkrechte 29,3 mm), Rohr 1 unverändert. Der Winkeladapter (Schlauchstutzen oder Rohrstumpf) sitzt auf dem Ring wie bisher (Flansch 5 mm höher: 237 mm Flanschabstand passen weiter, bei der Muffenvariante ca. 13 mm Luft zum Dach).
 - 3MF: `dn110_arbeitsplatte_buendig/dn110_buendig_alle.3mf` (8 Objekte: Rohr 1, Rohr 2, Ring, Halteflansch, Deckel, beide Winkeladapter, TPU-Ring). Export: `werkzeuge/export_dn110_buendig.sh` und `werkzeuge/export_dn110_buendig_3mf.py`.
+
+## DN110-T-Stück mit zwei Muffen (`abluft_dn110_tstueck.scad`)
+
+![DN110-T-Stück](bilder/dn110_tstueck.png)
+
+Zum Einbau in ein durchgehendes DN110-Rohr: Das Rohr wird aufgetrennt, beide glatten Rohrenden (AD 110) stecken in je eine **Muffe**. Der Abgang (T-Fuß) endet im **6er-Magnetflansch** des Systems (Muster des 100er-Schlauchanschlusses wie Ventilator-Adapter und DN110-Muffenanschluss, Bohrung ø90, Dichtungsnut r 50,5), darauf passt die 6er-Magnetmuffe.
+
+- **Muffen:** Innendurchmesser 110,6 mm (`tm_rohr_ad` + 2 × `tm_spiel` 0,3), 40 mm tief, Wand 4 mm (AD 118,6), 1,5 mm Einführfase. Dahinter ein **Anschlagring** (ID 104, 45°-Kegel unten, damit er stützfrei druckbar ist), sodass das Rohr nicht in den Abgang rutscht. In jeder Muffe eine **O-Ring-Nut** (TPU-Schnur 3 mm, 20 mm vom Rand, Dach 45°, Profil wie beim Ventilator-Adapter); der Ring `dichtung_muffe_110_tpu.stl` (ID 107,8 / AD 113,8) wird 2× gebraucht. `tm_nut = false` lässt die Nuten weg.
+- **Abgangsstutzen:** Echtes Rohr vom Rohr bis zum Flansch, 20 mm lang (`tm_stutzen_l`), Außenradius 56 (`tm_stutzen_r`), innen ø90. Die Magnetfläche liegt 87,3 mm von der Rohrachse. Der Stutzen ist außen ein Kreis mit **45°-Spitze nach unten** (stützfrei) und innen ein Kreis ø90 mit **45°-Dach nach oben** (`tm_decke_z` 52: flache Decke nur ca. 23 mm breit, statt ca. 63 mm Bogenbrücke). Der Flansch sitzt auf dem Stutzen, der untere Lappen auf der Spitze.
+- **Maße:** 192,6 mm hoch (2 × 40 Muffe + 2 × Anschlagring + 100 mm Mittelstück `tm_mitte`), Abgangsachse in halber Höhe. Footprint 135 × 147 mm, Volumen 427 cm³.
+- **Lappen:** `tm_flansch_winkel` = 30 (je ein Lappen genau oben und unten, der untere sitzt auf der Stutzenspitze). Mit 0° hängen mehr Lappen frei (mehr Lappen hängen frei, ggf. `tm_nasen_seitlich`).
+- **Druckpose = Einbaulage:** Rohr senkrecht, Muffenmündung unten auf dem Bett, Abgang waagerecht nach +Y:
+  - Beide Muffen stehen senkrecht: runde Bohrungen, Nuten (Dach 45°) und Anschlagringe (45°) sind stützfrei.
+  - Der Flansch steht senkrecht, Taschen und Nut liegen seitlich (kurze Brücken, ø15 mm).
+  - **Stützrippe (Nase):** Eine gerundete Rippe sitzt mittig unter dem Abgang (`tm_nasen`, `tm_nase_r`). Sie wächst aus der Wand des unteren Rohrstücks, geht in die Unterkante des Stutzens und den unteren Flanschrand über (höchstens 45°, am Druckbett abgeschnitten). Sie ist Teil des Druckteils.
+  - **Untere Seitenlappen:** Die beiden unteren Seitenlappen hängen neben dem Stutzen frei; ihre Spitzen sind kleine Überhänge (ca. 10 mm), ggf. mit minimalen Slicer-Stützen. Mit `tm_nasen_seitlich = true` bekommt jeder Lappen eine eigene Rippe aus dem Rohr.
+  - **Brücken:** das flache Dach der Stutzenbohrung (ca. 23 mm) und die ø90-Bohrung im Flansch selbst (8 mm tief, wegen der Dichtungsnut keine Teardrop-Form möglich). Beides liegt im Luftweg, nicht auf einer Dichtfläche.
+- **Geprüft (Rechenmodell):** STL wasserdicht; zwei DN110-Rohrenden (AD 110 / ID 104) sitzen ohne Überlappung in den Muffen; 0,6 mm tiefer erreichen sie den Anschlag; Überhangauswertung mit `werkzeuge/ueberhang.py` (Brücken: Stutzendach, Flanschbohrung, Taschen).
+- **Nicht geprüft:** Druck, Passung der Muffe (Spiel 0,3 mm; Rohrtoleranz HT/KG prüfen, bei zu strammem Sitz `tm_spiel` erhöhen), Dichtheit, Steifigkeit des Abgangs unter Schlauchlast (Stutzen 20 mm, bei Bedarf `tm_stutzen_l`/`tm_stutzen_r` vergrößern und mehr Wände), Polung des Flanschs.
+- **Magnetbedarf:** 6. **Volumen** 427 cm³ (bis ca. 540 g bei Vollfüllung).
+- Export: `werkzeuge/export_dn110_tstueck.sh` → `dn110_tstueck/dn110_tstueck.stl` und `dichtung_muffe_110_tpu.stl`; Bild: `werkzeuge/bild_dn110_tstueck.py`.
 
 ## Filterkasten (`abluft_filterkasten.scad`)
 
